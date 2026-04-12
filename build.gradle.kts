@@ -18,6 +18,15 @@ android {
     namespace = "com.fitness.app"
     compileSdk = 34
 
+    signingConfigs {
+        create("release") {
+            storeFile = file(localProperties.getProperty("RELEASE_KEYSTORE_PATH") ?: "release.jks")
+            storePassword = localProperties.getProperty("RELEASE_KEYSTORE_PASSWORD")
+            keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.fitness.app"
         minSdk = 24
@@ -40,6 +49,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
