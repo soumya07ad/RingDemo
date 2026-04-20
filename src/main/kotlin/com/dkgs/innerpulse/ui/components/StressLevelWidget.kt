@@ -1,0 +1,233 @@
+package com.dkgs.innerpulse.ui.components
+
+import android.content.res.Configuration
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.dkgs.innerpulse.ui.theme.FitnessAppTheme
+
+@Composable
+fun StressLevelWidget(stressLevel: Int) {
+    val level = stressLevel
+    
+    // Color based on stress level
+    val levelColor = when {
+        level < 30 -> Color(0xFF22C55E)  // Green - Low
+        level < 60 -> Color(0xFFF97316)  // Orange - Medium
+        else -> Color(0xFFEF4444)        // Red - High
+    }
+    
+    val levelLabel = when {
+        level < 30 -> "Low"
+        level < 60 -> "Medium"
+        else -> "High"
+    }
+    
+    val levelDescription = when {
+        level < 30 -> "You're relaxed"
+        level < 60 -> "Moderate stress"
+        else -> "High stress - take a break"
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "Stress Level",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Icon(
+                    imageVector = Icons.Filled.Info,
+                    contentDescription = "Info",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Gauge and Level
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Circular Gauge
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, shape = CircleShape)
+                        .clip(CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Inner circle for gradient effect
+                    Box(
+                        modifier = Modifier
+                            .size(90.dp)
+                            .background(
+                                color = levelColor.copy(alpha = 0.2f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                "$level",
+                                fontSize = 32.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = levelColor
+                            )
+                            Text(
+                                "/100",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                // Status Text
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(levelColor, shape = CircleShape)
+                            )
+                            Text(
+                                levelLabel,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = levelColor
+                            )
+                        }
+                        Text(
+                            levelDescription,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Text(
+                        "Based on: Heart rate variability & activity",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Progress Bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(3.dp))
+                    .clip(RoundedCornerShape(3.dp))
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(level / 100f)
+                        .background(levelColor)
+                )
+            }
+
+            // Tips
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), shape = RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            ) {
+                Text(
+                    when {
+                        level < 30 -> "💚 Keep up your healthy routine!"
+                        level < 60 -> "🟠 Try a 10-minute meditation or walk"
+                        else -> "🔴 Take a break and practice deep breathing"
+                    },
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PREVIEWS
+// ═══════════════════════════════════════════════════════════════════════
+
+@Preview(name = "Low Stress", showBackground = true)
+@Composable
+private fun StressLowPreview() {
+    FitnessAppTheme {
+        StressLevelWidget(stressLevel = 20)
+    }
+}
+
+@Preview(name = "Medium Stress", showBackground = true)
+@Composable
+private fun StressMediumPreview() {
+    FitnessAppTheme {
+        StressLevelWidget(stressLevel = 50)
+    }
+}
+
+@Preview(name = "High Stress", showBackground = true)
+@Composable
+private fun StressHighPreview() {
+    FitnessAppTheme {
+        StressLevelWidget(stressLevel = 85)
+    }
+}
+
+@Preview(name = "Dark Mode", uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
+@Composable
+private fun StressDarkPreview() {
+    FitnessAppTheme(darkTheme = true) {
+        StressLevelWidget(stressLevel = 45)
+    }
+}

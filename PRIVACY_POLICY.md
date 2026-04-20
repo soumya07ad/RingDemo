@@ -2,7 +2,7 @@
 
 **Last Updated:** April 08, 2026
 
-DKG Labs ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our Fitness & Smart Ring application.
+DKG Labs ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and protect your information when you use our InnerPulse application.
 
 ## 1. Information We Collect
 
@@ -59,4 +59,4 @@ We may update this Privacy Policy from time to time. We will notify you of any c
 If you have any questions about this Privacy Policy, please contact us at:
 
 **Email:** mdoffice@dkgrouplabs.com  
-**Website:** www.dkgrouplabs.com
+**Website:** [www.innerpulse.in](https://www.innerpulse.in/)

@@ -8,5 +8,5 @@
 }
 
 # Keep your app's classes
--keep class com.fitness.app.** { *; }
--keepnames class com.fitness.app.** { *; }
+-keep class com.dkgs.innerpulse.** { *; }
+-keepnames class com.dkgs.innerpulse.** { *; }

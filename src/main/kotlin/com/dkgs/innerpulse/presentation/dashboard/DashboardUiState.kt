@@ -1,0 +1,42 @@
+package com.dkgs.innerpulse.presentation.dashboard
+
+import com.dkgs.innerpulse.domain.model.Ring
+import com.dkgs.innerpulse.domain.model.RingHealthData
+import com.dkgs.innerpulse.domain.model.ConnectionStatus
+import com.dkgs.innerpulse.domain.model.DailyHealthSummary
+
+/**
+ * UI State for the Dashboard screen.
+ * 
+ * Combines ring health data with local fitness data into a single
+ * state object for the dashboard to observe.
+ */
+data class DashboardUiState(
+    // Ring connection
+    val isConnected: Boolean = false,
+    val connectedRing: Ring? = null,
+    val batteryLevel: Int? = null,
+    val isCharging: Boolean = false,
+    val ringType: Int = 2, // 1 for 研强, 2 for 小七
+
+    // Ring health metrics
+    val heartRate: Int = 0,
+    val spO2: Float = 0f,
+    val bloodPressureSystolic: Int = 0,
+    val bloodPressureDiastolic: Int = 0,
+    val steps: Int = 0,
+    val distance: Int = 0,
+    val calories: Int = 0,
+    val stressLevel: Int = 0,
+
+    // Daily summary
+    val dailySummary: DailyHealthSummary = DailyHealthSummary(),
+
+    // Loading / error
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
+) {
+    val hasHeartRate: Boolean get() = heartRate > 0
+    val hasSpO2: Boolean get() = spO2 > 0
+    val hasSteps: Boolean get() = steps > 0
+}

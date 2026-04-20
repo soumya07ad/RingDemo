@@ -1,0 +1,503 @@
+# Add project specific ProGuard rules here.
+# You can control the set of applied configuration files using the
+# proguardFiles setting in build.gradle.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+
+# Uncomment this to preserve the line number information for
+# debugging stack traces.
+#-keepattributes SourceFile,LineNumberTable
+
+# If you keep the line number information, uncomment this to
+# hide the original source file name.
+#-renamesourcefileattribute SourceFile
+#################################################
+## 基础通用混淆规则（SDK / App 共用）
+#################################################
+
+############################
+## 基础配置
+############################
+
+# 不使用大小写混合类名（兼容部分设备 / JNI）
+-dontusemixedcaseclassnames
+
+# 不跳过非 public 类（SDK 必须）
+-dontskipnonpubliclibraryclasses
+-dontskipnonpubliclibraryclassmembers
+
+# 不做激进优化（稳定第一）
+-dontoptimize
+
+# 不做字节码预校验（Android 无需）
+-dontpreverify
+
+# 允许访问级别修改（提高混淆效果）
+-allowaccessmodification
+
+# 打印混淆日志（生成 mapping.txt）
+-verbose
+
+# 忽略警告（第三方 SDK 很重要）
+-ignorewarnings
+
+
+############################
+## 保留注解 / 泛型 / 行号
+############################
+
+-keepattributes *Annotation*
+-keepattributes Signature
+-keepattributes Exceptions
+-keepattributes SourceFile,LineNumberTable
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
+
+# 重新打包混淆类
+-repackageclasses com.gps.track.jmring
+
+############################
+## Android 四大组件
+############################
+
+-keep class * extends android.app.Application
+-keep class * extends android.app.Activity
+-keep class * extends android.app.Service
+-keep class * extends android.content.BroadcastReceiver
+-keep class * extends android.content.ContentProvider
+
+# Fragment（AndroidX）
+-keep class * extends androidx.fragment.app.Fragment
+
+
+############################
+## View / XML 反射
+############################
+
+# 自定义 View
+-keep class * extends android.view.View {
+    <init>(android.content.Context);
+    <init>(android.content.Context, android.util.AttributeSet);
+    <init>(android.content.Context, android.util.AttributeSet, int);
+}
+
+# android:onClick
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+}
+
+# 属性动画
+-keepclassmembers class * extends android.view.View {
+    *** get*();
+    void set*(***);
+}
+
+
+############################
+## Parcelable / Serializable
+############################
+
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+}
+
+
+############################
+## R / BuildConfig
+############################
+
+-keep class **.R$* { *; }
+-keep class **.BuildConfig { *; }
+
+
+############################
+## 保留反射构造方法（通用）
+############################
+
+-keepclassmembers class * {
+    <init>(...);
+}
+
+############################
+## AndroidX
+############################
+
+-keep class androidx.** { *; }
+-dontwarn androidx.**
+
+-keep class android.support.** { *; }
+-dontwarn android.support.**
+
+############################
+## Android Lifecycle
+############################
+
+-keep class androidx.lifecycle.** { *; }
+-dontwarn androidx.lifecycle.**
+
+############################
+## RxJava / RxAndroid
+############################
+
+-keep class io.reactivex.** { *; }
+-dontwarn io.reactivex.**
+
+############################
+## RxLifecycle
+############################
+
+-keep class com.trello.rxlifecycle4.** { *; }
+-dontwarn com.trello.rxlifecycle4.**
+
+############################
+## RxBinding
+############################
+
+-keep class com.jakewharton.rxbinding4.** { *; }
+-dontwarn com.jakewharton.rxbinding4.**
+
+############################
+## RxRelay
+############################
+
+-keep class com.jakewharton.rxrelay3.** { *; }
+-dontwarn com.jakewharton.rxrelay3.**
+
+
+############################
+## Kotlin
+############################
+
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.**
+
+############################
+## Kotlin Coroutines
+############################
+
+-dontwarn kotlinx.coroutines.**
+
+
+############################
+## Gson
+############################
+
+-keep class com.google.gson.** { *; }
+-dontwarn com.google.gson.**
+
+############################
+## Fastjson
+############################
+
+-keep class com.alibaba.fastjson.** { *; }
+-dontwarn com.alibaba.fastjson.**
+
+############################
+## Retrofit
+############################
+
+-keep class retrofit2.** { *; }
+-dontwarn retrofit2.**
+
+############################
+## OkHttp / Okio
+############################
+
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+
+############################
+## RecyclerView Adapter Helper
+############################
+
+-keep class com.chad.library.adapter.** { *; }
+
+############################
+## SwipeLayout
+############################
+
+-keep class com.daimajia.swipelayout.** { *; }
+
+############################
+## LoadSir
+############################
+
+-keep class com.kingja.loadsir.** { *; }
+
+############################
+## WheelView / PickerView
+############################
+
+-keep class com.contrarywind.** { *; }
+
+############################
+## ImmersionBar
+############################
+
+-keep class com.gyf.immersionbar.** { *; }
+
+############################
+## Banner
+############################
+
+-keep class com.youth.banner.** { *; }
+
+############################
+## BasePopup
+############################
+
+-keep class razerdp.** { *; }
+
+
+############################
+## Glide
+############################
+
+-keep class com.bumptech.glide.** { *; }
+-dontwarn com.bumptech.glide.**
+
+############################
+## Logger
+############################
+
+-keep class com.orhanobut.logger.** { *; }
+
+############################
+## Hawk
+############################
+
+-keep class com.orhanobut.hawk.** { *; }
+
+############################
+## EasyPermissions
+############################
+
+-keep class pub.devrel.easypermissions.** { *; }
+
+############################
+## AutoSize（重点）
+############################
+
+-keep class me.jessyan.autosize.** { *; }
+-dontwarn me.jessyan.autosize.**
+
+############################
+## OkDownload
+############################
+
+-keep class com.liulishuo.okdownload.** { *; }
+-dontwarn com.liulishuo.okdownload.**
+
+
+############################
+## JNI
+############################
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+# Room
+-keep class * extends androidx.room.RoomDatabase { *; }
+-keep @androidx.room.Dao class * { *; }
+-keep @androidx.room.Entity class * { *; }
+-keep class *_Impl { *; }
+
+# Room annotations
+-keep class androidx.room.** { *; }
+
+# Room entities
+-keep class * extends androidx.room.RoomDatabase
+
+# Dao
+-keep @androidx.room.Dao class *
+
+# Entity
+-keep @androidx.room.Entity class *
+
+# TypeConverter
+-keepclassmembers class * {
+    @androidx.room.TypeConverter <methods>;
+}
+
+# avoid warnings
+-dontwarn androidx.room.**
+
+-keep class android.bluetooth.** { *; }
+-keep class * extends android.bluetooth.BluetoothGattCallback
+-keep class * implements android.bluetooth.BluetoothGattCallback
+
+# Gson
+-keep class com.google.gson.reflect.TypeToken { *; }
+-keep class * extends com.google.gson.reflect.TypeToken
+
+# SerializedName
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+############################
+## 暴露给外部的方法与实体类
+############################
+-keep class com.realsil.sd.dfu.** { *; }
+-dontwarn com.realsil.sd.dfu.**
+-keep class com.realsil.sd.core.** { *; }
+-dontwarn com.realsil.sd.core.**
+-keep class com.eiot.aizo.ble.** { *; }
+-dontwarn com.eiot.aizo.ble.**
+
+-keep class com.eiot.aizo.base.** { *; }
+-dontwarn com.eiot.aizo.ble.**
+-keep class com.eiot.aizo.bean.** { *; }
+-dontwarn com.eiot.aizo.bean.**
+-keep class com.eiot.aizo.commend.** { *; }
+-dontwarn com.eiot.aizo.commend.**
+-keep class com.eiot.aizo.ext.** { *; }
+-dontwarn com.eiot.aizo.ext.**
+-keep class com.eiot.aizo.help.** { *; }
+-dontwarn com.eiot.aizo.help.**
+-keep class com.eiot.aizo.ota.** { *; }
+-dontwarn com.eiot.aizo.ota.**
+-keep class com.eiot.aizo.result.** { *; }
+-dontwarn com.eiot.aizo.result.**
+-keep class com.eiot.aizo.sdk.** { *; }
+-dontwarn com.eiot.aizo.sdk.**
+-keep class com.eiot.aizo.util.** { *; }
+-dontwarn com.eiot.aizo.sdutilk.**
+-keep class com.eiot.aizo.watch.** { *; }
+-dontwarn com.eiot.aizo.watch.**
+-keep class com.eiot.aizo.BuildConfig { *; }
+-dontwarn com.eiot.aizo.BuildConfig
+-keep class com.eiot.be.algorithm.** { *; }
+-dontwarn com.eiot.be.algorithm.**
+
+-keep class com.eiot.ringsdk.base.** { *; }
+-dontwarn com.eiot.ringsdk.base.**
+-keep class com.eiot.ringsdk.battery.** { *; }
+-dontwarn com.eiot.ringsdk.battery.**
+-keep class com.eiot.ringsdk.be.** { *; }
+-dontwarn com.eiot.ringsdk.be.**
+-keep class com.eiot.ringsdk.bean.** { *; }
+-dontwarn com.eiot.ringsdk.bean.**
+-keep class com.eiot.ringsdk.bloodglu.** { *; }
+-dontwarn com.eiot.ringsdk.bloodglu.**
+-keep class com.eiot.ringsdk.callback.** { *; }
+-dontwarn com.eiot.ringsdk.callback.**
+-keep class com.eiot.ringsdk.ecg.** { *; }
+-dontwarn com.eiot.ringsdk.ecg.**
+-keep class com.eiot.ringsdk.emotion.** { *; }
+-dontwarn com.eiot.ringsdk.emotion.**
+-keep class com.eiot.ringsdk.ext.** { *; }
+-dontwarn com.eiot.ringsdk.ext.**
+-keep class com.eiot.ringsdk.heartrate.** { *; }
+-dontwarn com.eiot.ringsdk.heartrate.**
+-keep class com.eiot.ringsdk.loving.** { *; }
+-dontwarn com.eiot.ringsdk.loving.**
+-keep class com.eiot.ringsdk.measure.** { *; }
+-dontwarn com.eiot.ringsdk.measure.**
+-keep class com.eiot.ringsdk.ota.** { *; }
+-dontwarn com.eiot.ringsdk.ota.**
+-keep class com.eiot.ringsdk.ppi.** { *; }
+-dontwarn com.eiot.ringsdk.ppi.**
+-keep class com.eiot.ringsdk.score.** { *; }
+-dontwarn com.eiot.ringsdk.score.**
+-keep class com.eiot.ringsdk.sos.** { *; }
+-dontwarn com.eiot.ringsdk.sos.**
+-keep class com.eiot.ringsdk.sport.** { *; }
+-dontwarn com.eiot.ringsdk.sport.**
+-keep class com.eiot.ringsdk.ssl.** { *; }
+-dontwarn com.eiot.ringsdk.ssl.**
+-keep class com.eiot.ringsdk.userinfo.** { *; }
+-dontwarn com.eiot.ringsdk.userinfo.**
+-keep class com.eiot.ringsdk.util.** { *; }
+-dontwarn com.eiot.ringsdk.util.**
+-keep class com.eiot.ringsdk.vibrate.** { *; }
+-dontwarn com.eiot.ringsdk.vibrate.**
+-keep class com.eiot.ringsdk.voicerecord.** { *; }
+-dontwarn com.eiot.ringsdk.voicerecord.**
+
+-keep class com.jieli.bmp_convert.** { *; }
+-dontwarn com.jieli.bmp_convert
+-keep class com.jiaqiao.product.** { *; }
+-dontwarn com.jiaqiao.product.**
+-keep class com.jieli.jl_bt_ota.constant.** { *; }
+-dontwarn com.jieli.jl_bt_ota.constant.**
+-keep class com.jieli.jl_bt_ota.constant.** { *; }
+-dontwarn com.jieli.jl_bt_ota.constant.**
+-keep class com.jieli.jl_bt_ota.impl.** { *; }
+-dontwarn com.jieli.jl_bt_ota.impl.**
+-keep class com.jieli.jl_bt_ota.interfaces.** { *; }
+-dontwarn com.jieli.jl_bt_ota.interfaces.**
+-keep class com.jieli.jl_bt_ota.model.** { *; }
+-dontwarn com.jieli.jl_bt_ota.model.**
+-keep class com.jieli.jl_bt_ota.thread.** { *; }
+-dontwarn com.jieli.jl_bt_ota.thread.**
+-keep class com.jieli.jl_bt_ota.tool.** { *; }
+-dontwarn com.jieli.jl_bt_ota.tool.**
+-keep class com.jieli.jl_bt_ota.util.** { *; }
+-dontwarn com.jieli.jl_bt_ota.util.**
+-keep class com.jieli.jl_bt_ota.BuildConfig { *; }
+-dontwarn com.jieli.jl_bt_ota.util.BuildConfig
+-keep class com.jieli.jl_filebrowse.** { *; }
+-dontwarn com.jieli.jl_filebrowse.**
+-keep class com.jieli.jl_rcsp.constant.** { *; }
+-dontwarn com.jieli.jl_rcsp.constant.**
+-keep class com.jieli.jl_rcsp.exception.** { *; }
+-dontwarn com.jieli.jl_rcsp.exception.**
+-keep class com.jieli.jl_rcsp.impl.** { *; }
+-dontwarn com.jieli.jl_rcsp.impl.**
+-keep class com.jieli.jl_rcsp.interfaces.** { *; }
+-dontwarn com.jieli.jl_rcsp.interfaces.**
+-keep class com.jieli.jl_rcsp.model.** { *; }
+-dontwarn com.jieli.jl_rcsp.model.**
+-keep class com.jieli.jl_rcsp.tool.** { *; }
+-dontwarn com.jieli.jl_rcsp.tool.**
+-keep class com.jieli.jl_rcsp.util.** { *; }
+-dontwarn com.jieli.jl_rcsp.util.**
+-keep class com.jieli.jl_rcsp.BuildConfig { *; }
+-dontwarn com.jieli.jl_rcsp.BuildConfig
+-keep class com.jieli.jl_fatfs.** { *; }
+-dontwarn com.jieli.jl_fatfs.**
+-keep class com.jieli.jl_rcsp.task.** { *; }
+-dontwarn com.jieli.jl_fatfs.task.**
+-keep class com.jieli.jl_rcsp.tool.** { *; }
+-dontwarn com.jieli.jl_fatfs.tool.**
+-keep class com.jieli.jl_rcsp.util.** { *; }
+-dontwarn com.jieli.jl_fatfs.util.**
+-keep class com.jieli.jl_rcsp.watch.** { *; }
+-dontwarn com.jieli.jl_fatfs.watch.**
+
+-keep class com.gps.track.jmring.callback.** { *; }
+-dontwarn com.gps.track.jmring.callback.**
+-keep class com.gps.track.jmring.bean.** { *; }
+-dontwarn com.gps.track.jmring.bean.**
+-keep class com.gps.track.jmring.ble.RingBleUtils { *; }
+-dontwarn com.gps.track.jmring.ble.RingBleUtils
+-keep class com.gps.track.jmring.ble.BleScanUtils { *; }
+-dontwarn com.gps.track.jmring.ble.BleScanUtils
+-keep class com.gps.track.jmring.utils.RingDataUtils { *; }
+-dontwarn com.gps.track.jmring.utils.RingDataUtils
+-keep class com.gps.track.jmring.base.BaseRingBleManager { *; }
+-dontwarn com.gps.track.jmring.base.BaseRingBleManager
+-keep class com.gps.track.jmring.ble.ycbt.** { *; }
+-dontwarn com.gps.track.jmring.ble.ycbt.**
+-keep class com.gps.track.jmring.ble.eiot.EiotRingBleManager { *; }
+-dontwarn com.gps.track.jmring.ble.eiot.EiotRingBleManager
+-keep public interface com.gps.track.jmring.ble.scan.JMBluetoothController$* { *; }
+-dontwarn com.gps.track.jmring.ble.scan.JMBluetoothController$*
+
+-keep class com.alibaba.aliagentsdk.** { *; }
+-dontwarn com.alibaba.aliagentsdk.**

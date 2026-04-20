@@ -12,7 +12,10 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
+        maven {
+            url = uri("${rootDir}/sdkrepo")
+        }
     }
 }
 
-rootProject.name = "FitnessApp"
+rootProject.name = "InnerPulse"

@@ -2,9 +2,10 @@ import java.util.Properties
 
 plugins {
     id("com.android.application") version "8.5.0"
-    kotlin("android") version "1.9.22"
-    id("com.google.devtools.ksp") version "1.9.22-1.0.17"
+    kotlin("android") version "2.1.0"
+    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
     id("com.google.gms.google-services") version "4.4.2"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"
 }
 
 val localProperties = Properties()
@@ -15,8 +16,8 @@ if (localPropertiesFile.exists()) {
 val geminiApiKey = localProperties.getProperty("GEMINI_API_KEY") ?: ""
 
 android {
-    namespace = "com.fitness.app"
-    compileSdk = 34
+    namespace = "com.dkgs.innerpulse"
+    compileSdk = 35
 
     signingConfigs {
         create("release") {
@@ -28,13 +29,17 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.fitness.app"
-        minSdk = 24
-        targetSdk = 34
+        applicationId = "com.dkgs.innerpulse"
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         
         buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        
+        ndk {
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
+        }
     }
 
     buildFeatures {
@@ -42,13 +47,10 @@ android {
         buildConfig = true
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -135,7 +137,7 @@ dependencies {
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
 
     // ══════════════════════════════════════════════════════════
-    // Manridy MRD SDK (for R9 Ring) - WORKING SDK!
+    // JMRing SDK Integration
     // ══════════════════════════════════════════════════════════
-    // implementation(":sdk_mrd20240218_1.1.5@aar") // Removed as file is missing
+    api("com.jimi:JMRing:1.0.0_13")
 }
