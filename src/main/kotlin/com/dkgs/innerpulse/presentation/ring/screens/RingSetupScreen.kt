@@ -162,13 +162,17 @@ fun RingSetupScreen(
                     PermissionContent(
                         permissionState = uiState.permissionState,
                         onRequestPermission = onRequestPermission,
-                        onOpenSettings = onOpenSettings
+                        onOpenSettings = onOpenSettings,
+                        selectedRingType = uiState.selectedRingType,
+                        onRingTypeChange = onRingTypeChange
                     )
                 }
                 uiState.showManualEntry -> {
                     ManualEntryContent(
                         macAddress = uiState.manualMacAddress,
+                        selectedRingType = uiState.selectedRingType,
                         onMacChange = onMacChange,
+                        onRingTypeChange = onRingTypeChange,
                         onConnect = onConnectByMac,
                         onBack = onManualEntry
                     )
@@ -272,13 +276,23 @@ private fun PremiumSetupHeader() {
 private fun PermissionContent(
     permissionState: PermissionUiState,
     onRequestPermission: () -> Unit,
-    onOpenSettings: () -> Unit
+    onOpenSettings: () -> Unit,
+    selectedRingType: Int,
+    onRingTypeChange: (Int) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(32.dp))
+
+        // Ring Type Selector (Added to match Demo SDK logic)
+        RingTypeSelector(
+            selectedType = selectedRingType,
+            onTypeChange = onRingTypeChange
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Box(
             modifier = Modifier
@@ -1086,11 +1100,26 @@ private fun StressCard(stress: Int, onMeasureClick: () -> Unit = {}) {
 @Composable
 private fun ManualEntryContent(
     macAddress: String,
+    selectedRingType: Int,
     onMacChange: (String) -> Unit,
+    onRingTypeChange: (Int) -> Unit,
     onConnect: () -> Unit,
     onBack: () -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Ring Type Selector (Added to match Demo SDK logic)
+        RingTypeSelector(
+            selectedType = selectedRingType,
+            onTypeChange = onRingTypeChange
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
         Text(
             text = "Manual MAC Entry",
             style = MaterialTheme.typography.titleLarge,
@@ -1140,7 +1169,7 @@ private fun ManualEntryContent(
                 text = "CONNECT",
                 onClick = onConnect,
                 modifier = Modifier.weight(1f),
-                enabled = macAddress.length >= 17,
+                enabled = macAddress.length >= 10, // Adjusted to match ConnectRingUseCase
                 colors = listOf(NeonCyan.copy(alpha = 0.9f), NeonBlue)
             )
         }

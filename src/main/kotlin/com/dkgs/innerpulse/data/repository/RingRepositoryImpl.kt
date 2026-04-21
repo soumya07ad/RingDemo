@@ -234,8 +234,9 @@ class RingRepositoryImpl(
     }
     
     override fun startBloodPressureMeasurement() {
-        Log.i(TAG, "Starting BP measurement (SDK - Note: SDK uses HR/SpO2/Stress/Temp)")
-        // SDK doesn't specifically list BP in type (1, 2, 6, 7)
+        Log.i(TAG, "Starting BP measurement (SDK Proxy via HR)")
+        // Since BP isn't separate in JMRing SDK v1 types, we often use HR or generic health as proxy
+        jmRingManager.startMeasurement(1) 
     }
     
     override fun stopBloodPressureMeasurement() {
@@ -283,6 +284,7 @@ class RingRepositoryImpl(
     
     fun refreshAllData() {
         jmRingManager.fetchCachedData()
+        jmRingManager.requestSleepScore()
     }
     
     override fun stopMeasurement() {

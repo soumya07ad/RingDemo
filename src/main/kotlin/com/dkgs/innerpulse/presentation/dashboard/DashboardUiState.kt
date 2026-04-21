@@ -5,6 +5,9 @@ import com.dkgs.innerpulse.domain.model.RingHealthData
 import com.dkgs.innerpulse.domain.model.ConnectionStatus
 import com.dkgs.innerpulse.domain.model.DailyHealthSummary
 
+import com.dkgs.innerpulse.domain.model.FirmwareInfo
+import com.dkgs.innerpulse.domain.model.SleepData
+
 /**
  * UI State for the Dashboard screen.
  * 
@@ -21,13 +24,21 @@ data class DashboardUiState(
 
     // Ring health metrics
     val heartRate: Int = 0,
+    val heartRateMeasuring: Boolean = false,
     val spO2: Float = 0f,
+    val spO2Measuring: Boolean = false,
     val bloodPressureSystolic: Int = 0,
     val bloodPressureDiastolic: Int = 0,
+    val bloodPressureMeasuring: Boolean = false,
     val steps: Int = 0,
     val distance: Int = 0,
     val calories: Int = 0,
     val stressLevel: Int = 0,
+    val stressMeasuring: Boolean = false,
+    
+    // Additional ring metrics
+    val sleepData: SleepData? = null,
+    val firmwareInfo: FirmwareInfo? = null,
 
     // Daily summary
     val dailySummary: DailyHealthSummary = DailyHealthSummary(),

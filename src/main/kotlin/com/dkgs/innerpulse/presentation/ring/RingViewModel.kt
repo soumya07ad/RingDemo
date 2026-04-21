@@ -226,9 +226,10 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun connectByMacAddress(macAddress: String, deviceName: String = "Ring") {
         viewModelScope.launch {
+            val ringType = _uiState.value.selectedRingType
             _uiState.update { it.copy(isLoading = true, errorMessage = null, showManualEntry = false) }
             
-            when (val result = connectRingUseCase(macAddress, deviceName)) {
+            when (val result = connectRingUseCase(macAddress, deviceName, ringType)) {
                 is Result.Success -> {
                     _uiState.update { it.copy(
                         connectedRing = result.data,

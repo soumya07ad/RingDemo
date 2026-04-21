@@ -34,10 +34,12 @@ class ConnectRingUseCase(
     }
     
     /**
-     * Validate MAC address format
+     * Check if MAC address is potentially valid
      */
     private fun isValidMacAddress(mac: String): Boolean {
-        val macPattern = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$".toRegex()
-        return macPattern.matches(mac)
+        // More lenient check since SDK's formatMacAddress will handle standardization.
+        // Just ensures it's not empty and contains enough hex characters.
+        val hexOnly = mac.filter { it.isLetterOrDigit() }
+        return hexOnly.length >= 10 // Most MACs are 12 hex chars, but let's be flexible
     }
 }

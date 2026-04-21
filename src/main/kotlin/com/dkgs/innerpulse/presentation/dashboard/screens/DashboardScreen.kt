@@ -122,6 +122,28 @@ fun DashboardRoute(
         onFitnessHistoryClick = {
             navController?.navigate(Screen.FitnessHistory.route)
         },
+        onMeasureHeartRate = {
+            if (state.heartRateMeasuring) viewModel.stopHeartRateMeasurement()
+            else viewModel.startHeartRateMeasurement()
+        },
+        onMeasureSpO2 = {
+            if (state.spO2Measuring) viewModel.stopSpO2Measurement()
+            else viewModel.startSpO2Measurement()
+        },
+        onMeasureBloodPressure = {
+            if (state.bloodPressureMeasuring) viewModel.stopBloodPressureMeasurement()
+            else viewModel.startBloodPressureMeasurement()
+        },
+        onMeasureStress = {
+            if (state.stressMeasuring) viewModel.stopStressMeasurement()
+            else viewModel.startStressMeasurement()
+        },
+        onSyncSleep = {
+            viewModel.requestSleepHistory()
+        },
+        onSyncAllData = {
+            viewModel.syncAllData()
+        },
         currentTheme = currentTheme,
         onThemeChange = { themeViewModel.setTheme(it) },
         isUsingPhone = isUsingPhone,
@@ -137,6 +159,12 @@ fun DashboardScreenWithHeader(
     onDisconnectClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
     onFitnessHistoryClick: () -> Unit = {},
+    onMeasureHeartRate: () -> Unit = {},
+    onMeasureSpO2: () -> Unit = {},
+    onMeasureBloodPressure: () -> Unit = {},
+    onMeasureStress: () -> Unit = {},
+    onSyncSleep: () -> Unit = {},
+    onSyncAllData: () -> Unit = {},
     currentTheme: AppTheme = AppTheme.SYSTEM,
     onThemeChange: (AppTheme) -> Unit = {},
     isUsingPhone: Boolean = false,
@@ -302,6 +330,30 @@ fun DashboardScreenWithHeader(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        MeasurementButton(
+                            text = if (state.heartRateMeasuring) "Measuring..." else "Measure HR",
+                            icon = Icons.Default.Favorite,
+                            color = ErrorRed,
+                            onClick = onMeasureHeartRate,
+                            enabled = !state.heartRateMeasuring,
+                            modifier = Modifier.weight(1f)
+                        )
+                        MeasurementButton(
+                            text = if (state.spO2Measuring) "Measuring..." else "Measure SpO2",
+                            icon = Icons.Default.FavoriteBorder,
+                            color = NeonCyan,
+                            onClick = onMeasureSpO2,
+                            enabled = !state.spO2Measuring,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+
+                if (isConnected) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
                         FloatingMetricTile(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.MonitorHeart,
@@ -327,6 +379,25 @@ fun DashboardScreenWithHeader(
                                 glowColor = NeonCyan,
                                 iconBgColor = BloodOxygenIconBg
                             )
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
+                    }
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        MeasurementButton(
+                            text = if (state.bloodPressureMeasuring) "Measuring..." else "Measure BP",
+                            icon = Icons.Default.MonitorHeart,
+                            color = NeonOrange,
+                            onClick = onMeasureBloodPressure,
+                            enabled = !state.bloodPressureMeasuring,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (state.ringType == 1) {
+                            Spacer(modifier = Modifier.weight(1f)) // Temp measurement not implemented
                         } else {
                             Spacer(modifier = Modifier.weight(1f))
                         }
@@ -438,7 +509,24 @@ fun DashboardScreenWithHeader(
                             )
                         }
                     }
+                    
+                    if (isConnected) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        MeasurementButton(
+                            text = if (state.stressMeasuring) "Measuring Stress..." else "Measure Stress Level",
+                            icon = Icons.Default.PlayArrow,
+                            color = NeonCyan,
+                            onClick = onMeasureStress,
+                            enabled = !state.stressMeasuring
+                        )
+                    }
                 }
+
+                // Sleep Card
+                SleepCard(
+                    sleepData = state.sleepData,
+                    onRequestSleep = onSyncSleep
+                )
 
                 // Battery card
                 state.batteryLevel?.let { battery ->
@@ -460,6 +548,22 @@ fun DashboardScreenWithHeader(
 
                 // Daily Insights
                 DailyInsightsCard()
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Firmware Info
+                state.firmwareInfo?.let { 
+                    FirmwareCard(firmwareInfo = it)
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                NeonButton(
+                    text = "SYNC ALL DATA / GET SCORES",
+                    onClick = onSyncAllData,
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                    colors = listOf(PrimaryPurple, NeonBlue)
+                )
 
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -921,6 +1025,222 @@ fun getStressStatus(level: Int): String = when {
     level <= 30 -> "Low"
     level <= 60 -> "Moderate"
     else -> "High"
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// NEW COMPONENTS FROM SETUP SCREEN
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+fun MeasurementButton(
+    text: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp),
+        enabled = enabled,
+        shape = RoundedCornerShape(14.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = color.copy(alpha = 0.15f),
+            disabledContainerColor = color.copy(alpha = 0.08f)
+        ),
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+        if (!enabled) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(16.dp),
+                color = color,
+                strokeWidth = 2.dp
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        } else {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = color
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (enabled) color else color.copy(alpha = 0.5f)
+        )
+    }
+}
+
+@Composable
+fun SleepCard(
+    sleepData: com.dkgs.innerpulse.domain.model.SleepData?,
+    onRequestSleep: () -> Unit
+) {
+    NeonGlassCard(glowColor = NeonPurple.copy(alpha = 0.6f)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(NeonPurple.copy(alpha = 0.2f), NeonPurple.copy(alpha = 0.03f))
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = null,
+                    tint = NeonPurple,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "SLEEP",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                if (sleepData != null && sleepData.totalMinutes > 0) {
+                    val hours = sleepData.totalMinutes / 60
+                    val mins = sleepData.totalMinutes % 60
+                    Text(
+                        text = "${hours}h ${mins}m",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SleepMetric("Deep", "${sleepData.deepMinutes}m", NeonPurple)
+                        SleepMetric("Light", "${sleepData.lightMinutes}m", NeonCyan)
+                        SleepMetric("Awake", "${sleepData.awakeMinutes}m", NeonOrange)
+                    }
+                    if (sleepData.quality > 0) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Quality: ",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            StatusBadge(
+                                text = "${sleepData.quality}%",
+                                color = if (sleepData.quality >= 70) NeonGreen else NeonOrange
+                            )
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "No data",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            FilledTonalIconButton(
+                onClick = onRequestSleep,
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = NeonPurple.copy(alpha = 0.1f),
+                    contentColor = NeonPurple
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh Sleep",
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SleepMetric(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleSmall,
+            color = color,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+@Composable
+fun FirmwareCard(firmwareInfo: com.dkgs.innerpulse.domain.model.FirmwareInfo) {
+    NeonGlassCard(
+        glowColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        showGlow = false
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f).copy(alpha = 1f), Color.Transparent)
+                        )
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Build,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(14.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "FIRMWARE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = firmwareInfo.displayText,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (firmwareInfo.type.isNotEmpty()) {
+                    Text(
+                        text = "Type: ${firmwareInfo.type}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════

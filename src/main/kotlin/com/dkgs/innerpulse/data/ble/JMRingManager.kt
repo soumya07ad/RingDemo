@@ -25,9 +25,12 @@ import com.gps.track.jmring.callback.JMRingHealthAllBeanListener
 import com.gps.track.jmring.callback.JMRingSleepAllBeanListener
 import com.gps.track.jmring.callback.JMRingStressBeanListener
 import com.gps.track.jmring.callback.JMRingScanListener
+import com.gps.track.jmring.utils.RingDataUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -76,6 +79,7 @@ class JMRingManager private constructor(private val context: Context) :
 
     private var connectedRing: Ring? = null
     private var currentUserId: String = "12345" // Default or fetched from TokenManager
+    private var measurementTimeoutJobs = mutableMapOf<Int, Job>() // type to Job
 
     init {
         Log.i(TAG, "Initializing JMRingManager with official SDK")
@@ -100,15 +104,18 @@ class JMRingManager private constructor(private val context: Context) :
     // ═══════════════════════════════════
 
     fun connectRing(userId: String, macAddress: String, ringType: Int) {
+        val formattedMac = RingBleUtils.formatMacAddress(macAddress)
+        val sn = "780901703208128" // Default SN from Demo SDK for compatibility
+        
         currentUserId = userId
-        connectedRing = Ring(macAddress = macAddress, name = "JMRing", isConnected = false)
-        Log.i(TAG, "Connecting to ring: $macAddress, type: $ringType")
+        connectedRing = Ring(macAddress = formattedMac, name = "JMRing", isConnected = false)
+        Log.i(TAG, "Connecting to ring: $formattedMac, type: $ringType, SN: $sn")
         
         scope.launch {
             saveRingType(ringType)
         }
 
-        RingBleUtils.setRingData(userId, macAddress, "", ringType)
+        RingBleUtils.setRingData(userId, formattedMac, sn, ringType)
         RingBleUtils.getRingBleManager().onConnect()
     }
 
@@ -155,12 +162,69 @@ class JMRingManager private constructor(private val context: Context) :
 
     fun startMeasurement(type: Int) {
         Log.i(TAG, "Starting real-time measurement type: $type")
+        
+        // Update local measuring flag based on type
+        _ringData.value = _ringData.value.let { data ->
+            when (type) {
+                1 -> data.copy(heartRateMeasuring = true)
+                2 -> data.copy(spO2Measuring = true)
+                7 -> data.copy(stressMeasuring = true)
+                else -> data
+            }
+        }
+        
+        // Start a safety timeout (demo recommends 1 min)
+        measurementTimeoutJobs[type]?.cancel()
+        measurementTimeoutJobs[type] = scope.launch {
+            delay(65000) // 1 minute + 5s buffer
+            Log.w(TAG, "Measurement type $type timed out locally")
+            _ringData.value = _ringData.value.let { data ->
+                when (type) {
+                    1 -> data.copy(heartRateMeasuring = false)
+                    2 -> data.copy(spO2Measuring = false)
+                    7 -> data.copy(stressMeasuring = false)
+                    else -> data
+                }
+            }
+        }
+        
         RingBleUtils.getRingBleManager().startStopMeasurement(type)
     }
 
     fun stopMeasurement(type: Int) {
         Log.i(TAG, "Stopping measurement type: $type")
+        
+        measurementTimeoutJobs[type]?.cancel()
+        _ringData.value = _ringData.value.let { data ->
+            when (type) {
+                1 -> data.copy(heartRateMeasuring = false)
+                2 -> data.copy(spO2Measuring = false)
+                7 -> data.copy(stressMeasuring = false)
+                else -> data
+            }
+        }
+        
         RingBleUtils.getRingBleManager().startStopMeasurement(type)
+    }
+
+    fun requestSleepScore() {
+        Log.i(TAG, "Computing sleep scores")
+        val calendar = java.util.Calendar.getInstance()
+        // Reset to midnight as seen in demo zeroFromHour
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        
+        RingDataUtils.computeAllSleepScore(calendar.timeInMillis, true) { healthScore, sleepScore, _ ->
+            Log.i(TAG, "Scores computed: Health=$healthScore, Sleep=$sleepScore")
+            _ringData.value = _ringData.value.copy(
+                sleepData = _ringData.value.sleepData.copy(
+                    quality = sleepScore.toInt()
+                ),
+                lastUpdate = System.currentTimeMillis()
+            )
+        }
     }
 
     fun fetchCachedData() {
@@ -204,9 +268,18 @@ class JMRingManager private constructor(private val context: Context) :
 
     override fun onBatteryListener(isCharge: Boolean, electricity: Int?) {
         Log.d(TAG, "Battery level: $electricity%, charging: $isCharge")
+        
+        // Fetch firmware version (seen in demo app onBatteryListener)
+        val firmwareParams = RingBleUtils.getRingBleManager().getFirmwareParameters()
+        val version = firmwareParams?.version ?: ""
+        
         _ringData.value = _ringData.value.copy(
             battery = electricity,
             isCharging = isCharge,
+            firmwareInfo = _ringData.value.firmwareInfo.copy(
+                version = version,
+                lastUpdate = System.currentTimeMillis()
+            ),
             lastUpdate = System.currentTimeMillis()
         )
     }
@@ -286,24 +359,46 @@ class JMRingManager private constructor(private val context: Context) :
 
     override fun onRingAllCache() {
         Log.i(TAG, "Cache sync triggered by ring")
-        val currentTime = System.currentTimeMillis()
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        
+        val reqTime = calendar.timeInMillis
         val manager = RingBleUtils.getRingBleManager()
-        manager.getActivityHealthData(currentTime)
-        manager.getActivitySleepData(currentTime)
-        manager.getActivityStressData(currentTime)
+        
+        Log.i(TAG, "Syncing daily metrics for: $reqTime")
+        manager.getActivityHealthData(reqTime)
+        manager.getActivitySleepData(reqTime)
+        manager.getActivityStressData(reqTime)
     }
 
     override fun onMeasureResult(type: Int, isSuccess: Boolean, healthBean: JMHealthAllBean?, stressBean: JMStressBean?) {
         Log.i(TAG, "Measurement result: type=$type, success=$isSuccess")
+        
+        // Clear measuring flag regardless of success
+        measurementTimeoutJobs[type]?.cancel()
+        _ringData.value = _ringData.value.let { data ->
+            when (type) {
+                1 -> data.copy(heartRateMeasuring = false)
+                2 -> data.copy(spO2Measuring = false)
+                7 -> data.copy(stressMeasuring = false)
+                else -> data
+            }
+        }
+        
         if (!isSuccess) return
         
         _ringData.value = _ringData.value.copy(
             heartRate = healthBean?.dailyHeartRate?.toInt() ?: _ringData.value.heartRate,
             spO2 = healthBean?.spo2?.toFloat() ?: _ringData.value.spO2,
-            // BP fields removed as they do not exist in JMHealthAllBean
             stress = stressBean?.pressureIndex?.toInt() ?: _ringData.value.stress,
             lastUpdate = System.currentTimeMillis()
         )
+        
+        // If HR/SpO2/Stress measurement was triggered, might want to re-calculate score
+        requestSleepScore()
     }
 
     // ═══════════════════════════════════

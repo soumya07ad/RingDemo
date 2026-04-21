@@ -72,13 +72,18 @@ class DashboardViewModel(
                 _uiState.update { state ->
                     state.copy(
                         heartRate = ringData.heartRate,
+                        heartRateMeasuring = ringData.heartRateMeasuring,
                         spO2 = ringData.spO2,
+                        spO2Measuring = ringData.spO2Measuring,
                         bloodPressureSystolic = ringData.bloodPressureSystolic,
                         bloodPressureDiastolic = ringData.bloodPressureDiastolic,
+                        bloodPressureMeasuring = ringData.bloodPressureMeasuring,
                         calories = ringData.calories,
                         stressLevel = ringData.stress,
                         batteryLevel = ringData.battery,
-                        isCharging = ringData.isCharging
+                        isCharging = ringData.isCharging,
+                        sleepData = ringData.sleepData,
+                        firmwareInfo = ringData.firmwareInfo
                     )
                 }
             }
@@ -136,5 +141,49 @@ class DashboardViewModel(
 
     fun clearError() {
         _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    // ==================== Measurements ====================
+
+    fun startHeartRateMeasurement() {
+        ringRepository.startHeartRateMeasurement()
+    }
+
+    fun stopHeartRateMeasurement() {
+        ringRepository.stopHeartRateMeasurement()
+    }
+
+    fun startBloodPressureMeasurement() {
+        ringRepository.startBloodPressureMeasurement()
+    }
+
+    fun stopBloodPressureMeasurement() {
+        ringRepository.stopBloodPressureMeasurement()
+    }
+
+    fun startSpO2Measurement() {
+        ringRepository.startSpO2Measurement()
+    }
+
+    fun stopSpO2Measurement() {
+        ringRepository.stopSpO2Measurement()
+    }
+
+    fun startStressMeasurement() {
+        ringRepository.startStressMeasurement()
+    }
+
+    fun stopStressMeasurement() {
+        ringRepository.stopStressMeasurement()
+    }
+
+    fun requestSleepHistory() {
+        ringRepository.requestSleepHistory()
+    }
+
+    fun syncAllData() {
+        // We'll call fetchCachedData in the JMRingManager via a refresh method or requestSleepHistory
+        // which internally fetches all history in the latest implementation
+        ringRepository.requestSleepHistory() 
     }
 }
