@@ -17,7 +17,7 @@ class ConnectRingUseCase(
      * @param deviceName Optional device name for display
      * @return Result containing connected ring or error
      */
-    suspend operator fun invoke(macAddress: String, deviceName: String? = null, ringType: Int = 1): Result<Ring> {
+    suspend operator fun invoke(macAddress: String, deviceName: String? = null, ringType: Int = 2): Result<Ring> {
         val formattedMac = formatMacAddress(macAddress)
         
         // Validate MAC address format
