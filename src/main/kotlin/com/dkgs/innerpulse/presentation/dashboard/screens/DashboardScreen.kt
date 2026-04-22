@@ -195,6 +195,8 @@ fun DashboardScreenWithHeader(
                 BrandedTopBar(
                     painter = painterResource(id = R.drawable.ic_premium_logo),
                     title = "INNERPULSE",
+                    isConnected = isConnected,
+                    batteryLevel = state.batteryLevel,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -260,6 +262,18 @@ fun DashboardScreenWithHeader(
                         )
                     }
                 }
+            }
+
+            // Connectivity Status Banner
+            if (isConnected) {
+                ConnectivityBanner(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                )
+            } else if (ringConnectionState == RingConnectionState.CONNECTING) {
+                ConnectivityBanner(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    isConnecting = true
+                )
             }
 
             // Hero Section

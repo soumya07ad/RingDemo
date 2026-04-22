@@ -35,6 +35,7 @@ class SmartRingViewModel(
             ringRepository.connectionStatus.collect { status ->
                 _connectionState.value = when (status) {
                     is ConnectionStatus.Connected -> RingConnectionState.CONNECTED
+                    is ConnectionStatus.Connecting -> RingConnectionState.CONNECTING
                     else -> RingConnectionState.DISCONNECTED
                 }
             }

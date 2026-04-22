@@ -6,5 +6,6 @@ package com.dkgs.innerpulse.domain.model
  */
 enum class RingConnectionState {
     CONNECTED,
+    CONNECTING,
     DISCONNECTED
 }

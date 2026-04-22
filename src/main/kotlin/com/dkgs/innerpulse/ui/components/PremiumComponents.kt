@@ -475,7 +475,9 @@ fun StatusBadge(
 fun BrandedTopBar(
     painter: androidx.compose.ui.graphics.painter.Painter,
     title: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isConnected: Boolean = false,
+    batteryLevel: Int? = null
 ) {
     val isDark = AppColors.isDark
     
@@ -517,7 +519,7 @@ fun BrandedTopBar(
         
         Spacer(modifier = Modifier.width(12.dp))
         
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium.copy(
@@ -538,6 +540,18 @@ fun BrandedTopBar(
                         ),
                         shape = CircleShape
                     )
+            )
+        }
+
+        if (isConnected) {
+            StatusBadge(
+                text = "Connected${batteryLevel?.let { " • $it%" } ?: ""}",
+                color = NeonGreen
+            )
+        } else {
+            StatusBadge(
+                text = "Disconnected",
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
     }
@@ -675,6 +689,80 @@ fun AmbientPulseGlow(
                 shape = CircleShape
             )
     )
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CONNECTIVITY BANNER — Premium status notification
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+fun ConnectivityBanner(
+    modifier: Modifier = Modifier,
+    isConnecting: Boolean = false
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "bannerGlow")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 12.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = NeonGreen.copy(alpha = 0.4f),
+                spotColor = NeonGreen.copy(alpha = 0.4f)
+            ),
+        shape = RoundedCornerShape(16.dp),
+        color = NeonGreen.copy(alpha = alpha),
+        border = BorderStroke(
+            1.dp,
+            Brush.horizontalGradient(listOf(NeonGreen.copy(alpha = 0.5f), Color.Transparent))
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(NeonGreen)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = if (isConnecting) "CONNECTING TO SMART RING..." else "SMART RING ACTIVE",
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 1.2.sp
+                ),
+                color = NeonGreen
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            if (isConnecting) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(16.dp),
+                    color = NeonGreen,
+                    strokeWidth = 2.dp
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = NeonGreen,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
