@@ -45,20 +45,11 @@ class ConnectRingUseCase(
     }
 
     /**
-     * Parse any user input into standard uppercase MAC format
+     * Parse any user input into the raw format expected by the SDK's internal formatter.
+     * The Demo app successfully connects when passing lowercase, colon-less strings
+     * to RingBleUtils.formatMacAddress().
      */
     private fun formatMacAddress(mac: String): String {
-        val uppercaseMac = mac.uppercase()
-        val hexOnly = uppercaseMac.filter { it.isLetterOrDigit() }
-        
-        if (hexOnly.length == 12) {
-            val formatted = java.lang.StringBuilder()
-            for (i in 0 until 12 step 2) {
-                formatted.append(hexOnly.substring(i, i + 2))
-                if (i < 10) formatted.append(":")
-            }
-            return formatted.toString()
-        }
-        return uppercaseMac
+        return mac.filter { it.isLetterOrDigit() }.lowercase()
     }
 }
