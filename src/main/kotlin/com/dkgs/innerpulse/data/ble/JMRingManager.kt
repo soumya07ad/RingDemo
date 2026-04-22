@@ -80,6 +80,9 @@ class JMRingManager private constructor(private val context: Context) :
     private var connectedRing: Ring? = null
     private var currentUserId: String = "12345" // Default or fetched from TokenManager
     private var measurementTimeoutJobs = mutableMapOf<Int, Job>() // type to Job
+    
+    private var connectionRetries = 0
+    private val MAX_RETRIES = 5
 
     init {
         Log.i(TAG, "Initializing JMRingManager with official SDK")
@@ -104,6 +107,7 @@ class JMRingManager private constructor(private val context: Context) :
     // ═══════════════════════════════════
 
     fun connectRing(userId: String, macAddress: String, ringType: Int) {
+        connectionRetries = 0
         val formattedMac = RingBleUtils.formatMacAddress(macAddress)
         val sn = "780901703208128" // Default SN from Demo SDK for compatibility
         
@@ -241,6 +245,7 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     override fun onConnectSuccess() {
+        connectionRetries = 0
         Log.i(TAG, "Successfully connected to ring")
         val ring = connectedRing?.copy(isConnected = true) ?: Ring(macAddress = "", name = "JMRing", isConnected = true)
         _connectionState.value = BleConnectionState.Connected(ring)
@@ -262,8 +267,16 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     override fun onConnectFail() {
-        Log.e(TAG, "Connection failed")
-        _connectionState.value = BleConnectionState.Error("Connection failed")
+        // Demo SDK behavior: immediately retry connection (see demo MainActivity line 184)
+        connectionRetries++
+        if (connectionRetries <= MAX_RETRIES) {
+            Log.w(TAG, "Connection failed, retrying immediately ($connectionRetries/$MAX_RETRIES)")
+            RingBleUtils.getRingBleManager().onConnect()
+        } else {
+            Log.e(TAG, "Connection failed after $MAX_RETRIES retries")
+            connectionRetries = 0
+            _connectionState.value = BleConnectionState.Error("Connection failed after $MAX_RETRIES attempts")
+        }
     }
 
     override fun onBatteryListener(isCharge: Boolean, electricity: Int?) {

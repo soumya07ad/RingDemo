@@ -18,13 +18,16 @@ class ConnectRingUseCase(
      * @return Result containing connected ring or error
      */
     suspend operator fun invoke(macAddress: String, deviceName: String? = null, ringType: Int = 1): Result<Ring> {
+        val formattedMac = formatMacAddress(macAddress)
+        
         // Validate MAC address format
-        if (!isValidMacAddress(macAddress)) {
-            return Result.error("Invalid MAC address format")
+        if (!isValidMacAddress(formattedMac)) {
+            return Result.error("Invalid MAC address format. Please provide 12 hex characters.")
         }
         
-        return repository.connect(macAddress, deviceName, ringType)
+        return repository.connect(formattedMac, deviceName, ringType)
     }
+
     
     /**
      * Connect to a Ring object
@@ -34,12 +37,28 @@ class ConnectRingUseCase(
     }
     
     /**
-     * Check if MAC address is potentially valid
+     * Check if MAC address matches standard format XX:XX:XX:XX:XX:XX
      */
     private fun isValidMacAddress(mac: String): Boolean {
-        // More lenient check since SDK's formatMacAddress will handle standardization.
-        // Just ensures it's not empty and contains enough hex characters.
-        val hexOnly = mac.filter { it.isLetterOrDigit() }
-        return hexOnly.length >= 10 // Most MACs are 12 hex chars, but let's be flexible
+        val regex = "^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$".toRegex()
+        return mac.matches(regex)
+    }
+
+    /**
+     * Parse any user input into standard uppercase MAC format
+     */
+    private fun formatMacAddress(mac: String): String {
+        val uppercaseMac = mac.uppercase()
+        val hexOnly = uppercaseMac.filter { it.isLetterOrDigit() }
+        
+        if (hexOnly.length == 12) {
+            val formatted = java.lang.StringBuilder()
+            for (i in 0 until 12 step 2) {
+                formatted.append(hexOnly.substring(i, i + 2))
+                if (i < 10) formatted.append(":")
+            }
+            return formatted.toString()
+        }
+        return uppercaseMac
     }
 }

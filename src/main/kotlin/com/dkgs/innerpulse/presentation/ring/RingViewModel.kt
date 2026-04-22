@@ -90,18 +90,19 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun getRequiredPermissions(): Array<String> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+: Only need Bluetooth permissions
-            // (neverForLocation flag in manifest means no location needed)
+            // Android 12+: Match Demo SDK exactly — include location for JMRing SDK
             arrayOf(
                 Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
+                Manifest.permission.BLUETOOTH_ADVERTISE,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
         } else {
             // Android 11 and below: Need legacy Bluetooth + Location
             arrayOf(
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
             )
         }
     }
@@ -196,6 +197,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Connect to a scanned device
      */
     fun connectToDevice(ring: Ring, ringType: Int) {
+        stopScan() // Safely kill any active scans to prevent GATT connection drops
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             
@@ -225,6 +227,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Connect using manual MAC address entry
      */
     fun connectByMacAddress(macAddress: String, deviceName: String = "Ring") {
+        stopScan() // Ensure adapter is free from scanning duties
         viewModelScope.launch {
             val ringType = _uiState.value.selectedRingType
             _uiState.update { it.copy(isLoading = true, errorMessage = null, showManualEntry = false) }
