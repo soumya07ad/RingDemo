@@ -140,4 +140,23 @@ dependencies {
     // JMRing SDK Integration
     // ══════════════════════════════════════════════════════════
     api("com.jimi:JMRing:1.0.0_13")
+    
+    // Explicitly adding transitive dependencies to fix "Cannot access supertype" errors in IDE
+    implementation("com.jimi:ycbtsdk-release:4.0.6")
+    implementation("com.jimi:jl_rcsp:0.5.5")
+    implementation("com.jimi:JL_Watch:1.10.3")
+    implementation("com.jimi:jl_bt_ota:1.9.6")
+    implementation("com.jimi:aizo_sdk_debug:1.1.5")
+    implementation("com.jimi:aizo_be_lib_release:1.1.5")
+    implementation("com.jimi:aizo_serversdk_release:2_2.1.14")
+    implementation("com.jimi:AliAgent-release:4.2.2")
+    implementation("com.jimi:BmpConvert:1.6.0")
+    
+    // External SDK dependencies
+    implementation("com.blankj:utilcodex:1.31.1")
+    implementation("com.tencent:mmkv-static:1.3.2")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.0")
+    implementation("com.github.liangjingkanji:Serialize:1.3.1")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
 }
