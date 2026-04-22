@@ -37,10 +37,10 @@ class ConnectRingUseCase(
     }
     
     /**
-     * Check if MAC address matches standard format XX:XX:XX:XX:XX:XX
+     * Check if MAC address is a valid 12-character hex string (after formatting)
      */
     private fun isValidMacAddress(mac: String): Boolean {
-        val regex = "^([0-9A-F]{2}[:]){5}([0-9A-F]{2})$".toRegex()
+        val regex = "^[0-9a-f]{12}$".toRegex()
         return mac.matches(regex)
     }
 
