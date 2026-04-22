@@ -1107,7 +1107,9 @@ private fun ManualEntryContent(
     onBack: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(32.dp))
@@ -1140,7 +1142,7 @@ private fun ManualEntryContent(
             value = macAddress,
             onValueChange = onMacChange,
             label = { Text("MAC Address") },
-            placeholder = { Text("XX:XX:XX:XX:XX:XX") },
+            placeholder = { Text("XX:XX:XX:XX:XX:XX or XXXXXXXXXXXX") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             colors = OutlinedTextFieldDefaults.colors(
@@ -1169,7 +1171,7 @@ private fun ManualEntryContent(
                 text = "CONNECT",
                 onClick = onConnect,
                 modifier = Modifier.weight(1f),
-                enabled = macAddress.length >= 10, // Adjusted to match ConnectRingUseCase
+                enabled = macAddress.isNotEmpty(), // Allow any length so the user can always attempt connection
                 colors = listOf(NeonCyan.copy(alpha = 0.9f), NeonBlue)
             )
         }
