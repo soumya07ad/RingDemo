@@ -2,7 +2,6 @@ package com.dkgs.innerpulse.data.ble
 
 import android.content.Context
 import android.util.Log
-import android.bluetooth.BluetoothDevice
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -272,24 +271,6 @@ class JMRingManager private constructor(private val context: Context) :
         _connectionState.value = BleConnectionState.Disconnected
     }
 
-    override fun onRcspInit(device: BluetoothDevice?, isInit: Boolean) {
-        Log.i(TAG, "Callback: onRcspInit - device=${device?.address}, isInit=$isInit")
-        if (isInit && device != null) {
-            val ring = connectedRing?.copy(isConnected = true, macAddress = device.address) 
-                ?: Ring(macAddress = device.address, name = device.name ?: "Ring", isConnected = true)
-            _connectionState.value = BleConnectionState.Connected(ring)
-        }
-    }
-
-    override fun onAuthSuccess(device: BluetoothDevice?, isSuccess: Boolean) {
-        Log.i(TAG, "Callback: onAuthSuccess - device=${device?.address}, success=$isSuccess")
-        if (isSuccess && device != null) {
-            val ring = connectedRing?.copy(isConnected = true, macAddress = device.address) 
-                ?: Ring(macAddress = device.address, name = device.name ?: "Ring", isConnected = true)
-            _connectionState.value = BleConnectionState.Connected(ring)
-        }
-    }
-
     override fun onConnectFail() {
         // Demo SDK behavior: immediately retry connection (see demo MainActivity line 184)
         connectionRetries++
@@ -305,6 +286,14 @@ class JMRingManager private constructor(private val context: Context) :
 
     override fun onBatteryListener(isCharge: Boolean, electricity: Int?) {
         Log.d(TAG, "Battery level: $electricity%, charging: $isCharge")
+        
+        // Safety trigger: If we receive battery data, the ring is definitely connected and authenticated.
+        // This helps if the SDK missed the onConnectSuccess callback.
+        if (_connectionState.value !is BleConnectionState.Connected) {
+            Log.i(TAG, "✓ Data flow detected (battery). Transitioning to Connected state.")
+            val ring = connectedRing?.copy(isConnected = true) ?: Ring(macAddress = "", name = "Ring", isConnected = true)
+            _connectionState.value = BleConnectionState.Connected(ring)
+        }
         
         // Fetch firmware version (seen in demo app onBatteryListener)
         val firmwareParams = RingBleUtils.getRingBleManager().getFirmwareParameters()
@@ -323,6 +312,14 @@ class JMRingManager private constructor(private val context: Context) :
 
     override fun onHealthAllBeanListener(tag: String, isRingData: Boolean, reqTime: Long?, list: List<JMHealthAllBean>) {
         if (list.isEmpty()) return
+        
+        // Safety trigger: If we receive health data, the ring is definitely connected and authenticated.
+        if (_connectionState.value !is BleConnectionState.Connected) {
+            Log.i(TAG, "✓ Data flow detected (health). Transitioning to Connected state.")
+            val ring = connectedRing?.copy(isConnected = true) ?: Ring(macAddress = "", name = "Ring", isConnected = true)
+            _connectionState.value = BleConnectionState.Connected(ring)
+        }
+
         val bean = list.last()
         Log.d(TAG, "Health data update: HR=${bean.dailyHeartRate}, Steps=${bean.stepDiff}")
         
