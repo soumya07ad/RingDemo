@@ -124,6 +124,11 @@ class JMRingManager private constructor(private val context: Context) :
         }
 
         RingBleUtils.setRingData(userId, formattedMac, sn, safeRingType)
+        
+        // IMPORTANT: Re-setup listeners here. The SDK swaps the underlying manager 
+        // (e.g., to YcbtRingBleManager for Xiaoqi rings) inside setRingData.
+        setupListeners()
+        
         RingBleUtils.getRingBleManager().onConnect()
     }
 
