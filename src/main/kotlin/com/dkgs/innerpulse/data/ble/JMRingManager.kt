@@ -2,6 +2,7 @@ package com.dkgs.innerpulse.data.ble
 
 import android.content.Context
 import android.util.Log
+import android.bluetooth.BluetoothDevice
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -245,12 +246,13 @@ class JMRingManager private constructor(private val context: Context) :
     // ═══════════════════════════════════
 
     override fun onConnecting() {
+        Log.i(TAG, "Callback: onConnecting")
         _connectionState.value = BleConnectionState.Connecting
     }
 
     override fun onConnectSuccess() {
         connectionRetries = 0
-        Log.i(TAG, "Successfully connected to ring")
+        Log.i(TAG, "Callback: onConnectSuccess - SUCCESSFULLY CONNECTED")
         val ring = connectedRing?.copy(isConnected = true) ?: Ring(macAddress = "", name = "JMRing", isConnected = true)
         _connectionState.value = BleConnectionState.Connected(ring)
         
@@ -268,6 +270,24 @@ class JMRingManager private constructor(private val context: Context) :
     override fun onDisconnect(isCallback: Boolean) {
         Log.i(TAG, "Ring disconnected (isCallback=$isCallback)")
         _connectionState.value = BleConnectionState.Disconnected
+    }
+
+    override fun onRcspInit(device: BluetoothDevice?, isInit: Boolean) {
+        Log.i(TAG, "Callback: onRcspInit - device=${device?.address}, isInit=$isInit")
+        if (isInit && device != null) {
+            val ring = connectedRing?.copy(isConnected = true, macAddress = device.address) 
+                ?: Ring(macAddress = device.address, name = device.name ?: "Ring", isConnected = true)
+            _connectionState.value = BleConnectionState.Connected(ring)
+        }
+    }
+
+    override fun onAuthSuccess(device: BluetoothDevice?, isSuccess: Boolean) {
+        Log.i(TAG, "Callback: onAuthSuccess - device=${device?.address}, success=$isSuccess")
+        if (isSuccess && device != null) {
+            val ring = connectedRing?.copy(isConnected = true, macAddress = device.address) 
+                ?: Ring(macAddress = device.address, name = device.name ?: "Ring", isConnected = true)
+            _connectionState.value = BleConnectionState.Connected(ring)
+        }
     }
 
     override fun onConnectFail() {

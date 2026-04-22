@@ -111,6 +111,7 @@ class RingRepositoryImpl(
      * Map BLE Connection State to domain ConnectionStatus
      */
     private fun mapConnectionState(state: BleConnectionState): ConnectionStatus {
+        Log.d(TAG, "Mapping BLE state to domain status: $state")
         return when (state) {
             is BleConnectionState.Disconnected -> {
                 connectedRing = null
@@ -118,6 +119,7 @@ class RingRepositoryImpl(
             }
             is BleConnectionState.Connecting -> ConnectionStatus.Connecting
             is BleConnectionState.Connected -> {
+                Log.i(TAG, "✓ Mapping CONNECTED state for ring: ${state.ring.macAddress}")
                 connectedRing = state.ring.copy(isConnected = true)
                 ConnectionStatus.Connected(connectedRing!!)
             }

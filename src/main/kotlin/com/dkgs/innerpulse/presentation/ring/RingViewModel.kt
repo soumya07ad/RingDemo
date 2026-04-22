@@ -57,6 +57,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
     private fun observeRepositoryStates() {
         viewModelScope.launch {
             container.ringRepository.connectionStatus.collect { status ->
+                android.util.Log.d("RingViewModel", "📡 Connection status update: $status")
                 _uiState.update { it.copy(
                     connectionStatus = status,
                     connectedRing = (status as? ConnectionStatus.Connected)?.ring,
