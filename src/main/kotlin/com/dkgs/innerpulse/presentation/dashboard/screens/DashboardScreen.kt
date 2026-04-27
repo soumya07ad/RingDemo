@@ -378,40 +378,45 @@ fun DashboardScreenWithHeader(
                     }
                 }
 
-                if (isConnected) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    val bpValue = when {
+                        state.bloodPressureMeasuring && state.bloodPressureHeartRate > 0 -> "HR: ${state.bloodPressureHeartRate}"
+                        state.bloodPressureSystolic > 0 && state.bloodPressureDiastolic > 0 -> "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}"
+                        else -> "--"
+                    }
+                    
+                    FloatingMetricTile(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.MonitorHeart,
+                        label = "BLOOD PRESSURE",
+                        value = bpValue,
+                        unit = if (bpValue.contains("/")) "mmHg" else "",
+                        progress = if (state.bloodPressureSystolic > 0) (state.bloodPressureSystolic / 180f).coerceIn(0f, 1f) else 0f,
+                        gradientColors = listOf(NeonOrange, ErrorRed),
+                        glowColor = NeonOrange,
+                        iconBgColor = HeartRateIconBg
+                    )
+                    
+                    // Placeholder for Body Temp if Type 1
+                    if (state.ringType == 1) {
                         FloatingMetricTile(
                             modifier = Modifier.weight(1f),
-                            icon = Icons.Default.MonitorHeart,
-                            label = "BLOOD PRESSURE",
-                            value = if (state.bloodPressureMeasuring && state.bloodPressureHeartRate > 0) "HR: ${state.bloodPressureHeartRate}" else "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}",
-                            unit = "mmHg",
-                            progress = 0.7f,
-                            gradientColors = listOf(NeonOrange, ErrorRed),
-                            glowColor = NeonOrange,
-                            iconBgColor = HeartRateIconBg
+                            icon = Icons.Default.Thermostat,
+                            label = "BODY TEMP",
+                            value = if (isConnected) "36.5" else "--",
+                            unit = "°C",
+                            progress = if (isConnected) 0.5f else 0f,
+                            gradientColors = listOf(NeonCyan, NeonGreen),
+                            glowColor = NeonCyan,
+                            iconBgColor = BloodOxygenIconBg
                         )
-                        
-                        // Placeholder for Body Temp if Type 1
-                        if (state.ringType == 1) {
-                            FloatingMetricTile(
-                                modifier = Modifier.weight(1f),
-                                icon = Icons.Default.Thermostat,
-                                label = "BODY TEMP",
-                                value = "36.5", // Static for now as SDK integration for temp is future
-                                unit = "°C",
-                                progress = 0.5f,
-                                gradientColors = listOf(NeonCyan, NeonGreen),
-                                glowColor = NeonCyan,
-                                iconBgColor = BloodOxygenIconBg
-                            )
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
+                }
                     
                     Row(
                         modifier = Modifier.fillMaxWidth(),

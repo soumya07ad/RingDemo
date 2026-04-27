@@ -344,14 +344,15 @@ class JMRingManager private constructor(private val context: Context) :
         }
 
         val bean = list.last()
-        Log.d(TAG, "Health data update: HR=${bean.dailyHeartRate}, Steps=${bean.stepDiff}")
-        
-        val currentData = _ringData.value
-        val hrValue = bean.dailyHeartRate?.toInt() ?: 0
+        val bpHigh = bean.bphp?.toInt() ?: 0
+        val bpLow = bean.bplp?.toInt() ?: 0
+        Log.d(TAG, "Health data update: HR=${bean.dailyHeartRate}, BP=$bpHigh/$bpLow, Steps=${bean.stepDiff}")
         
         _ringData.value = currentData.copy(
             heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
             bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
+            bloodPressureSystolic = if (bpHigh > 0) bpHigh else currentData.bloodPressureSystolic,
+            bloodPressureDiastolic = if (bpLow > 0) bpLow else currentData.bloodPressureDiastolic,
             spO2 = bean.spo2?.toFloat() ?: currentData.spO2,
             steps = bean.stepDiff?.toInt() ?: currentData.steps,
             calories = bean.caloriesDiff?.toInt() ?: currentData.calories,
@@ -458,12 +459,16 @@ class JMRingManager private constructor(private val context: Context) :
         val currentData = _ringData.value
         val hrValue = healthBean?.dailyHeartRate?.toInt() ?: 0
         val stressValue = stressBean?.pressureIndex?.toInt() ?: 0
+        val bpHigh = healthBean?.bphp?.toInt() ?: 0
+        val bpLow = healthBean?.bplp?.toInt() ?: 0
         
-        Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, Stress=$stressValue")
+        Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, BP=$bpHigh/$bpLow, Stress=$stressValue")
         
         _ringData.value = currentData.copy(
             heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
             bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
+            bloodPressureSystolic = if (bpHigh > 0) bpHigh else currentData.bloodPressureSystolic,
+            bloodPressureDiastolic = if (bpLow > 0) bpLow else currentData.bloodPressureDiastolic,
             spO2 = healthBean?.spo2?.toFloat() ?: currentData.spO2,
             stress = if (stressValue > 0) stressValue else currentData.stress,
             lastUpdate = System.currentTimeMillis()
