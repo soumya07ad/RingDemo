@@ -38,27 +38,38 @@ fun LoginScreen(
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
+        android.util.Log.d("AuthDebug", "Google Sign-In result received. Code: ${result.resultCode}")
+        
         if (result.resultCode == Activity.RESULT_OK) {
             try {
-                val account = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                    .getResult(ApiException::class.java)
+                val accountTask = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                val account = accountTask.getResult(ApiException::class.java)
                 val idToken = account?.idToken
+                
+                android.util.Log.d("AuthDebug", "ID Token retrieved: ${idToken != null}")
+                
                 if (idToken != null) {
                     viewModel.signInWithGoogle(idToken)
                 } else {
-                    Toast.makeText(context, "Google Sign-In failed: No ID token", Toast.LENGTH_SHORT).show()
+                    val msg = "Google Sign-In failed: No ID token returned by server"
+                    android.util.Log.e("AuthDebug", msg)
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                 }
             } catch (e: ApiException) {
                 val statusCode = e.statusCode
+                android.util.Log.e("AuthDebug", "ApiException during Google Sign-In: $statusCode", e)
+                
                 val errorMessage = when (statusCode) {
                     7 -> "Network Error: Check your internet (7)"
-                    10 -> "Developer Error: Likely missing SHA-1 in Firebase Console (10)"
+                    10 -> "Developer Error: Likely missing SHA-1 fingerprint in Firebase Console (10)"
                     12500 -> "Sign-In Failed: Check your Firebase config (12500)"
                     12501 -> "Sign-In Cancelled (12501)"
                     else -> "Google Sign-In failed: ${e.localizedMessage} ($statusCode)"
                 }
                 Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
             }
+        } else {
+            android.util.Log.w("AuthDebug", "Google Sign-In cancelled or failed before intent finished. ResultCode: ${result.resultCode}")
         }
     }
 

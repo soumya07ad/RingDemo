@@ -142,15 +142,15 @@ dependencies {
     api("com.jimi:JMRing:1.0.0_13")
     
     // Explicitly adding transitive dependencies to fix "Cannot access supertype" errors in IDE
-    implementation("com.jimi:ycbtsdk-release:4.0.6")
-    implementation("com.jimi:jl_rcsp:0.5.5")
-    implementation("com.jimi:JL_Watch:1.10.3")
-    implementation("com.jimi:jl_bt_ota:1.9.6")
-    implementation("com.jimi:aizo_sdk_debug:1.1.5")
-    implementation("com.jimi:aizo_be_lib_release:1.1.5")
-    implementation("com.jimi:aizo_serversdk_release:2_2.1.14")
-    implementation("com.jimi:AliAgent-release:4.2.2")
-    implementation("com.jimi:BmpConvert:1.6.0")
+    api("com.jimi:ycbtsdk-release:4.0.6")
+    api("com.jimi:jl_rcsp:0.5.5")
+    api("com.jimi:JL_Watch:1.10.3")
+    api("com.jimi:jl_bt_ota:1.9.6")
+    api("com.jimi:aizo_sdk_debug:1.1.5")
+    api("com.jimi:aizo_be_lib_release:1.1.5")
+    api("com.jimi:aizo_serversdk_release:2_2.1.14")
+    api("com.jimi:AliAgent-release:4.2.2")
+    api("com.jimi:BmpConvert:1.6.0")
     
     // External SDK dependencies
     implementation("com.blankj:utilcodex:1.31.1")

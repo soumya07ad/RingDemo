@@ -17,6 +17,7 @@ import kotlinx.coroutines.tasks.await
  */
 data class AppNavigationUiState(
     val userLoggedIn: Boolean = false,
+    val permissionsGranted: Boolean = false,
     val setupComplete: Boolean = false,
     val isLoading: Boolean = true
 )
@@ -53,15 +54,62 @@ class AppNavigationViewModel(
             
             val finalToken = tokenManager.getToken()
             val setupCompleteStatus = tokenManager.setupCompleteFlow.first()
+            val permissionsStatus = checkAllPermissions()
             
             _uiState.update { 
                 it.copy(
                     userLoggedIn = !finalToken.isNullOrEmpty(),
+                    permissionsGranted = permissionsStatus,
                     setupComplete = setupCompleteStatus,
                     isLoading = false
                 )
             }
         }
+    }
+
+    /**
+     * Define all dangerous permissions required by the app across all features.
+     */
+    fun getGlobalPermissions(): Array<String> {
+        val list = mutableListOf(
+            android.Manifest.permission.ACCESS_FINE_LOCATION,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION,
+            android.Manifest.permission.BODY_SENSORS,
+            android.Manifest.permission.ACTIVITY_RECOGNITION,
+            android.Manifest.permission.RECORD_AUDIO
+        )
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            list.add(android.Manifest.permission.BLUETOOTH_SCAN)
+            list.add(android.Manifest.permission.BLUETOOTH_CONNECT)
+        }
+        
+        // Storage permissions for reports/logs
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            // Android 13+ doesn't need generic storage but specific media ones if used
+        } else {
+            list.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            list.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        return list.toTypedArray()
+    }
+
+    fun checkAllPermissions(): Boolean {
+        val context = com.dkgs.innerpulse.FitnessApplication.getInstance()
+        return getGlobalPermissions().all {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, it) == 
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    fun onPermissionsResult(allGranted: Boolean) {
+        _uiState.update { it.copy(permissionsGranted = allGranted) }
+    }
+
+    fun refreshPermissionStatus() {
+        val status = checkAllPermissions()
+        _uiState.update { it.copy(permissionsGranted = status) }
     }
 
     fun onLoginSuccess() {

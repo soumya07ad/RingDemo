@@ -111,7 +111,8 @@ fun RingSetupRoute(
         },
         onMeasureStress = { viewModel.startStressMeasurement() },
         onRequestSleep = { viewModel.requestSleepHistory() },
-        onClearError = { viewModel.clearError() }
+        onClearError = { viewModel.clearError() },
+        onRefresh = { viewModel.refreshStatus(context) }
     )
 }
 
@@ -139,7 +140,8 @@ fun RingSetupScreen(
     onMeasureSpO2: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onRequestSleep: () -> Unit = {},
-    onClearError: () -> Unit = {}
+    onClearError: () -> Unit = {},
+    onRefresh: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Cinematic background
@@ -165,6 +167,7 @@ fun RingSetupScreen(
                         isLocationEnabled = uiState.isLocationEnabled,
                         onRequestPermission = onRequestPermission,
                         onOpenSettings = onOpenSettings,
+                        onRefresh = onRefresh,
                         selectedRingType = uiState.selectedRingType,
                         onRingTypeChange = onRingTypeChange
                     )
@@ -281,6 +284,7 @@ private fun PermissionContent(
     isLocationEnabled: Boolean,
     onRequestPermission: () -> Unit,
     onOpenSettings: () -> Unit,
+    onRefresh: () -> Unit,
     selectedRingType: Int,
     onRingTypeChange: (Int) -> Unit
 ) {
@@ -331,15 +335,21 @@ private fun PermissionContent(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(
-            text = when (permissionState) {
-                PermissionUiState.PermanentlyDenied -> "Permissions Required"
-                PermissionUiState.Denied -> "Bluetooth Access Denied"
-                else -> "Allow Bluetooth Access"
-            },
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = when (permissionState) {
+                    PermissionUiState.PermanentlyDenied -> "Permissions Required"
+                    PermissionUiState.Denied -> "Bluetooth Access Denied"
+                    else -> "Allow Bluetooth Access"
+                },
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(onClick = onRefresh) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = NeonCyan)
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

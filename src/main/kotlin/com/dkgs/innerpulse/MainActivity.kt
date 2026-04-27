@@ -76,8 +76,8 @@ class MainActivity : ComponentActivity() {
         // Initialize DI container (creates FitnessAPI, Retrofit, etc.)
         AppContainer.initialize(this)
 
-        // Start background sync
-        SyncWorker.scheduleSyncWorker(this)
+        // Start background sync (using the new consolidated worker)
+        // SyncWorker.scheduleSyncWorker(this) // Deprecated: causing 404s
 
         setContent {
             val factory = remember { AppContainer.getInstance(this).viewModelFactory }
@@ -112,6 +112,20 @@ fun AppNavigationFlow(
     val navState by navViewModel.uiState.collectAsState()
     val navController = rememberNavController()
 
+    // Refresh permissions when app resumes (e.g. returning from settings)
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                navViewModel.refreshPermissionStatus()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     // Don't show anything while loading persistent state
     if (navState.isLoading) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -126,6 +140,14 @@ fun AppNavigationFlow(
                 viewModel = viewModel(factory = factory),
                 onAuthSuccess = {
                     navViewModel.onLoginSuccess()
+                }
+            )
+        }
+        !navState.permissionsGranted -> {
+            com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
+                viewModel = navViewModel,
+                onAllPermissionsGranted = { 
+                    // No-op, navState will update automatically via viewModel
                 }
             )
         }

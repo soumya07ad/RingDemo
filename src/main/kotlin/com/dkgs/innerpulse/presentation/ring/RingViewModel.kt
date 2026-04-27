@@ -134,28 +134,36 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         // Also check if Bluetooth is actually enabled
         val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
         
+        // Check GPS status (Required for Android 11 and below)
+        val locationEnabled = isLocationEnabled(context)
+        
         // Log individual permission states for debugging
         permissions.forEach { perm ->
             val granted = ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
-            Log.d("RingViewModel", "Permission $perm: ${if (granted) "GRANTED" else "DENIED"}")
+            Log.d("RingViewModel", "Check Permission: $perm -> ${if (granted) "GRANTED" else "DENIED"}")
         }
-        Log.d("RingViewModel", "Bluetooth enabled: $bluetoothEnabled")
-        Log.d("RingViewModel", "All permissions granted: $allGranted")
+        Log.d("RingViewModel", "Status -> Bluetooth: $bluetoothEnabled, Location Services: $locationEnabled, All Permissions: $allGranted")
         
-        // Also check if Location is enabled on Android 11 and below
-        val locationEnabled = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            isLocationEnabled(context)
-        } else true
-        
+        val isAndroid11OrBelow = Build.VERSION.SDK_INT <= Build.VERSION_CODES.R
+        val gpsRequiredButOff = isAndroid11OrBelow && !locationEnabled
+
         _uiState.update { 
             it.copy(
                 permissionState = if (allGranted) PermissionUiState.Granted else PermissionUiState.NotRequested,
                 isBluetoothEnabled = bluetoothEnabled,
-                isLocationEnabled = locationEnabled
+                isLocationEnabled = locationEnabled,
+                errorMessage = if (gpsRequiredButOff) "Location Services (GPS) must be ON to scan for rings" else it.errorMessage
             )
         }
         
         return allGranted && bluetoothEnabled && locationEnabled
+    }
+
+    /**
+     * Manually refresh permission and hardware status
+     */
+    fun refreshStatus(context: Context) {
+        checkPermissions(context)
     }
     
     /**
