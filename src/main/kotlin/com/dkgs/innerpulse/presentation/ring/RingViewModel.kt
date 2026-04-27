@@ -230,6 +230,25 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Connect to a scanned device
      */
     fun connectToDevice(ring: Ring, ringType: Int) {
+        val context = getApplication<Application>()
+        val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
+        val locationEnabled = isLocationEnabled(context)
+
+        if (!_uiState.value.hasPermissions) {
+            _uiState.update { it.copy(errorMessage = "Permissions required") }
+            return
+        }
+
+        if (!bluetoothEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Bluetooth") }
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && !locationEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Location services (GPS)") }
+            return
+        }
+
         stopScan() // Safely kill any active scans to prevent GATT connection drops
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -260,6 +279,25 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Connect using manual MAC address entry
      */
     fun connectByMacAddress(macAddress: String, deviceName: String = "Ring") {
+        val context = getApplication<Application>()
+        val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
+        val locationEnabled = isLocationEnabled(context)
+
+        if (!_uiState.value.hasPermissions) {
+            _uiState.update { it.copy(errorMessage = "Permissions required") }
+            return
+        }
+
+        if (!bluetoothEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Bluetooth") }
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && !locationEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Location services (GPS)") }
+            return
+        }
+
         stopScan() // Ensure adapter is free from scanning duties
         viewModelScope.launch {
             val ringType = _uiState.value.selectedRingType
