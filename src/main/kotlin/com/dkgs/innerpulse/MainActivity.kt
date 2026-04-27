@@ -324,7 +324,7 @@ fun AppBottomNav(navController: NavHostController) {
     val rightItems = listOf(Screen.Wellness, Screen.Streaks)
 
     // Selection color
-    val accentColor = if (isDark) NeonCyan else SkyBlue
+    val accentColor = if (isDark) NeonCyan else LightPrimary
 
     Box(
         modifier = Modifier
@@ -339,21 +339,26 @@ fun AppBottomNav(navController: NavHostController) {
                 .align(Alignment.BottomCenter)
                 .padding(horizontal = 16.dp, vertical = 8.dp)
                 .shadow(
-                    elevation = 16.dp,
+                    elevation = if (isDark) 16.dp else 12.dp,
                     shape = RoundedCornerShape(24.dp),
-                    ambientColor = if (isDark) Color.Black else Color.Gray.copy(alpha = 0.2f)
+                    ambientColor = if (isDark) Color.Black else LightCardShadow,
+                    spotColor = if (isDark) Color.Black else LightCardShadow
                 ),
             shape = RoundedCornerShape(24.dp),
-            color = if (isDark) Color(0xE60A0A14) else Color(0xCCFFFFFF),
+            color = if (isDark) Color(0xE60A0A14) else LightSurface,
             border = BorderStroke(
-                width = 0.5.dp,
-                brush = Brush.linearGradient(
-                    listOf(
-                        Color.White.copy(alpha = 0.2f),
-                        Color.Transparent,
-                        accentColor.copy(alpha = 0.2f)
+                width = 1.dp,
+                brush = if (isDark) {
+                    Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 0.2f),
+                            Color.Transparent,
+                            accentColor.copy(alpha = 0.2f)
+                        )
                     )
-                )
+                } else {
+                    androidx.compose.ui.graphics.SolidColor(LightBorderSubtle)
+                }
             )
         ) {
             Row(
@@ -467,7 +472,7 @@ private fun BottomNavItem(
     onClick: () -> Unit
 ) {
     val isDark = AppColors.isDark
-    val accentColor = if (isDark) NeonCyan else SkyBlue
+    val accentColor = if (isDark) NeonCyan else LightPrimary
     
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.1f else 1f,

@@ -40,7 +40,11 @@ fun SmartRingCard(
 
     // Animated glow color
     val glowColor by animateColorAsState(
-        targetValue = if (isConnected) NeonGreen else NeonCyan,
+        targetValue = if (isConnected) {
+            if (AppColors.isDark) NeonGreen else LightSuccess
+        } else {
+            if (AppColors.isDark) NeonCyan else LightWarning
+        },
         animationSpec = tween(600),
         label = "ringCardGlow"
     )
@@ -69,7 +73,7 @@ fun SmartRingCard(
                 modifier = Modifier
                     .size(52.dp)
                     .clip(CircleShape)
-                    .background(BloodOxygenIconBg),
+                    .background(if (isConnected) LightSuccessBg else LightWarningBg),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -111,7 +115,11 @@ fun SmartRingCard(
                         else
                             "Not connected",
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isConnected) NeonGreen else MetricLabelGray
+                        color = if (isConnected) {
+                            if (AppColors.isDark) NeonGreen else LightSuccess
+                        } else {
+                            if (AppColors.isDark) MetricLabelGray else LightWarning
+                        }
                     )
                 }
             }
@@ -170,9 +178,11 @@ fun SmartRingCard(
                     Box(
                         modifier = Modifier
                             .background(
-                                brush = Brush.horizontalGradient(
-                                    listOf(SkyBlue, NeonGreen)
-                                ),
+                                brush = if (AppColors.isDark) {
+                                    Brush.horizontalGradient(listOf(SkyBlue, NeonGreen))
+                                } else {
+                                    AppColors.accentGradient
+                                },
                                 shape = buttonShape
                             )
                             .padding(horizontal = 20.dp, vertical = 10.dp),

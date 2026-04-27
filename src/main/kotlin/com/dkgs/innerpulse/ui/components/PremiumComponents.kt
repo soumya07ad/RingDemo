@@ -70,19 +70,19 @@ fun NeonGlassCard(
                         }
                     } else {
                         // Glass border for light mode
-                        Modifier.border(1.dp, LightGlassBorderStrong, shape)
+                        Modifier.border(1.dp, LightBorderSubtle, shape)
                     }
                 ),
             shape = shape,
-            color = if (isDark) MaterialTheme.colorScheme.surface else LightGlassCard,
-            shadowElevation = if (isDark) 0.dp else 8.dp
+            color = if (isDark) MaterialTheme.colorScheme.surface else LightCard,
+            shadowElevation = if (isDark) 0.dp else 4.dp
         ) {
             Column(
                 modifier = Modifier
                     .background(if (isDark) CardGlassBrush else Brush.verticalGradient(
                         listOf(
-                            Color(0x33FFFFFF),  // 20% white top
-                            Color(0x0DFFFFFF)   // 5% white bottom
+                            Color(0xFFFFFFFF),  // Pure white top
+                            Color(0xFFF8FAFF)   // Very light blue-white bottom
                         )
                     ))
                     .padding(20.dp),
@@ -115,33 +115,26 @@ fun FloatingMetricTile(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            // Outer 3D shadow
+            // Outer 3D shadow (Light mode)
             .shadow(
-                elevation = 8.dp,
+                elevation = if (isDark) 0.dp else 6.dp,
                 shape = shape,
-                ambientColor = if (isDark) Color.Transparent else PremiumShadowColor,
-                spotColor = if (isDark) Color.Transparent else PremiumShadowColor
-            )
-            // Secondary sky blue glow
-            .shadow(
-                elevation = if (isDark) 0.dp else 4.dp,
-                shape = shape,
-                ambientColor = SkyBlue.copy(alpha = 0.15f),
-                spotColor = SkyBlue.copy(alpha = 0.15f)
+                ambientColor = if (isDark) Color.Transparent else LightCardShadow,
+                spotColor = if (isDark) Color.Transparent else LightCardShadow
             )
             .clip(shape)
             .then(
                 if (isDark) {
                     Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
                 } else {
-                    Modifier.border(1.dp, MetricCardBorder, shape)
+                    Modifier.border(1.dp, LightBorderSubtle, shape)
                 }
             )
             .then(
                 if (onClick != null) Modifier.clickable { onClick() } else Modifier
             ),
         shape = shape,
-        color = if (isDark) MaterialTheme.colorScheme.surface else MetricCardGlass,
+        color = if (isDark) MaterialTheme.colorScheme.surface else LightCard,
         shadowElevation = 0.dp
     ) {
         Row(
@@ -149,8 +142,8 @@ fun FloatingMetricTile(
             modifier = Modifier
                 .background(if (isDark) CardGlassBrush else Brush.verticalGradient(
                     listOf(
-                        PremiumGlassHighlight,  // 60% white top
-                        MetricCardGlass         // 65% white bottom
+                        LightSurface,        // Pure white top
+                        LightSurfaceVariant  // Subtle blue-tint white bottom
                     )
                 ))
                 .padding(16.dp)
@@ -191,7 +184,7 @@ fun FloatingMetricTile(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MetricLabelGray,
+                    color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(4.dp))
@@ -201,7 +194,7 @@ fun FloatingMetricTile(
                     Text(
                         text = value,
                         style = MaterialTheme.typography.headlineMedium,
-                        color = if (isDark) MaterialTheme.colorScheme.onSurface else MetricValueDark,
+                        color = if (isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
                         fontWeight = FontWeight.Bold
                     )
                     if (unit.isNotEmpty()) {
@@ -209,7 +202,7 @@ fun FloatingMetricTile(
                         Text(
                             text = unit,
                             style = MaterialTheme.typography.bodySmall,
-                            color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else MetricLabelGray,
+                            color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
                             modifier = Modifier.padding(bottom = 3.dp)
                         )
                     }
@@ -234,38 +227,31 @@ fun MetricGlassCard(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            // Outer 3D shadow
+            // Outer 3D shadow (Light mode)
             .shadow(
-                elevation = 8.dp,
+                elevation = if (isDark) 0.dp else 8.dp,
                 shape = shape,
-                ambientColor = if (isDark) Color.Transparent else PremiumShadowColor,
-                spotColor = if (isDark) Color.Transparent else PremiumShadowColor
-            )
-            // Secondary sky blue glow
-            .shadow(
-                elevation = if (isDark) 0.dp else 4.dp,
-                shape = shape,
-                ambientColor = SkyBlue.copy(alpha = 0.15f),
-                spotColor = SkyBlue.copy(alpha = 0.15f)
+                ambientColor = if (isDark) Color.Transparent else LightCardShadow,
+                spotColor = if (isDark) Color.Transparent else LightCardShadow
             )
             .clip(shape)
             .then(
                 if (isDark) {
                     Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
                 } else {
-                    Modifier.border(1.dp, MetricCardBorder, shape)
+                    Modifier.border(1.dp, LightBorderSubtle, shape)
                 }
             ),
         shape = shape,
-        color = if (isDark) MaterialTheme.colorScheme.surface else MetricCardGlass,
+        color = if (isDark) MaterialTheme.colorScheme.surface else LightCard,
         shadowElevation = 0.dp
     ) {
         Column(
             modifier = Modifier
                 .background(if (isDark) CardGlassBrush else Brush.verticalGradient(
                     listOf(
-                        PremiumGlassHighlight,  // 60% white top
-                        MetricCardGlass         // 65% white bottom
+                        LightSurface,        // Pure white top
+                        LightSurfaceVariant  // Subtle blue-tint white bottom
                     )
                 ))
                 .padding(20.dp),
@@ -702,30 +688,25 @@ fun ConnectivityBanner(
     isConnecting: Boolean = false
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "bannerGlow")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.1f,
-        targetValue = 0.3f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = EaseInOutSine),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
+    val isDark = AppColors.isDark
+    val baseColor = if (isDark) NeonGreen else LightSuccess
+    val bgColor = if (isDark) NeonGreen.copy(alpha = alpha) else LightSuccessBg
+    val borderColor = if (isDark) NeonGreen.copy(alpha = 0.5f) else LightSuccess
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 12.dp,
+                elevation = if (isDark) 12.dp else 4.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = NeonGreen.copy(alpha = 0.4f),
-                spotColor = NeonGreen.copy(alpha = 0.4f)
+                ambientColor = baseColor.copy(alpha = 0.4f),
+                spotColor = baseColor.copy(alpha = 0.4f)
             ),
         shape = RoundedCornerShape(16.dp),
-        color = NeonGreen.copy(alpha = alpha),
+        color = bgColor,
         border = BorderStroke(
             1.dp,
-            Brush.horizontalGradient(listOf(NeonGreen.copy(alpha = 0.5f), Color.Transparent))
+            Brush.horizontalGradient(listOf(borderColor.copy(alpha = 0.5f), Color.Transparent))
         )
     ) {
         Row(
@@ -736,7 +717,7 @@ fun ConnectivityBanner(
                 modifier = Modifier
                     .size(10.dp)
                     .clip(CircleShape)
-                    .background(NeonGreen)
+                    .background(baseColor)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
@@ -745,20 +726,20 @@ fun ConnectivityBanner(
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 1.2.sp
                 ),
-                color = NeonGreen
+                color = baseColor
             )
             Spacer(modifier = Modifier.weight(1f))
             if (isConnecting) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(16.dp),
-                    color = NeonGreen,
+                    color = baseColor,
                     strokeWidth = 2.dp
                 )
             } else {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null,
-                    tint = NeonGreen,
+                    tint = baseColor,
                     modifier = Modifier.size(18.dp)
                 )
             }

@@ -175,7 +175,22 @@ fun DashboardScreenWithHeader(
     val isConnected = ringConnectionState == RingConnectionState.CONNECTED
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CinematicBackground()
+        if (AppColors.isDark) {
+            CinematicBackground()
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFFF8FAFF),  // very light blue-white at top
+                                Color(0xFFF1F5F9)   // light cool grey at bottom
+                            )
+                        )
+                    )
+            )
+        }
 
         Column(
             modifier = Modifier
@@ -607,8 +622,8 @@ private fun HeroDashboardHeader(
         // Small ring animation
         AnimatedRing3D(
             modifier = Modifier.size(100.dp),
-            primaryColor = if (isConnected) NeonCyan else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            secondaryColor = if (isConnected) PrimaryPurple else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f).copy(alpha = 0.5f),
+            primaryColor = if (isConnected) (if (AppColors.isDark) NeonCyan else LightSecondary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            secondaryColor = if (isConnected) (if (AppColors.isDark) PrimaryPurple else LightPrimary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f).copy(alpha = 0.5f),
             isConnected = isConnected
         )
 
@@ -627,7 +642,7 @@ private fun HeroDashboardHeader(
         Spacer(modifier = Modifier.height(24.dp))
 
         HorizontalDivider(
-            color = SkyBlue.copy(alpha = 0.35f),
+            color = if (AppColors.isDark) SkyBlue.copy(alpha = 0.35f) else LightBorderSubtle,
             thickness = 1.dp
         )
     }
@@ -720,7 +735,11 @@ fun WeeklyEmotionsChart() {
                     // Bar with rounded top
                     drawRect(
                         brush = Brush.verticalGradient(
-                            colors = listOf(NeonCyan.copy(alpha = 0.7f), NeonBlue.copy(alpha = 0.3f)),
+                            colors = if (AppColors.isDark) {
+                                listOf(NeonCyan.copy(alpha = 0.7f), NeonBlue.copy(alpha = 0.3f))
+                            } else {
+                                listOf(LightSecondary.copy(alpha = 0.7f), LightPrimary.copy(alpha = 0.3f))
+                            },
                             startY = top, endY = bottom
                         ),
                         topLeft = Offset(x - barW / 2f, top),

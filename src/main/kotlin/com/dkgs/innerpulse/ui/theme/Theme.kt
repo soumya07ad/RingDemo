@@ -72,54 +72,40 @@ val TextPrimary = Color(0xFFF5F5F7)          // Apple-style white
 val TextSecondary = Color(0xFF8E8E93)        // iOS secondary
 val TextMuted = Color(0xFF48484A)            // iOS tertiary
 
-// ── Text Colors (Light Mode) ────────────────────────────────────────
-val LightTextPrimary = Color(0xFF1A1A1A)
-val LightTextSecondary = Color(0xFF6B6B6B)
-val LightTextMuted = Color(0xFF94A3B8)
+// ── Light Mode Text Colors ──────────────────────────────────────────
+val LightTextPrimary = Color(0xFF1A1A2E)          // Deep Navy Black
+val LightTextSecondary = Color(0xFF64748B)        // Slate Grey
+val LightTextMuted = Color(0xFF94A3B8)            // Light Slate
 
 // ── Light Mode Backgrounds ──────────────────────────────────────────
-val LightBackground = Color(0xFFD9F3FF)        // Deep sky blue
-val LightSurface = Color(0xFFFFFFFF)            // Pure white cards
-val LightSurfaceVariant = Color(0xFFE8F4FD)     // Soft blue tint
-val LightCard = Color(0xFFFFFFFF)               // Pure white cards
+val LightBackground = Color(0xFFF1F5F9)           // Very light cool grey
+val LightSurface = Color(0xFFFFFFFF)               // Pure white
+val LightSurfaceVariant = Color(0xFFF8FAFF)        // White with subtle blue tint
+val LightCard = Color(0xFFFFFFFF)                  // Pure white cards
 
 // ── Light Mode Accent Colors ────────────────────────────────────────
-val SkyBlue = Color(0xFF4FC3F7)
-val SkyBlueDark = Color(0xFF039BE5)
-val HighlighterGreen = Color(0xFF39FF14)
-val SoftHighlighterGreen = Color(0xFF66FF47)    // Slightly softer green
+val LightPrimary = Color(0xFF6B4EFF)              // Deep Purple
+val LightSecondary = Color(0xFF00BCD4)            // Vibrant Cyan
+val LightAccent = Color(0xFFFF6B6B)               // Coral
+val LightSuccess = Color(0xFF00C896)              // Emerald
+val LightWarning = Color(0xFFFFB300)              // Amber
+val LightWarningBg = Color(0xFFFFF8E1)            // Warm yellow tint
+val LightSuccessBg = Color(0xFFF0FFF8)            // Light green tint
 
-// ── Light Mode Glass Effect Colors ───────────────────────────────────
-val LightGlassCard = Color(0x59FFFFFF)          // ~35% white translucency
-val LightGlassBorderStrong = Color(0x66FFFFFF)  // ~40% white border
-val LightGlassShadow = Color(0x224FC3F7)        // Sky blue shadow
-
-// ── Light Mode Glass ────────────────────────────────────────────────
-val LightGlassBorder = Color(0x224FC3F7)         // 13% sky blue
-val LightGlassOverlay = Color(0x0A4FC3F7)        // 4% sky blue
-
-// ── Premium Glass (Light Mode Buttons) ──────────────────────────────
-val PremiumGlassWhite = Color(0x59FFFFFF)         // 35% white glass bg
-val PremiumGlassBorder = Color(0x73FFFFFF)        // 45% white border
-val PremiumGlassHighlight = Color(0x99FFFFFF)     // 60% white inner shine
+// ── Light Mode Effects & Shadows ────────────────────────────────────
+val LightCardShadow = Color(0x0F000000)           // 6% black shadow
+val LightBorderSubtle = Color(0xFFE2E8F0)         // Subtle navigation border
 val PremiumShadowColor = Color(0x14000000)        // 8% black outer shadow
-val DarkGrayText = Color(0xFF2A2A2A)              // Dark button text
+val DarkGrayText = Color(0xFF1A1A2E)              // Deep Navy Black
 
-// ── Metric Card Glass (Light Mode Dashboard) ────────────────────────
-val MetricCardGlass = Color(0xA6FFFFFF)            // 65% white solid glass
-val MetricCardBorder = Color(0x99FFFFFF)            // 60% white border
-val MetricLabelGray = Color(0xFF6A6A6A)            // Metric label text
-val MetricValueDark = Color(0xFF1A1A1A)            // Metric value text
-
-// ── Metric Icon Circle Backgrounds ──────────────────────────────────
-val HeartRateIconBg = Color(0xFFFFEAEA)            // Soft red
-val BloodOxygenIconBg = Color(0xFFE8F9FF)          // Light cyan
-val StepsIconBg = Color(0xFFF3E9FF)                // Light purple
-val DistanceIconBg = Color(0xFFFFF4E5)             // Light amber
-val StressIconBg = Color(0xFFE8FFF1)               // Light green
-val StressStatusBg = Color(0xFFDFFFEA)             // Soft green for status pill
-val StressStatusText = Color(0xFF2E7D32)           // Dark green text for status pill
-val MetricDividerColor = Color(0x0D000000)         // 5% black row separator
+// ── Metric Icon Circle Backgrounds (Light Mode) ────────────────────
+val HeartRateIconBg = Color(0xFFFFF0F0)            // Soft red tint
+val BloodOxygenIconBg = Color(0xFFF0FFFE)          // Soft cyan tint
+val StepsIconBg = Color(0xFFF3F0FF)                // Soft purple tint
+val DistanceIconBg = Color(0xFFFFF8F0)             // Soft orange tint
+val StressIconBg = Color(0xFFF0FFF8)               // Soft green tint
+val SleepIconBg = Color(0xFFF0F0FF)                // Soft indigo tint
+val MetricDividerColor = Color(0xFFE2E8F0)         // 100% Slate 200
 
 // ═══════════════════════════════════════════════════════════════════════
 // THEME-AWARE COMPOSABLE ACCESSORS
@@ -148,10 +134,10 @@ object AppColors {
         @Composable get() = if (MaterialTheme.colorScheme.background == DarkBackground) GlassBorder else LightGlassBorder
 
     val navBarBackground: Color
-        @Composable get() = if (isDark) Color(0xFF080810) else Color(0xCCFFFFFF)  // 80% white glass
+        @Composable get() = if (isDark) Color(0xFF080810) else Color(0xFFFFFFFF)
 
     val navBarBorder: Color
-        @Composable get() = if (isDark) Color(0xFF1A1A2E) else LightGlassBorderStrong
+        @Composable get() = if (isDark) Color(0xFF1A1A2E) else LightBorderSubtle
 
     val isDark: Boolean
         @Composable get() = MaterialTheme.colorScheme.background == DarkBackground
@@ -198,13 +184,12 @@ object AppColors {
         }
     }
 
-    /** Primary accent gradient for buttons (Sky Blue → Green in light, Purple in dark) */
+    /** Primary accent gradient for buttons (Purple → Cyan in light/dark) */
     val accentGradient: Brush
-        @Composable get() = if (isDark) {
-            Brush.horizontalGradient(listOf(PrimaryPurple, NeonPurple))
-        } else {
-            Brush.horizontalGradient(listOf(SkyBlue, SoftHighlighterGreen))
-        }
+        @Composable get() = Brush.horizontalGradient(
+            if (isDark) listOf(PrimaryPurple, NeonPurple) 
+            else listOf(LightPrimary, LightSecondary)
+        )
 
     /** Background gradient brush for the overall screen */
     val backgroundGradient: Brush
@@ -213,8 +198,8 @@ object AppColors {
         } else {
             Brush.verticalGradient(
                 listOf(
-                    LightBackground,      // #D9F3FF deep sky blue top
-                    Color(0xFFF3FFF6)      // very light neon green tint bottom
+                    Color(0xFFF8FAFF),  // very light blue-white at top
+                    Color(0xFFF1F5F9)   // light cool grey at bottom
                 )
             )
         }
@@ -304,20 +289,20 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = SkyBlue,
+    primary = LightPrimary,
     onPrimary = Color.White,
-    primaryContainer = SkyBlueDark,
-    onPrimaryContainer = Color.White,
+    primaryContainer = LightPrimary.copy(alpha = 0.1f),
+    onPrimaryContainer = LightPrimary,
 
-    secondary = HighlighterGreen,
-    onSecondary = Color(0xFF003300),
-    secondaryContainer = HighlighterGreen.copy(alpha = 0.15f),
-    onSecondaryContainer = Color(0xFF003300),
+    secondary = LightSecondary,
+    onSecondary = Color.White,
+    secondaryContainer = LightSecondary.copy(alpha = 0.1f),
+    onSecondaryContainer = LightSecondary,
 
-    tertiary = SkyBlueDark,
+    tertiary = LightAccent,
     onTertiary = Color.White,
-    tertiaryContainer = SkyBlue.copy(alpha = 0.12f),
-    onTertiaryContainer = SkyBlueDark,
+    tertiaryContainer = LightAccent.copy(alpha = 0.1f),
+    onTertiaryContainer = LightAccent,
 
     background = LightBackground,
     onBackground = LightTextPrimary,
@@ -330,8 +315,8 @@ private val LightColorScheme = lightColorScheme(
     error = ErrorRed,
     onError = Color.White,
 
-    outline = SkyBlue.copy(alpha = 0.2f),
-    outlineVariant = SkyBlue.copy(alpha = 0.1f)
+    outline = LightBorderSubtle,
+    outlineVariant = LightBorderSubtle.copy(alpha = 0.5f)
 )
 
 @Composable
