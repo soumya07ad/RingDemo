@@ -102,10 +102,12 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
             )
         } else {
             // Android 11 and below: Need FINE location specifically for BLE scan
-            // Some devices also require COARSE, so we include both to be safe
+            // We also include legacy Bluetooth permissions just in case the SDK checks for them
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN
             )
         }
     }
