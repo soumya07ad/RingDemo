@@ -101,10 +101,6 @@ fun RingSetupRoute(
             if (uiState.ringData.heartRateMeasuring) viewModel.stopHeartRateMeasurement()
             else viewModel.startHeartRateMeasurement()
         },
-        onMeasureBloodPressure = {
-            if (uiState.ringData.bloodPressureMeasuring) viewModel.stopBloodPressureMeasurement()
-            else viewModel.startBloodPressureMeasurement()
-        },
         onMeasureSpO2 = {
             if (uiState.ringData.spO2Measuring) viewModel.stopSpO2Measurement()
             else viewModel.startSpO2Measurement()
@@ -136,7 +132,6 @@ fun RingSetupScreen(
     onConnectByMac: () -> Unit = {},
     onDisconnect: () -> Unit = {},
     onMeasureHeartRate: () -> Unit = {},
-    onMeasureBloodPressure: () -> Unit = {},
     onMeasureSpO2: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onRequestSleep: () -> Unit = {},
@@ -191,7 +186,6 @@ fun RingSetupScreen(
                         onDisconnect = onDisconnect,
                         onDone = onSetupComplete,
                         onMeasureHeartRate = onMeasureHeartRate,
-                        onMeasureBloodPressure = onMeasureBloodPressure,
                         onMeasureSpO2 = onMeasureSpO2,
                         onMeasureStress = onMeasureStress,
                         onRequestSleep = onRequestSleep
@@ -748,7 +742,6 @@ private fun ConnectedContent(
     onDisconnect: () -> Unit,
     onDone: () -> Unit,
     onMeasureHeartRate: () -> Unit,
-    onMeasureBloodPressure: () -> Unit = {},
     onMeasureSpO2: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onRequestSleep: () -> Unit = {}
@@ -841,24 +834,6 @@ private fun ConnectedContent(
                     color = ErrorRed,
                     onClick = onMeasureHeartRate,
                     enabled = !uiState.ringData.heartRateMeasuring
-                )
-            }
-
-            // Blood Pressure
-            item {
-                BloodPressureCard(
-                    systolic = uiState.ringData.bloodPressureSystolic,
-                    diastolic = uiState.ringData.bloodPressureDiastolic,
-                    isMeasuring = uiState.ringData.bloodPressureMeasuring
-                )
-            }
-            item {
-                MeasurementButton(
-                    text = if (uiState.ringData.bloodPressureMeasuring) "Measuring BP..." else "Measure Blood Pressure",
-                    icon = Icons.Default.FavoriteBorder,
-                    color = PrimaryPurple,
-                    onClick = onMeasureBloodPressure,
-                    enabled = !uiState.ringData.bloodPressureMeasuring
                 )
             }
 
@@ -979,64 +954,6 @@ private fun MeasurementButton(
         )
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// BLOOD PRESSURE CARD
-// ═══════════════════════════════════════════════════════════════════════
-
-@Composable
-private fun BloodPressureCard(systolic: Int, diastolic: Int, isMeasuring: Boolean) {
-    NeonGlassCard(glowColor = PrimaryPurple) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(PrimaryPurple.copy(alpha = 0.2f), PrimaryPurple.copy(alpha = 0.03f))
-                        )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,
-                    contentDescription = null,
-                    tint = PrimaryPurple,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "BLOOD PRESSURE",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (isMeasuring) "Measuring..."
-                    else if (systolic > 0) "$systolic/$diastolic mmHg"
-                    else "-- / -- mmHg",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            if (isMeasuring) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = PrimaryPurple,
-                    strokeWidth = 2.dp
-                )
-            }
-        }
-    }
-}
-
 
 // ═══════════════════════════════════════════════════════════════════════
 // STRESS CARD

@@ -362,20 +362,6 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     /**
-     * Start blood pressure measurement
-     */
-    fun startBloodPressureMeasurement() {
-        container.ringRepository.startBloodPressureMeasurement()
-    }
-    
-    /**
-     * Stop blood pressure measurement
-     */
-    fun stopBloodPressureMeasurement() {
-        container.ringRepository.stopBloodPressureMeasurement()
-    }
-    
-    /**
      * Start SpO2 measurement
      */
     fun startSpO2Measurement() {
