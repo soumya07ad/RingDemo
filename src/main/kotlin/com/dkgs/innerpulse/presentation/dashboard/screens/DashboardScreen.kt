@@ -418,23 +418,22 @@ fun DashboardScreenWithHeader(
                     }
                 }
                     
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MeasurementButton(
-                            text = if (state.bloodPressureMeasuring) (if (state.bloodPressureHeartRate > 0) "Measuring (${state.bloodPressureHeartRate})..." else "Measuring...") else "Measure BP",
-                            icon = Icons.Default.MonitorHeart,
-                            color = NeonOrange,
-                            onClick = onMeasureBloodPressure,
-                            enabled = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        if (state.ringType == 1) {
-                            Spacer(modifier = Modifier.weight(1f)) // Temp measurement not implemented
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    MeasurementButton(
+                        text = if (state.bloodPressureMeasuring) (if (state.bloodPressureHeartRate > 0) "Measuring (${state.bloodPressureHeartRate})..." else "Measuring...") else "Measure BP",
+                        icon = Icons.Default.MonitorHeart,
+                        color = NeonOrange,
+                        onClick = onMeasureBloodPressure,
+                        enabled = true,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (state.ringType == 1) {
+                        Spacer(modifier = Modifier.weight(1f)) // Temp measurement not implemented
+                    } else {
+                        Spacer(modifier = Modifier.weight(1f))
                     }
                 }
 
