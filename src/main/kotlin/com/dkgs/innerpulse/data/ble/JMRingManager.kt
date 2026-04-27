@@ -175,15 +175,12 @@ class JMRingManager private constructor(private val context: Context) :
     // ═══════════════════════════════════
 
     fun startMeasurement(type: Int, isBp: Boolean = false) {
-        Log.i(TAG, "Starting real-time measurement type: $type (isBp: $isBp)")
+        Log.i(TAG, "Starting real-time measurement type: $type")
+        RingBleUtils.getRingBleManager().startStopMeasurement(type)
         
-        // Update local measuring flag based on type
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> {
-                    if (isBp) data.copy(bloodPressureMeasuring = true)
-                    else data.copy(heartRateMeasuring = true)
-                }
+                1 -> data.copy(heartRateMeasuring = true)
                 2 -> data.copy(spO2Measuring = true)
                 7 -> data.copy(stressMeasuring = true)
                 else -> data
@@ -197,15 +194,13 @@ class JMRingManager private constructor(private val context: Context) :
             Log.w(TAG, "Measurement type $type timed out locally")
             _ringData.value = _ringData.value.let { data ->
                 when (type) {
-                    1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
+                    1 -> data.copy(heartRateMeasuring = false)
                     2 -> data.copy(spO2Measuring = false)
                     7 -> data.copy(stressMeasuring = false)
                     else -> data
                 }
             }
         }
-        
-        RingBleUtils.getRingBleManager().startStopMeasurement(type)
     }
 
     fun stopMeasurement(type: Int) {
@@ -214,7 +209,7 @@ class JMRingManager private constructor(private val context: Context) :
         measurementTimeoutJobs[type]?.cancel()
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
+                1 -> data.copy(heartRateMeasuring = false)
                 2 -> data.copy(spO2Measuring = false)
                 7 -> data.copy(stressMeasuring = false)
                 else -> data
@@ -289,8 +284,7 @@ class JMRingManager private constructor(private val context: Context) :
         _ringData.value = _ringData.value.copy(
             heartRateMeasuring = false,
             spO2Measuring = false,
-            stressMeasuring = false,
-            bloodPressureMeasuring = false
+            stressMeasuring = false
         )
     }
 
@@ -347,29 +341,10 @@ class JMRingManager private constructor(private val context: Context) :
         val currentData = _ringData.value
         val hrValue = bean.dailyHeartRate?.toInt() ?: 0
         
-        // Diagnostic: Print all fields to find BP names
-        try {
-            val fields = bean.javaClass.declaredFields
-            Log.d(TAG, "--- JMHealthAllBean Fields ---")
-            for (f in fields) {
-                f.isAccessible = true
-                Log.d(TAG, "Field: ${f.name} = ${f.get(bean)}")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error listing fields", e)
-        }
-
-        // Common guesses for BP fields in JMRing SDK
-        val bpHigh = 0 
-        val bpLow = 0  
-        
-        Log.d(TAG, "Health data update: HR=$hrValue, BP=$bpHigh/$bpLow, Steps=${bean.stepDiff}")
+        Log.d(TAG, "Health data update: HR=$hrValue, Steps=${bean.stepDiff}")
         
         _ringData.value = currentData.copy(
-            heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
-            bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
-            bloodPressureSystolic = if (bpHigh > 0) bpHigh else currentData.bloodPressureSystolic,
-            bloodPressureDiastolic = if (bpLow > 0) bpLow else currentData.bloodPressureDiastolic,
+            heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
             spO2 = bean.spo2?.toFloat() ?: currentData.spO2,
             steps = bean.stepDiff?.toInt() ?: currentData.steps,
             calories = bean.caloriesDiff?.toInt() ?: currentData.calories,
@@ -457,11 +432,12 @@ class JMRingManager private constructor(private val context: Context) :
     override fun onMeasureResult(type: Int, isSuccess: Boolean, healthBean: JMHealthAllBean?, stressBean: JMStressBean?) {
         Log.i(TAG, "Measurement result: type=$type, success=$isSuccess")
         
-        // Clear measuring flag regardless of success
-        measurementTimeoutJobs[type]?.cancel()
+        measurementTimeoutJobs[1]?.cancel()
+        _ringData.value = _ringData.value.copy(heartRateMeasuring = false)
+
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
+                1 -> data.copy(heartRateMeasuring = false)
                 2 -> data.copy(spO2Measuring = false)
                 7 -> data.copy(stressMeasuring = false)
                 else -> data
@@ -495,10 +471,7 @@ class JMRingManager private constructor(private val context: Context) :
         Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, BP=$bpHigh/$bpLow, Stress=$stressValue")
         
         _ringData.value = currentData.copy(
-            heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
-            bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
-            bloodPressureSystolic = if (bpHigh > 0) bpHigh else currentData.bloodPressureSystolic,
-            bloodPressureDiastolic = if (bpLow > 0) bpLow else currentData.bloodPressureDiastolic,
+            heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
             spO2 = healthBean?.spo2?.toFloat() ?: currentData.spO2,
             stress = if (stressValue > 0) stressValue else currentData.stress,
             lastUpdate = System.currentTimeMillis()

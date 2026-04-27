@@ -130,10 +130,6 @@ fun DashboardRoute(
             if (state.spO2Measuring) viewModel.stopSpO2Measurement()
             else viewModel.startSpO2Measurement()
         },
-        onMeasureBloodPressure = {
-            if (state.bloodPressureMeasuring) viewModel.stopBloodPressureMeasurement()
-            else viewModel.startBloodPressureMeasurement()
-        },
         onMeasureStress = {
             if (state.stressMeasuring) viewModel.stopStressMeasurement()
             else viewModel.startStressMeasurement()
@@ -161,7 +157,6 @@ fun DashboardScreenWithHeader(
     onFitnessHistoryClick: () -> Unit = {},
     onMeasureHeartRate: () -> Unit = {},
     onMeasureSpO2: () -> Unit = {},
-    onMeasureBloodPressure: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onSyncSleep: () -> Unit = {},
     onSyncAllData: () -> Unit = {},
@@ -378,64 +373,7 @@ fun DashboardScreenWithHeader(
                     }
                 }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    val bpValue = when {
-                        state.bloodPressureMeasuring && state.bloodPressureHeartRate > 0 -> "HR: ${state.bloodPressureHeartRate}"
-                        state.bloodPressureSystolic > 0 && state.bloodPressureDiastolic > 0 -> "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}"
-                        else -> "--"
-                    }
-                    
-                    FloatingMetricTile(
-                        modifier = Modifier.weight(1f),
-                        icon = Icons.Default.MonitorHeart,
-                        label = "BLOOD PRESSURE",
-                        value = bpValue,
-                        unit = if (bpValue.contains("/")) "mmHg" else "",
-                        progress = if (state.bloodPressureSystolic > 0) (state.bloodPressureSystolic / 180f).coerceIn(0f, 1f) else 0f,
-                        gradientColors = listOf(NeonOrange, ErrorRed),
-                        glowColor = NeonOrange,
-                        iconBgColor = HeartRateIconBg
-                    )
-                    
-                    // Placeholder for Body Temp if Type 1
-                    if (state.ringType == 1) {
-                        FloatingMetricTile(
-                            modifier = Modifier.weight(1f),
-                            icon = Icons.Default.Thermostat,
-                            label = "BODY TEMP",
-                            value = if (isConnected) "36.5" else "--",
-                            unit = "°C",
-                            progress = if (isConnected) 0.5f else 0f,
-                            gradientColors = listOf(NeonCyan, NeonGreen),
-                            glowColor = NeonCyan,
-                            iconBgColor = BloodOxygenIconBg
-                        )
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
-                    
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    MeasurementButton(
-                        text = if (state.bloodPressureMeasuring) (if (state.bloodPressureHeartRate > 0) "Measuring (${state.bloodPressureHeartRate})..." else "Measuring...") else "Measure BP",
-                        icon = Icons.Default.MonitorHeart,
-                        color = NeonOrange,
-                        onClick = onMeasureBloodPressure,
-                        enabled = true,
-                        modifier = Modifier.weight(1f)
-                    )
-                    if (state.ringType == 1) {
-                        Spacer(modifier = Modifier.weight(1f)) // Temp measurement not implemented
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
+                // Steps & Calories Row
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

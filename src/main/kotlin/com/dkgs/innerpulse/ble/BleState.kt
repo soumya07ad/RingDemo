@@ -92,10 +92,6 @@ data class RingData(
     val isCharging: Boolean = false,  // true when ring is on charger
     val heartRate: Int = 0,
     val heartRateMeasuring: Boolean = false,  // true when HR measurement in progress
-    val bloodPressureSystolic: Int = 0,       // mmHg (high) - bphp
-    val bloodPressureDiastolic: Int = 0,      // mmHg (low) - bplp
-    val bloodPressureHeartRate: Int = 0,      // bpm during BP measurement - bphr
-    val bloodPressureMeasuring: Boolean = false,
     val spO2: Float = 0f,          // blood oxygen % (Float: 99.5)
     val spO2Measuring: Boolean = false,
     val stress: Int = 0,         // stress level (0-100)
@@ -147,7 +143,6 @@ data class MeasurementTimer(
 enum class MeasurementType {
     NONE,
     HEART_RATE,
-    BLOOD_PRESSURE,
     SPO2,
     STRESS;
     
@@ -157,7 +152,6 @@ enum class MeasurementType {
     val displayName: String
         get() = when (this) {
             HEART_RATE -> "Heart Rate"
-            BLOOD_PRESSURE -> "Blood Pressure"
             SPO2 -> "Blood Oxygen (SpO2)"
             STRESS -> "Stress Level"
             NONE -> ""

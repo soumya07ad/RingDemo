@@ -75,9 +75,6 @@ class DashboardViewModel(
                         heartRateMeasuring = ringData.heartRateMeasuring,
                         spO2 = ringData.spO2,
                         spO2Measuring = ringData.spO2Measuring,
-                        bloodPressureSystolic = ringData.bloodPressureSystolic,
-                        bloodPressureDiastolic = ringData.bloodPressureDiastolic,
-                        bloodPressureMeasuring = ringData.bloodPressureMeasuring,
                         calories = ringData.calories,
                         stressLevel = ringData.stress,
                         batteryLevel = ringData.battery,
@@ -151,14 +148,6 @@ class DashboardViewModel(
 
     fun stopHeartRateMeasurement() {
         ringRepository.stopHeartRateMeasurement()
-    }
-
-    fun startBloodPressureMeasurement() {
-        ringRepository.startBloodPressureMeasurement()
-    }
-
-    fun stopBloodPressureMeasurement() {
-        ringRepository.stopBloodPressureMeasurement()
     }
 
     fun startSpO2Measurement() {
