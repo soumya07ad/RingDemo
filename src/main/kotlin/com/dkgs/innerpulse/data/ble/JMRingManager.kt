@@ -347,9 +347,21 @@ class JMRingManager private constructor(private val context: Context) :
         val currentData = _ringData.value
         val hrValue = bean.dailyHeartRate?.toInt() ?: 0
         
-        // Attempt to find BP fields via common names or log them for discovery
-        val bpHigh = 0 // bean.bphp?.toInt() ?: 0 (Unresolved in this SDK version)
-        val bpLow = 0  // bean.bplp?.toInt() ?: 0 (Unresolved in this SDK version)
+        // Diagnostic: Print all fields to find BP names
+        try {
+            val fields = bean.javaClass.declaredFields
+            Log.d(TAG, "--- JMHealthAllBean Fields ---")
+            for (f in fields) {
+                f.isAccessible = true
+                Log.d(TAG, "Field: ${f.name} = ${f.get(bean)}")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error listing fields", e)
+        }
+
+        // Common guesses for BP fields in JMRing SDK
+        val bpHigh = 0 
+        val bpLow = 0  
         
         Log.d(TAG, "Health data update: HR=$hrValue, BP=$bpHigh/$bpLow, Steps=${bean.stepDiff}")
         
@@ -464,8 +476,21 @@ class JMRingManager private constructor(private val context: Context) :
         val currentData = _ringData.value
         val hrValue = healthBean?.dailyHeartRate?.toInt() ?: 0
         val stressValue = stressBean?.pressureIndex?.toInt() ?: 0
-        val bpHigh = 0 // healthBean?.bphp?.toInt() ?: 0
-        val bpLow = 0  // healthBean?.bplp?.toInt() ?: 0
+        
+        // Diagnostic for Measure Result
+        if (healthBean != null) {
+            try {
+                val fields = healthBean.javaClass.declaredFields
+                Log.d(TAG, "--- MeasureResult HealthBean Fields ---")
+                for (f in fields) {
+                    f.isAccessible = true
+                    Log.d(TAG, "Field: ${f.name} = ${f.get(healthBean)}")
+                }
+            } catch (e: Exception) { }
+        }
+
+        val bpHigh = 0 
+        val bpLow = 0  
         
         Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, BP=$bpHigh/$bpLow, Stress=$stressValue")
         
