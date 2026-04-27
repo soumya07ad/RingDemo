@@ -555,38 +555,50 @@ private fun HeroDashboardHeader(
     onConnectClick: () -> Unit = {},
     onDisconnectClick: () -> Unit = {}
 ) {
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .height(320.dp),
+        contentAlignment = Alignment.Center
     ) {
-        // Small ring animation
-        AnimatedRing3D(
-            modifier = Modifier.size(100.dp),
-            primaryColor = if (isConnected) (if (AppColors.isDark) NeonCyan else LightSecondary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            secondaryColor = if (isConnected) (if (AppColors.isDark) PrimaryPurple else LightPrimary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f).copy(alpha = 0.5f),
-            isConnected = isConnected
-        )
+        // Cinematic Background Ambient Glow
+        if (isConnected) {
+            AmbientPulseGlow(
+                color = NeonCyan.copy(alpha = 0.3f),
+                size = 280.dp
+            )
+            AmbientPulseGlow(
+                color = PrimaryPurple.copy(alpha = 0.2f),
+                size = 400.dp
+            )
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Large immersive ring animation
+            AnimatedRing3D(
+                modifier = Modifier.size(if (isConnected) 180.dp else 120.dp),
+                primaryColor = if (isConnected) (if (AppColors.isDark) NeonCyan else LightSecondary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                secondaryColor = if (isConnected) (if (AppColors.isDark) PrimaryPurple else LightPrimary) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                isConnected = isConnected
+            )
 
-        // Smart Ring Card with connection management
-        SmartRingCard(
-            connectionState = ringConnectionState,
-            ringName = pairedRing?.name ?: "Smart Ring",
-            batteryLevel = batteryLevel,
-            onConnectClick = onConnectClick,
-            onDisconnectClick = onDisconnectClick,
-            modifier = Modifier.padding(horizontal = 0.dp)
-        )
+            Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        HorizontalDivider(
-            color = if (AppColors.isDark) NeonCyan.copy(alpha = 0.35f) else LightBorderSubtle,
-            thickness = 1.dp
-        )
+            // Smart Ring Card with connection management
+            SmartRingCard(
+                connectionState = ringConnectionState,
+                ringName = pairedRing?.name ?: "Smart Ring",
+                batteryLevel = batteryLevel,
+                onConnectClick = onConnectClick,
+                onDisconnectClick = onDisconnectClick,
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .widthIn(max = 400.dp)
+            )
+        }
     }
 }
 

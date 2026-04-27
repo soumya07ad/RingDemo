@@ -68,106 +68,100 @@ fun SmartRingCard(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Ring icon
+            // Ring icon with pulse
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(56.dp)
                     .clip(CircleShape)
-                    .background(if (isConnected) LightSuccessBg else LightWarningBg),
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(glowColor.copy(alpha = 0.2f), Color.Transparent)
+                        )
+                    ),
                 contentAlignment = Alignment.Center
             ) {
+                // Outer pulsing ring
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .scale(if (isConnected) pulseAlpha else 1f)
+                        .border(2.dp, glowColor.copy(alpha = 0.3f), CircleShape)
+                )
+                
                 Icon(
-                    imageVector = Icons.Default.Notifications,
+                    imageVector = Icons.Default.Adjust,
                     contentDescription = "Ring",
                     tint = glowColor,
                     modifier = Modifier.size(24.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
 
             // Title + status
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = ringName,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
-                    fontWeight = FontWeight.Bold
+                    text = ringName.uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        letterSpacing = 1.sp,
+                        fontWeight = FontWeight.Black
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Status dot
                     Box(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(
-                                if (isConnected) NeonGreen.copy(alpha = pulseAlpha)
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
+                            .background(glowColor)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isConnected)
-                            "Connected${batteryLevel?.let { " • $it%" } ?: ""}"
-                        else
-                            "Not connected",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (isConnected) {
-                            if (AppColors.isDark) NeonGreen else LightSuccess
-                        } else {
-                            if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightWarning
-                        }
+                        text = if (isConnected) "CONNECTED" else "DISCONNECTED",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = glowColor
                     )
+                    
+                    if (isConnected && batteryLevel != null) {
+                        Text(
+                            text = " • $batteryLevel%",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Medium
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Action button
-            val buttonShape = RoundedCornerShape(24.dp)
-
+            // Action Button
             if (isConnected) {
-                // Disconnect button
                 OutlinedButton(
                     onClick = onDisconnectClick,
-                    shape = buttonShape,
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.horizontalGradient(
-                            listOf(ErrorRed.copy(alpha = 0.6f), ErrorRed.copy(alpha = 0.3f))
-                        )
-                    ),
+                    modifier = Modifier.height(36.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, ErrorRed.copy(alpha = 0.5f)),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = ErrorRed
                     ),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+                    contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = ErrorRed
-                    )
+                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Disconnect",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.5.sp
-                    )
+                    Text("DISCONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             } else {
-                // Connect button with gradient
                 Button(
                     onClick = onConnectClick,
-                    shape = buttonShape,
+                    modifier = Modifier.height(36.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Transparent
-                    ),
-                    contentPadding = PaddingValues(0.dp),
-                    modifier = Modifier
                         .shadow(
                             10.dp,
                             buttonShape,

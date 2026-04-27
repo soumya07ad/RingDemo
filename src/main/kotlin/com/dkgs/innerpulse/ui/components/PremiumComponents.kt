@@ -445,8 +445,11 @@ fun StatusBadge(
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = text,
-                style = MaterialTheme.typography.labelSmall,
+                text = text.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.8.sp
+                ),
                 color = color,
                 fontWeight = FontWeight.SemiBold
             )
@@ -509,11 +512,14 @@ fun BrandedTopBar(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.sp
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.2.sp
                 ),
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Visible
             )
             
             // Subtle underline glow for the brand
