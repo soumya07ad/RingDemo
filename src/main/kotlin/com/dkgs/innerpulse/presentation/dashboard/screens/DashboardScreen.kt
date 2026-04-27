@@ -1295,7 +1295,7 @@ fun DashboardScreen() {
 // PREVIEWS — Multi-state, ViewModel-free
 // ═══════════════════════════════════════════════════════════════════════
 
-@Preview(name = "Connected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_6)
+@Preview(name = "Connected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_7)
 @Composable
 private fun DashboardConnectedPreview() {
     FitnessAppTheme(darkTheme = true) {
@@ -1303,7 +1303,7 @@ private fun DashboardConnectedPreview() {
     }
 }
 
-@Preview(name = "Disconnected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_6)
+@Preview(name = "Disconnected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_7)
 @Composable
 private fun DashboardDisconnectedPreview() {
     FitnessAppTheme(darkTheme = true) {
@@ -1335,7 +1335,7 @@ private fun DashboardDarkModePreview() {
     }
 }
 
-@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF050508, device = Devices.TABLET)
+@Preview(name = "Tablet", showBackground = true, backgroundColor = 0xFF050508, device = "id:pixel_tablet")
 @Composable
 private fun DashboardTabletPreview() {
     FitnessAppTheme(darkTheme = true) {

@@ -2,8 +2,9 @@ package com.dkgs.innerpulse.presentation.ring
 
 import android.Manifest
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.location.LocationManager
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -100,12 +101,23 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         } else {
-            // Android 11 and below: Need legacy Bluetooth + Location
+            // Android 11 and below: Need FINE location specifically for BLE scan
+            // Some devices also require COARSE, so we include both to be safe
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
             )
         }
+    }
+    
+    /**
+     * Check if Location Services (GPS) are enabled
+     * Required for BLE scanning on Android 11 and below
+     */
+    fun isLocationEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || 
+               locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
     }
     
     /**
@@ -118,7 +130,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         }
         
         // Also check if Bluetooth is actually enabled
-        val bluetoothEnabled = BluetoothAdapter.getDefaultAdapter()?.isEnabled == true
+        val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
         
         // Log individual permission states for debugging
         permissions.forEach { perm ->
@@ -128,14 +140,20 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         Log.d("RingViewModel", "Bluetooth enabled: $bluetoothEnabled")
         Log.d("RingViewModel", "All permissions granted: $allGranted")
         
+        // Also check if Location is enabled on Android 11 and below
+        val locationEnabled = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            isLocationEnabled(context)
+        } else true
+        
         _uiState.update { 
             it.copy(
                 permissionState = if (allGranted) PermissionUiState.Granted else PermissionUiState.NotRequested,
-                isBluetoothEnabled = bluetoothEnabled
+                isBluetoothEnabled = bluetoothEnabled,
+                isLocationEnabled = locationEnabled
             )
         }
         
-        return allGranted
+        return allGranted && bluetoothEnabled && locationEnabled
     }
     
     /**
@@ -156,8 +174,22 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Start scanning for devices
      */
     fun startScan() {
+        val context = getApplication<Application>()
+        val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
+        val locationEnabled = isLocationEnabled(context)
+
         if (!_uiState.value.hasPermissions) {
             _uiState.update { it.copy(errorMessage = "Permissions required") }
+            return
+        }
+
+        if (!bluetoothEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Bluetooth") }
+            return
+        }
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S && !locationEnabled) {
+            _uiState.update { it.copy(errorMessage = "Please enable Location services") }
             return
         }
         

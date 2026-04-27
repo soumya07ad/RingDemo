@@ -1,5 +1,6 @@
 package com.dkgs.innerpulse.data.ble
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.datastore.core.DataStore
@@ -10,8 +11,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.dkgs.innerpulse.ble.BleConnectionState
 import com.dkgs.innerpulse.ble.RingData
 import com.dkgs.innerpulse.domain.model.Ring
-import com.dkgs.innerpulse.domain.model.SleepData
-import com.dkgs.innerpulse.domain.model.FirmwareInfo
 import com.gps.track.jmring.bean.JMHealthAllBean
 import com.gps.track.jmring.bean.JMScanBean
 import com.gps.track.jmring.bean.JMSleepBean
@@ -53,6 +52,7 @@ class JMRingManager private constructor(private val context: Context) :
         private const val TAG = "JMRingManager"
         private val RING_TYPE_KEY = intPreferencesKey("ring_type")
 
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var INSTANCE: JMRingManager? = null
 
@@ -137,6 +137,7 @@ class JMRingManager private constructor(private val context: Context) :
         RingBleUtils.getRingBleManager().onDisconnect()
     }
 
+    @Suppress("unused")
     fun cleanup() {
         val manager = RingBleUtils.getRingBleManager()
         manager.removeJMRingConnectListener(this)
@@ -236,7 +237,7 @@ class JMRingManager private constructor(private val context: Context) :
             Log.i(TAG, "Scores computed: Health=$healthScore, Sleep=$sleepScore")
             _ringData.value = _ringData.value.copy(
                 sleepData = _ringData.value.sleepData.copy(
-                    quality = sleepScore.toInt()
+                    quality = sleepScore
                 ),
                 lastUpdate = System.currentTimeMillis()
             )

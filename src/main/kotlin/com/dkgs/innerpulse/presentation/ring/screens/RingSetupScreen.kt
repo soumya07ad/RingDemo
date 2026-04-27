@@ -161,6 +161,8 @@ fun RingSetupScreen(
                 !uiState.hasPermissions -> {
                     PermissionContent(
                         permissionState = uiState.permissionState,
+                        isBluetoothEnabled = uiState.isBluetoothEnabled,
+                        isLocationEnabled = uiState.isLocationEnabled,
                         onRequestPermission = onRequestPermission,
                         onOpenSettings = onOpenSettings,
                         selectedRingType = uiState.selectedRingType,
@@ -275,6 +277,8 @@ private fun PremiumSetupHeader() {
 @Composable
 private fun PermissionContent(
     permissionState: PermissionUiState,
+    isBluetoothEnabled: Boolean,
+    isLocationEnabled: Boolean,
     onRequestPermission: () -> Unit,
     onOpenSettings: () -> Unit,
     selectedRingType: Int,
@@ -370,9 +374,18 @@ private fun PermissionContent(
                 if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
                     Spacer(modifier = Modifier.height(8.dp))
                     PermissionItem(
-                        icon = Icons.Default.LocationOn,
-                        title = "Location",
-                        description = "Required for Bluetooth on Android 11 and below"
+                        icon = if (isLocationEnabled) Icons.Default.LocationOn else Icons.Default.Warning,
+                        title = "Location Services",
+                        description = if (isLocationEnabled) "Enabled" else "REQUIRED - Please turn ON GPS",
+                        isError = !isLocationEnabled
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    PermissionItem(
+                        icon = if (isBluetoothEnabled) Icons.Default.BluetoothDrive else Icons.Default.Warning,
+                        title = "Bluetooth",
+                        description = if (isBluetoothEnabled) "Enabled" else "REQUIRED - Please turn ON Bluetooth",
+                        isError = !isBluetoothEnabled
                     )
                 }
             }
@@ -393,7 +406,8 @@ private fun PermissionContent(
 private fun PermissionItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
-    description: String
+    description: String,
+    isError: Boolean = false
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -402,7 +416,7 @@ private fun PermissionItem(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = NeonCyan,
+            tint = if (isError) ErrorRed else NeonCyan,
             modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
@@ -1356,7 +1370,7 @@ private fun FirmwareCard(firmwareInfo: com.dkgs.innerpulse.domain.model.Firmware
 // PREVIEWS — Multi-state, ViewModel-free
 // ═══════════════════════════════════════════════════════════════════════
 
-@Preview(name = "Permissions", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_6)
+@Preview(name = "Permissions", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_7)
 @Composable
 private fun SetupPermissionsPreview() {
     FitnessAppTheme(darkTheme = true) {
@@ -1364,7 +1378,7 @@ private fun SetupPermissionsPreview() {
     }
 }
 
-@Preview(name = "Scanning", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_6)
+@Preview(name = "Scanning", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_7)
 @Composable
 private fun SetupScanningPreview() {
     FitnessAppTheme(darkTheme = true) {
@@ -1380,7 +1394,7 @@ private fun SetupConnectingPreview() {
     }
 }
 
-@Preview(name = "Connected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_6)
+@Preview(name = "Connected", showBackground = true, backgroundColor = 0xFF050508, device = Devices.PIXEL_7)
 @Composable
 private fun SetupConnectedPreview() {
     FitnessAppTheme(darkTheme = true) {

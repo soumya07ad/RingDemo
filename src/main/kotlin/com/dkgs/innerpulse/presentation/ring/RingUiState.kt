@@ -13,6 +13,7 @@ data class RingUiState(
     // Permission state
     val permissionState: PermissionUiState = PermissionUiState.NotRequested,
     val isBluetoothEnabled: Boolean = true,
+    val isLocationEnabled: Boolean = true,
     
     // Scanning
     val scanStatus: ScanStatus = ScanStatus.Idle,
