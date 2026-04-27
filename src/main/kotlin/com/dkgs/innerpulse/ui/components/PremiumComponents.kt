@@ -688,6 +688,15 @@ fun ConnectivityBanner(
     isConnecting: Boolean = false
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "bannerGlow")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = EaseInOutSine),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
     val isDark = AppColors.isDark
     val baseColor = if (isDark) NeonGreen else LightSuccess
     val bgColor = if (isDark) NeonGreen.copy(alpha = alpha) else LightSuccessBg

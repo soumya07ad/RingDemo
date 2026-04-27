@@ -367,7 +367,7 @@ private fun ExerciseGlassCard(
                     exercise.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MetricValueDark
+                    color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
@@ -381,7 +381,7 @@ private fun ExerciseGlassCard(
                     "${exercise.durationMinutes} min",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = SkyBlue
+                    color = if (AppColors.isDark) SkyBlue else LightSecondary
                 )
             }
 

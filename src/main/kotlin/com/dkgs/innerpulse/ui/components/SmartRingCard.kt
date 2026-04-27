@@ -91,7 +91,7 @@ fun SmartRingCard(
                 Text(
                     text = ringName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MetricValueDark,
+                    color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
                     fontWeight = FontWeight.Bold
                 )
 
@@ -118,7 +118,7 @@ fun SmartRingCard(
                         color = if (isConnected) {
                             if (AppColors.isDark) NeonGreen else LightSuccess
                         } else {
-                            if (AppColors.isDark) MetricLabelGray else LightWarning
+                            if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightWarning
                         }
                     )
                 }
@@ -171,8 +171,8 @@ fun SmartRingCard(
                         .shadow(
                             10.dp,
                             buttonShape,
-                            ambientColor = SkyBlue.copy(alpha = 0.3f),
-                            spotColor = SkyBlue.copy(alpha = 0.3f)
+                            ambientColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f),
+                            spotColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f)
                         )
                 ) {
                     Box(

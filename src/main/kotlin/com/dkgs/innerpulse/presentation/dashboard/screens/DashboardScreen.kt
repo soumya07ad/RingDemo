@@ -512,14 +512,14 @@ fun DashboardScreenWithHeader(
                             Text(
                                 text = "STRESS LEVEL",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MetricLabelGray,
+                                color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
                                 fontWeight = FontWeight.Medium
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "$stressLevel",
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else MetricValueDark,
+                                color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -527,12 +527,12 @@ fun DashboardScreenWithHeader(
                         // Right: Status chip
                         Surface(
                             shape = RoundedCornerShape(16.dp),
-                            color = if (AppColors.isDark) getStressColor(stressLevel).copy(alpha = 0.15f) else StressStatusBg
+                            color = if (AppColors.isDark) getStressColor(stressLevel).copy(alpha = 0.15f) else LightSuccessBg
                         ) {
                             Text(
                                 text = getStressStatus(stressLevel),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = if (AppColors.isDark) getStressColor(stressLevel) else StressStatusText,
+                                color = if (AppColors.isDark) getStressColor(stressLevel) else LightSuccess,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                             )
@@ -642,7 +642,7 @@ private fun HeroDashboardHeader(
         Spacer(modifier = Modifier.height(24.dp))
 
         HorizontalDivider(
-            color = if (AppColors.isDark) SkyBlue.copy(alpha = 0.35f) else LightBorderSubtle,
+            color = if (AppColors.isDark) NeonCyan.copy(alpha = 0.35f) else LightBorderSubtle,
             thickness = 1.dp
         )
     }
@@ -655,6 +655,7 @@ private fun HeroDashboardHeader(
 
 @Composable
 fun WeeklyEmotionsChart() {
+    val isDark = AppColors.isDark
     val moodData = listOf(
         Triple("Mon", 65f, "Good"),
         Triple("Tue", 72f, "Great"),
@@ -735,7 +736,7 @@ fun WeeklyEmotionsChart() {
                     // Bar with rounded top
                     drawRect(
                         brush = Brush.verticalGradient(
-                            colors = if (AppColors.isDark) {
+                            colors = if (isDark) {
                                 listOf(NeonCyan.copy(alpha = 0.7f), NeonBlue.copy(alpha = 0.3f))
                             } else {
                                 listOf(LightSecondary.copy(alpha = 0.7f), LightPrimary.copy(alpha = 0.3f))
@@ -989,7 +990,7 @@ fun DailySummaryCard() {
         Text(
             text = "DAILY SUMMARY",
             style = MaterialTheme.typography.labelMedium,
-            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MetricLabelGray,
+            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
             fontWeight = FontWeight.Medium
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -1009,7 +1010,7 @@ private fun DividerRow() {
     HorizontalDivider(
         modifier = Modifier.padding(vertical = 12.dp),
         thickness = 1.dp,
-        color = if (AppColors.isDark) AppColors.dividerColor else MetricDividerColor
+        color = if (AppColors.isDark) AppColors.dividerColor else LightBorderSubtle
     )
 }
 
@@ -1030,7 +1031,7 @@ private fun SummaryRow(icon: ImageVector, label: String, value: String) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else MetricLabelGray,
+            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
             modifier = Modifier.weight(1f),
             fontWeight = FontWeight.Medium
         )
@@ -1038,7 +1039,7 @@ private fun SummaryRow(icon: ImageVector, label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleMedium,
-            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else MetricValueDark,
+            color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
             fontWeight = FontWeight.Bold
         )
     }

@@ -49,6 +49,7 @@ val AccentCyan = NeonCyan
 val AccentPink = NeonPink
 val AccentOrange = NeonOrange
 val AccentBlue = NeonBlue
+val SkyBlue = NeonCyan
 
 // ── Status Colors ───────────────────────────────────────────────────
 val SuccessGreen = Color(0xFF30D158)
@@ -60,6 +61,15 @@ val GlassWhite = Color(0x0DFFFFFF)           // 5% white
 val GlassBorder = Color(0x1AFFFFFF)          // 10% white
 val GlassHighlight = Color(0x26FFFFFF)       // 15% white
 val GlassOverlay = Color(0x33FFFFFF)         // 20% white
+
+// Compatibility constants for Wellness and Meditation screens
+val PremiumGlassHighlight = GlassHighlight
+val PremiumGlassWhite = GlassWhite
+val PremiumGlassBorder = GlassBorder
+val SoftHighlighterGreen = Color(0xFFF0FFF8)
+val HighlighterGreen = Color(0xFF30D158)
+val MetricCardBorder = Color(0xFFE2E8F0)
+val MetricCardGlass = Color(0xFFFFFFFF)
 
 // ── Depth & Glow ────────────────────────────────────────────────────
 val DepthShadow = Color(0xFF000000)
@@ -131,7 +141,7 @@ object AppColors {
         @Composable get() = if (MaterialTheme.colorScheme.background == DarkBackground) DarkCard.copy(alpha = 0.7f) else LightCard
 
     val glassBorder: Color
-        @Composable get() = if (MaterialTheme.colorScheme.background == DarkBackground) GlassBorder else LightGlassBorder
+        @Composable get() = if (MaterialTheme.colorScheme.background == DarkBackground) GlassBorder else LightBorderSubtle
 
     val navBarBackground: Color
         @Composable get() = if (isDark) Color(0xFF080810) else Color(0xFFFFFFFF)
@@ -168,7 +178,7 @@ object AppColors {
 
     /** Divider / border color */
     val dividerColor: Color
-        @Composable get() = if (isDark) GlassBorder else LightGlassBorder
+        @Composable get() = if (isDark) GlassBorder else LightBorderSubtle
 
     /** Section border brush with accent */
     @Composable
