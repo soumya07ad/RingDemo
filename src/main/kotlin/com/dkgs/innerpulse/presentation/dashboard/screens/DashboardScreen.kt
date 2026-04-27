@@ -517,7 +517,7 @@ fun DashboardScreenWithHeader(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "$stressLevel",
+                                text = if (stressLevel > 0) "$stressLevel" else "--",
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
                                 fontWeight = FontWeight.Bold
@@ -1056,6 +1056,7 @@ fun getStressColor(level: Int): Color = when {
 }
 
 fun getStressStatus(level: Int): String = when {
+    level <= 0 -> "N/A"
     level <= 30 -> "Low"
     level <= 60 -> "Moderate"
     else -> "High"

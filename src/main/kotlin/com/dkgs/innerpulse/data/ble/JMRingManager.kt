@@ -265,12 +265,18 @@ class JMRingManager private constructor(private val context: Context) :
         _connectionState.value = BleConnectionState.Connected(ring)
         
         // Auto-fetch historical data immediately after connection as requested
-        val currentTime = System.currentTimeMillis()
+        val calendar = java.util.Calendar.getInstance()
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+        calendar.set(java.util.Calendar.MINUTE, 0)
+        calendar.set(java.util.Calendar.SECOND, 0)
+        calendar.set(java.util.Calendar.MILLISECOND, 0)
+        val midnightTime = calendar.timeInMillis
+        
         val manager = RingBleUtils.getRingBleManager()
-        Log.i(TAG, "Auto-fetching historical data (Health, Sleep, Stress)")
-        manager.getActivityHealthData(currentTime)
-        manager.getActivitySleepData(currentTime)
-        manager.getActivityStressData(currentTime)
+        Log.i(TAG, "Auto-fetching historical data for today (Health, Sleep, Stress) using midnight: $midnightTime")
+        manager.getActivityHealthData(midnightTime)
+        manager.getActivitySleepData(midnightTime)
+        manager.getActivityStressData(midnightTime)
         
         fetchCachedData()
     }
@@ -355,12 +361,14 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     override fun onStressBeanListener(tag: String, isRingData: Boolean, reqTime: Long?, list: List<JMStressBean>) {
+        Log.d(TAG, "onStressBeanListener: list size=${list.size}, tag=$tag")
         if (list.isEmpty()) return
         val bean = list.last()
-        Log.d(TAG, "Stress data update: ${bean.pressureIndex}")
+        val stressValue = bean.pressureIndex?.toInt() ?: 0
+        Log.i(TAG, "STRESS UPDATE RECEIVED: $stressValue (isRingData=$isRingData)")
         
         _ringData.value = _ringData.value.copy(
-            stress = bean.pressureIndex?.toInt() ?: 0,
+            stress = if (stressValue > 0) stressValue else _ringData.value.stress,
             lastUpdate = System.currentTimeMillis()
         )
     }
@@ -442,16 +450,22 @@ class JMRingManager private constructor(private val context: Context) :
             }
         }
         
-        if (!isSuccess) return
+        if (!isSuccess) {
+            Log.w(TAG, "Measurement failed for type $type")
+            return
+        }
         
         val currentData = _ringData.value
         val hrValue = healthBean?.dailyHeartRate?.toInt() ?: 0
+        val stressValue = stressBean?.pressureIndex?.toInt() ?: 0
+        
+        Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, Stress=$stressValue")
         
         _ringData.value = currentData.copy(
             heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
             bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
             spO2 = healthBean?.spo2?.toFloat() ?: currentData.spO2,
-            stress = stressBean?.pressureIndex?.toInt() ?: currentData.stress,
+            stress = if (stressValue > 0) stressValue else currentData.stress,
             lastUpdate = System.currentTimeMillis()
         )
         
