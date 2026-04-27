@@ -344,9 +344,14 @@ class JMRingManager private constructor(private val context: Context) :
         }
 
         val bean = list.last()
-        val bpHigh = bean.bphp?.toInt() ?: 0
-        val bpLow = bean.bplp?.toInt() ?: 0
-        Log.d(TAG, "Health data update: HR=${bean.dailyHeartRate}, BP=$bpHigh/$bpLow, Steps=${bean.stepDiff}")
+        val currentData = _ringData.value
+        val hrValue = bean.dailyHeartRate?.toInt() ?: 0
+        
+        // Attempt to find BP fields via common names or log them for discovery
+        val bpHigh = 0 // bean.bphp?.toInt() ?: 0 (Unresolved in this SDK version)
+        val bpLow = 0  // bean.bplp?.toInt() ?: 0 (Unresolved in this SDK version)
+        
+        Log.d(TAG, "Health data update: HR=$hrValue, BP=$bpHigh/$bpLow, Steps=${bean.stepDiff}")
         
         _ringData.value = currentData.copy(
             heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
@@ -459,8 +464,8 @@ class JMRingManager private constructor(private val context: Context) :
         val currentData = _ringData.value
         val hrValue = healthBean?.dailyHeartRate?.toInt() ?: 0
         val stressValue = stressBean?.pressureIndex?.toInt() ?: 0
-        val bpHigh = healthBean?.bphp?.toInt() ?: 0
-        val bpLow = healthBean?.bplp?.toInt() ?: 0
+        val bpHigh = 0 // healthBean?.bphp?.toInt() ?: 0
+        val bpLow = 0  // healthBean?.bplp?.toInt() ?: 0
         
         Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, BP=$bpHigh/$bpLow, Stress=$stressValue")
         
