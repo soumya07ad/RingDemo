@@ -173,13 +173,16 @@ class JMRingManager private constructor(private val context: Context) :
     // Measurements & Data
     // ═══════════════════════════════════
 
-    fun startMeasurement(type: Int) {
-        Log.i(TAG, "Starting real-time measurement type: $type")
+    fun startMeasurement(type: Int, isBp: Boolean = false) {
+        Log.i(TAG, "Starting real-time measurement type: $type (isBp: $isBp)")
         
         // Update local measuring flag based on type
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> data.copy(heartRateMeasuring = true)
+                1 -> {
+                    if (isBp) data.copy(bloodPressureMeasuring = true)
+                    else data.copy(heartRateMeasuring = true)
+                }
                 2 -> data.copy(spO2Measuring = true)
                 7 -> data.copy(stressMeasuring = true)
                 else -> data
@@ -193,7 +196,7 @@ class JMRingManager private constructor(private val context: Context) :
             Log.w(TAG, "Measurement type $type timed out locally")
             _ringData.value = _ringData.value.let { data ->
                 when (type) {
-                    1 -> data.copy(heartRateMeasuring = false)
+                    1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
                     2 -> data.copy(spO2Measuring = false)
                     7 -> data.copy(stressMeasuring = false)
                     else -> data
@@ -210,7 +213,7 @@ class JMRingManager private constructor(private val context: Context) :
         measurementTimeoutJobs[type]?.cancel()
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> data.copy(heartRateMeasuring = false)
+                1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
                 2 -> data.copy(spO2Measuring = false)
                 7 -> data.copy(stressMeasuring = false)
                 else -> data
@@ -274,6 +277,14 @@ class JMRingManager private constructor(private val context: Context) :
     override fun onDisconnect(isCallback: Boolean) {
         Log.i(TAG, "Ring disconnected (isCallback=$isCallback)")
         _connectionState.value = BleConnectionState.Disconnected
+        
+        // Clear measuring flags on disconnect
+        _ringData.value = _ringData.value.copy(
+            heartRateMeasuring = false,
+            spO2Measuring = false,
+            stressMeasuring = false,
+            bloodPressureMeasuring = false
+        )
     }
 
     override fun onConnectFail() {
@@ -328,13 +339,16 @@ class JMRingManager private constructor(private val context: Context) :
         val bean = list.last()
         Log.d(TAG, "Health data update: HR=${bean.dailyHeartRate}, Steps=${bean.stepDiff}")
         
-        _ringData.value = _ringData.value.copy(
-            heartRate = bean.dailyHeartRate?.toInt() ?: _ringData.value.heartRate,
-            spO2 = bean.spo2?.toFloat() ?: _ringData.value.spO2,
-            // BP fields removed as they do not exist in JMHealthAllBean
-            steps = bean.stepDiff?.toInt() ?: _ringData.value.steps,
-            calories = bean.caloriesDiff?.toInt() ?: _ringData.value.calories,
-            distance = bean.distanceDiff?.toInt() ?: _ringData.value.distance,
+        val currentData = _ringData.value
+        val hrValue = bean.dailyHeartRate?.toInt() ?: 0
+        
+        _ringData.value = currentData.copy(
+            heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
+            bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
+            spO2 = bean.spo2?.toFloat() ?: currentData.spO2,
+            steps = bean.stepDiff?.toInt() ?: currentData.steps,
+            calories = bean.caloriesDiff?.toInt() ?: currentData.calories,
+            distance = bean.distanceDiff?.toInt() ?: currentData.distance,
             lastUpdate = System.currentTimeMillis()
         )
     }
@@ -420,7 +434,7 @@ class JMRingManager private constructor(private val context: Context) :
         measurementTimeoutJobs[type]?.cancel()
         _ringData.value = _ringData.value.let { data ->
             when (type) {
-                1 -> data.copy(heartRateMeasuring = false)
+                1 -> data.copy(heartRateMeasuring = false, bloodPressureMeasuring = false)
                 2 -> data.copy(spO2Measuring = false)
                 7 -> data.copy(stressMeasuring = false)
                 else -> data
@@ -429,10 +443,14 @@ class JMRingManager private constructor(private val context: Context) :
         
         if (!isSuccess) return
         
-        _ringData.value = _ringData.value.copy(
-            heartRate = healthBean?.dailyHeartRate?.toInt() ?: _ringData.value.heartRate,
-            spO2 = healthBean?.spo2?.toFloat() ?: _ringData.value.spO2,
-            stress = stressBean?.pressureIndex?.toInt() ?: _ringData.value.stress,
+        val currentData = _ringData.value
+        val hrValue = healthBean?.dailyHeartRate?.toInt() ?: 0
+        
+        _ringData.value = currentData.copy(
+            heartRate = if (currentData.bloodPressureMeasuring) currentData.heartRate else (if (hrValue > 0) hrValue else currentData.heartRate),
+            bloodPressureHeartRate = if (currentData.bloodPressureMeasuring) (if (hrValue > 0) hrValue else currentData.bloodPressureHeartRate) else currentData.bloodPressureHeartRate,
+            spO2 = healthBean?.spo2?.toFloat() ?: currentData.spO2,
+            stress = stressBean?.pressureIndex?.toInt() ?: currentData.stress,
             lastUpdate = System.currentTimeMillis()
         )
         

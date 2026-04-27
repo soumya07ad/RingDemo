@@ -349,7 +349,7 @@ fun DashboardScreenWithHeader(
                             icon = Icons.Default.Favorite,
                             color = ErrorRed,
                             onClick = onMeasureHeartRate,
-                            enabled = !state.heartRateMeasuring,
+                            enabled = true,
                             modifier = Modifier.weight(1f)
                         )
                         MeasurementButton(
@@ -357,7 +357,7 @@ fun DashboardScreenWithHeader(
                             icon = Icons.Default.FavoriteBorder,
                             color = NeonCyan,
                             onClick = onMeasureSpO2,
-                            enabled = !state.spO2Measuring,
+                            enabled = true,
                             modifier = Modifier.weight(1f)
                         )
                     }
@@ -372,7 +372,7 @@ fun DashboardScreenWithHeader(
                             modifier = Modifier.weight(1f),
                             icon = Icons.Default.MonitorHeart,
                             label = "BLOOD PRESSURE",
-                            value = "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}",
+                            value = if (state.bloodPressureMeasuring && state.bloodPressureHeartRate > 0) "HR: ${state.bloodPressureHeartRate}" else "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}",
                             unit = "mmHg",
                             progress = 0.7f,
                             gradientColors = listOf(NeonOrange, ErrorRed),
@@ -403,11 +403,11 @@ fun DashboardScreenWithHeader(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         MeasurementButton(
-                            text = if (state.bloodPressureMeasuring) "Measuring..." else "Measure BP",
+                            text = if (state.bloodPressureMeasuring) (if (state.bloodPressureHeartRate > 0) "Measuring (${state.bloodPressureHeartRate})..." else "Measuring...") else "Measure BP",
                             icon = Icons.Default.MonitorHeart,
                             color = NeonOrange,
                             onClick = onMeasureBloodPressure,
-                            enabled = !state.bloodPressureMeasuring,
+                            enabled = true,
                             modifier = Modifier.weight(1f)
                         )
                         if (state.ringType == 1) {
@@ -531,7 +531,7 @@ fun DashboardScreenWithHeader(
                             icon = Icons.Default.PlayArrow,
                             color = NeonCyan,
                             onClick = onMeasureStress,
-                            enabled = !state.stressMeasuring
+                            enabled = true
                         )
                     }
                 }
