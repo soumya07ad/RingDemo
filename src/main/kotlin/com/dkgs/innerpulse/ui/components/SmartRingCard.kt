@@ -130,8 +130,9 @@ fun SmartRingCard(
                     )
                     
                     if (isConnected && batteryLevel != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = " • $batteryLevel%",
+                            text = "• $batteryLevel%",
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Medium
                             ),

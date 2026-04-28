@@ -434,14 +434,14 @@ fun AppBottomNav(navController: NavHostController) {
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = (-12).dp)
+                .offset(y = (-8).dp)
                 .size(64.dp),
             contentAlignment = Alignment.Center
         ) {
-            // Ambient Aura Glow
+            // Ambient Aura Glow (Reduced size to prevent content overlap)
             AmbientPulseGlow(
                 color = if (isDark) NeonPurple else PrimaryPurple,
-                size = 80.dp
+                size = 72.dp
             )
 
             Surface(

@@ -474,7 +474,7 @@ fun BrandedTopBar(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 3D Ring Logo (Smaller, refined)
@@ -518,8 +518,7 @@ fun BrandedTopBar(
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
-                softWrap = false,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Visible
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
             
             // Subtle underline glow for the brand
@@ -536,17 +535,8 @@ fun BrandedTopBar(
             )
         }
 
-        if (isConnected) {
-            StatusBadge(
-                text = "Connected${batteryLevel?.let { " • $it%" } ?: ""}",
-                color = NeonGreen
-            )
-        } else {
-            StatusBadge(
-                text = "Disconnected",
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-            )
-        }
+        // Redundant status badge removed to prevent overlap with title. 
+        // Status is now clearly visible in the ConnectivityBanner.
     }
 }
 

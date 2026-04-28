@@ -198,32 +198,33 @@ fun DashboardScreenWithHeader(
                 .statusBarsPadding()
                 .verticalScroll(rememberScrollState())
         ) {
-            // Branded Top Header
-            Row(
+            // Branded Top Header + Actions
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(top = 12.dp)
             ) {
-                // Left-aligned Brand Identity
+                // Left-aligned Brand Identity (Now simpler without redundant Row)
                 BrandedTopBar(
                     painter = painterResource(id = R.drawable.ic_premium_logo),
                     title = "INNERPULSE",
                     isConnected = isConnected,
                     batteryLevel = state.batteryLevel,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.align(Alignment.CenterStart)
                 )
-
+    
                 // Settings & Theme Utility Bar (Top Right)
                 Row(
-                    modifier = Modifier.padding(end = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Theme toggle
                     Box {
                         var themeMenuExpanded by remember { mutableStateOf(false) }
-
+    
                         IconButton(onClick = { themeMenuExpanded = true }) {
                             Icon(
                                 imageVector = when (currentTheme) {
@@ -236,7 +237,7 @@ fun DashboardScreenWithHeader(
                                 modifier = Modifier.size(22.dp)
                             )
                         }
-
+    
                         DropdownMenu(
                             expanded = themeMenuExpanded,
                             onDismissRequest = { themeMenuExpanded = false }
@@ -267,7 +268,7 @@ fun DashboardScreenWithHeader(
                             )
                         }
                     }
-
+    
                     IconButton(onClick = onSettingsClick) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -278,6 +279,8 @@ fun DashboardScreenWithHeader(
                     }
                 }
             }
+            
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Connectivity Status Banner
             if (isConnected) {
