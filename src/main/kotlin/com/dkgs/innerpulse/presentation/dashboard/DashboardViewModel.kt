@@ -77,6 +77,7 @@ class DashboardViewModel(
                         spO2Measuring = ringData.spO2Measuring,
                         calories = ringData.calories,
                         stressLevel = ringData.stress,
+                        stressMeasuring = ringData.stressMeasuring,
                         batteryLevel = ringData.battery,
                         isCharging = ringData.isCharging,
                         sleepData = ringData.sleepData,

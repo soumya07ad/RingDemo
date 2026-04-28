@@ -42,6 +42,7 @@ data class RingHealthData(
     val spO2: Float = 0f,           // blood oxygen % (Float: 99.5)
     val spO2Measuring: Boolean = false,
     val stress: Int = 0,          // stress level (0-100)
+    val stressMeasuring: Boolean = false,
     val steps: Int = 0,
     val distance: Int = 0,       // meters
     val calories: Int = 0,       // kcal

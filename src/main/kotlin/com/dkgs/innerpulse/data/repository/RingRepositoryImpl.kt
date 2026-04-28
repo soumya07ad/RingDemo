@@ -142,6 +142,7 @@ class RingRepositoryImpl(
             spO2 = data.spO2,
             spO2Measuring = data.spO2Measuring,
             stress = data.stress,
+            stressMeasuring = data.stressMeasuring,
             steps = data.steps,
             distance = data.distance,
             calories = data.calories,
