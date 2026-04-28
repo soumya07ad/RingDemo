@@ -282,17 +282,8 @@ fun DashboardScreenWithHeader(
             
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Connectivity Status Banner
-            if (isConnected) {
-                ConnectivityBanner(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                )
-            } else if (ringConnectionState == RingConnectionState.CONNECTING) {
-                ConnectivityBanner(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                    isConnecting = true
-                )
-            }
+            // Connectivity Status Banner removed as requested. Status is shown in the ring card.
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Hero Section
             HeroDashboardHeader(
@@ -455,6 +446,7 @@ fun DashboardScreenWithHeader(
                             )
                         }
                         
+
                         Spacer(modifier = Modifier.width(16.dp))
                         
                         // Middle: Text section
