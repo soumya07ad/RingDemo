@@ -890,6 +890,7 @@ fun PremiumBatteryCard(battery: Int, isCharging: Boolean = false) {
                     modifier = Modifier.fillMaxSize(),
                     progress = battery / 100f,
                     gradientColors = listOf(batteryColor, batteryColor.copy(alpha = 0.5f)),
+                    trackColor = NeonGreen.copy(alpha = 0.12f),
                     strokeWidth = 6f,
                     glowRadius = 4f
                 )

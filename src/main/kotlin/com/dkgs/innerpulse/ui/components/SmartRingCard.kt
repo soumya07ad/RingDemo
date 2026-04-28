@@ -132,37 +132,21 @@ fun SmartRingCard(
                     if (isConnected && batteryLevel != null) {
                         Spacer(modifier = Modifier.width(12.dp))
                         
-                        // Battery Badge
+                        // Battery Badge (Icon removed as requested)
                         Surface(
                             shape = RoundedCornerShape(6.dp),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
                             modifier = Modifier.padding(vertical = 2.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = when {
-                                        batteryLevel > 80 -> Icons.Default.BatteryFull
-                                        batteryLevel > 50 -> Icons.Default.Battery5Bar
-                                        batteryLevel > 20 -> Icons.Default.Battery3Bar
-                                        else -> Icons.Default.BatteryAlert
-                                    },
-                                    contentDescription = null,
-                                    modifier = Modifier.size(12.dp),
-                                    tint = if (batteryLevel < 20) Color.Red else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "$batteryLevel%",
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 10.sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                )
-                            }
+                            Text(
+                                text = "$batteryLevel%",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 11.sp
+                                ),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                            )
                         }
                     }
                 }
@@ -172,17 +156,17 @@ fun SmartRingCard(
             if (isConnected) {
                 OutlinedButton(
                     onClick = onDisconnectClick,
-                    modifier = Modifier.height(36.dp),
+                    modifier = Modifier.height(40.dp),
                     shape = RoundedCornerShape(10.dp),
                     border = androidx.compose.foundation.BorderStroke(1.dp, ErrorRed.copy(alpha = 0.5f)),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = ErrorRed
                     ),
-                    contentPadding = PaddingValues(horizontal = 12.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(14.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("DISCONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text("DISCONNECT", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                 }
             } else {
                 val buttonShape = RoundedCornerShape(10.dp)
