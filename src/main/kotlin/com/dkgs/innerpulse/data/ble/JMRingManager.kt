@@ -240,8 +240,19 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     fun fetchCachedData() {
-        Log.i(TAG, "Fetching cached data from ring")
+        val today = java.util.Calendar.getInstance().timeInMillis
+        Log.i(TAG, "Syncing today's data (Health, Sleep, Stress)")
+        RingBleUtils.getRingBleManager().getActivityHealthData(today)
+        RingBleUtils.getRingBleManager().getActivitySleepData(today)
+        RingBleUtils.getRingBleManager().getActivityStressData(today)
+        // Also call cache handler for generic items
         RingBleUtils.getRingBleManager().handlerCacheRing(TAG)
+    }
+
+    fun requestStressHistory() {
+        val today = java.util.Calendar.getInstance().timeInMillis
+        Log.i(TAG, "Explicitly requesting stress data for today")
+        RingBleUtils.getRingBleManager().getActivityStressData(today)
     }
 
     // ═══════════════════════════════════
@@ -476,6 +487,9 @@ class JMRingManager private constructor(private val context: Context) :
             heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
             spO2 = if (spo2Value > 0f) spo2Value else currentData.spO2,
             stress = if (stressValue > 0) stressValue else currentData.stress,
+            heartRateMeasuring = false,
+            spO2Measuring = false,
+            stressMeasuring = false,
             lastUpdate = System.currentTimeMillis()
         )
         
