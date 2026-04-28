@@ -3,6 +3,7 @@ package com.dkgs.innerpulse.ui.components
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -157,41 +158,25 @@ fun SmartRingCard(
                     Text("DISCONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             } else {
+                val buttonShape = RoundedCornerShape(10.dp)
                 Button(
                     onClick = onConnectClick,
-                    modifier = Modifier.height(36.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
+                    modifier = Modifier
+                        .height(36.dp)
                         .shadow(
                             10.dp,
                             buttonShape,
                             ambientColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f),
                             spotColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f)
-                        )
+                        ),
+                    shape = buttonShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (AppColors.isDark) SkyBlue else LightPrimary,
+                        contentColor = Color.White
+                    ),
+                    contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                brush = if (AppColors.isDark) {
-                                    Brush.horizontalGradient(listOf(SkyBlue, NeonGreen))
-                                } else {
-                                    AppColors.accentGradient
-                                },
-                                shape = buttonShape
-                            )
-                            .padding(horizontal = 20.dp, vertical = 10.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "Connect Ring",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White,
-                                letterSpacing = 0.5.sp
-                            )
-                        }
-                    }
+                    Text("CONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

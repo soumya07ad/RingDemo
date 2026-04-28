@@ -340,12 +340,13 @@ class JMRingManager private constructor(private val context: Context) :
         val bean = list.last()
         val currentData = _ringData.value
         val hrValue = bean.dailyHeartRate?.toInt() ?: 0
+        val spo2Value = bean.spo2?.toFloat() ?: 0f
         
-        Log.d(TAG, "Health data update: HR=$hrValue, Steps=${bean.stepDiff}")
+        Log.d(TAG, "Health data update: HR=$hrValue, SpO2=$spo2Value, Steps=${bean.stepDiff}")
         
         _ringData.value = currentData.copy(
             heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
-            spO2 = bean.spo2?.toFloat() ?: currentData.spO2,
+            spO2 = if (spo2Value > 0f) spo2Value else currentData.spO2,
             steps = bean.stepDiff?.toInt() ?: currentData.steps,
             calories = bean.caloriesDiff?.toInt() ?: currentData.calories,
             distance = bean.distanceDiff?.toInt() ?: currentData.distance,
@@ -470,9 +471,10 @@ class JMRingManager private constructor(private val context: Context) :
         
         Log.i(TAG, "Measurement SUCCESS: type=$type, HR=$hrValue, SpO2=${healthBean?.spo2}, BP=$bpHigh/$bpLow, Stress=$stressValue")
         
+        val spo2Value = healthBean?.spo2?.toFloat() ?: 0f
         _ringData.value = currentData.copy(
             heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
-            spO2 = healthBean?.spo2?.toFloat() ?: currentData.spO2,
+            spO2 = if (spo2Value > 0f) spo2Value else currentData.spO2,
             stress = if (stressValue > 0) stressValue else currentData.stress,
             lastUpdate = System.currentTimeMillis()
         )

@@ -20,6 +20,7 @@ class SettingsRepository(context: Context) : ISettingsRepository {
         const val PREF_USER_DOB         = "pref_user_dob"
         const val PREF_USER_GENDER      = "pref_user_gender"
         const val PREF_RING_TYPE        = "pref_ring_type"
+        const val PREF_RING_MAC_ADDRESS = "pref_ring_mac_address"
     }
 
     // ── Toggle preferences ─────────────────────────────────────────
@@ -38,6 +39,9 @@ class SettingsRepository(context: Context) : ISettingsRepository {
 
     private val _ringType = MutableStateFlow(prefs.getInt(PREF_RING_TYPE, 2))
     override val ringType: StateFlow<Int> = _ringType.asStateFlow()
+
+    private val _ringMacAddress = MutableStateFlow(prefs.getString(PREF_RING_MAC_ADDRESS, "") ?: "")
+    override val ringMacAddress: StateFlow<String> = _ringMacAddress.asStateFlow()
 
     override fun setNotificationsEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(PREF_NOTIFICATIONS, enabled).apply()
@@ -59,6 +63,11 @@ class SettingsRepository(context: Context) : ISettingsRepository {
     override fun setRingType(type: Int) {
         prefs.edit().putInt(PREF_RING_TYPE, type).apply()
         _ringType.value = type
+    }
+
+    override fun setRingMacAddress(mac: String) {
+        prefs.edit().putString(PREF_RING_MAC_ADDRESS, mac).apply()
+        _ringMacAddress.value = mac
     }
 
     // ── Profile preferences ────────────────────────────────────────

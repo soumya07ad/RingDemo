@@ -67,7 +67,8 @@ class AppViewModelFactory(private val container: AppContainer) : ViewModelProvid
 
             modelClass.isAssignableFrom(SmartRingViewModel::class.java) ->
                 SmartRingViewModel(
-                    ringRepository = container.ringRepository
+                    ringRepository = container.ringRepository,
+                    settingsRepository = container.settingsRepository
                 ) as T
 
             modelClass.isAssignableFrom(ThemeViewModel::class.java) ->

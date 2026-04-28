@@ -78,6 +78,11 @@ fun DashboardRoute(
     val isUsingPhone by viewModel.isUsingPhone.collectAsState()
     val isSupported by viewModel.stepTrackingSupported.collectAsState()
 
+    // Auto-reconnect to previously paired ring via BLE scan
+    LaunchedEffect(Unit) {
+        smartRingViewModel.autoReconnect()
+    }
+
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val permissionLauncher = rememberLauncherForActivityResult(

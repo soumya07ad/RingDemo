@@ -269,8 +269,9 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
                         connectedRing = result.data,
                         isLoading = false
                     )}
-                    // Persist ring type on successful connection
+                    // Persist ring type and MAC address on successful connection
                     container.settingsRepository.setRingType(ringType)
+                    container.settingsRepository.setRingMacAddress(result.data.macAddress)
                 }
                 is Result.Error -> {
                     _uiState.update { it.copy(
@@ -319,6 +320,9 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
                         connectedRing = result.data,
                         isLoading = false
                     )}
+                    // Persist ring type and MAC address on successful connection
+                    container.settingsRepository.setRingType(ringType)
+                    container.settingsRepository.setRingMacAddress(result.data.macAddress)
                 }
                 is Result.Error -> {
                     _uiState.update { it.copy(
