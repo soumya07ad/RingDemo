@@ -80,6 +80,7 @@ class DashboardViewModel(
                         distance = ringData.distance,
                         stressLevel = ringData.stress,
                         stressMeasuring = ringData.stressMeasuring,
+                        healthScore = ringData.healthScore,
                         batteryLevel = ringData.battery,
                         isCharging = ringData.isCharging,
                         sleepData = ringData.sleepData,

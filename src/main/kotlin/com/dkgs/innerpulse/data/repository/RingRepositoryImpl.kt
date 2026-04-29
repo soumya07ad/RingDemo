@@ -148,6 +148,7 @@ class RingRepositoryImpl(
             calories = data.calories,
             sleepData = data.sleepData,
             firmwareInfo = data.firmwareInfo,
+            healthScore = data.healthScore,
             lastUpdate = data.lastUpdate
         )
     }

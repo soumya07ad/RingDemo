@@ -295,7 +295,14 @@ fun DashboardScreenWithHeader(
                 onDisconnectClick = onDisconnectClick
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            if (isConnected) {
+                HealthScoreCard(
+                    score = state.healthScore,
+                    onRefresh = onSyncSleep,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
             // Health Metrics Grid
             Column(
@@ -1307,10 +1314,78 @@ private fun DashboardLandscapePreview() {
     }
 }
 
-@Preview(name = "Loading", showBackground = true, backgroundColor = 0xFF050508)
 @Composable
 private fun DashboardLoadingPreview() {
     FitnessAppTheme(darkTheme = true) {
         DashboardScreenWithHeader(state = PreviewData.loadingDashboardState)
+    }
+}
+
+@Composable
+fun HealthScoreCard(
+    score: Int,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    MetricGlassCard(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                Text(
+                    text = "HEALTH SCORE",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (score > 0) "$score" else "--",
+                    style = MaterialTheme.typography.displaySmall,
+                    color = when {
+                        score >= 80 -> NeonGreen
+                        score >= 60 -> WarningAmber
+                        score > 0 -> ErrorRed
+                        else -> MaterialTheme.colorScheme.onSurface
+                    },
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
+                Surface(
+                    onClick = onRefresh,
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                    modifier = Modifier.clip(RoundedCornerShape(12.dp))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Recalculate",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Based on activity & sleep",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+        }
     }
 }

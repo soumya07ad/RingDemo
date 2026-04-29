@@ -235,6 +235,7 @@ class JMRingManager private constructor(private val context: Context) :
                 sleepData = _ringData.value.sleepData.copy(
                     quality = sleepScore
                 ),
+                healthScore = healthScore,
                 lastUpdate = System.currentTimeMillis()
             )
         }

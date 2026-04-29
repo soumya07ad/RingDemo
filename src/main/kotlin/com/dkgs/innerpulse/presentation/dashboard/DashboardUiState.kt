@@ -36,6 +36,7 @@ data class DashboardUiState(
     val calories: Int = 0,
     val stressLevel: Int = 0,
     val stressMeasuring: Boolean = false,
+    val healthScore: Int = 0,
     
     // Additional ring metrics
     val sleepData: SleepData? = null,

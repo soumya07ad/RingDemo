@@ -101,6 +101,7 @@ data class RingData(
     val calories: Int = 0,       // kcal
     val sleepData: com.dkgs.innerpulse.domain.model.SleepData = com.dkgs.innerpulse.domain.model.SleepData(),
     val firmwareInfo: com.dkgs.innerpulse.domain.model.FirmwareInfo = com.dkgs.innerpulse.domain.model.FirmwareInfo(), // Firmware version and type
+    val healthScore: Int = 0,
     val lastUpdate: Long = 0L
 ) {
     val totalSleepMinutes: Int get() = sleepData.totalMinutes
