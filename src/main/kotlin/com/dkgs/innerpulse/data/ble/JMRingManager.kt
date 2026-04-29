@@ -266,6 +266,8 @@ class JMRingManager private constructor(private val context: Context) :
                 if (_connectionState.value is BleConnectionState.Connected) {
                     Log.i(TAG, "⏰ Automatic 2-minute background refresh triggered")
                     fetchCachedData()
+                    // Also refresh scores (Health Score, Sleep Quality)
+                    requestSleepScore()
                 } else {
                     break
                 }

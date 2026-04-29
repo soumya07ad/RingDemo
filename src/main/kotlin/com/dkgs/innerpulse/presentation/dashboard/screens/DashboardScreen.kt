@@ -334,7 +334,7 @@ fun DashboardScreenWithHeader(
                     FloatingMetricTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Favorite,
-                        label = "LIVE",
+                        label = "HEART RATE",
                         value = if (!isConnected) "--" else if (state.heartRate > 0) "${state.heartRate}" else "--",
                         unit = "bpm",
                         progress = if (isConnected) (state.heartRate / 200f).coerceIn(0f, 1f) else 0f,
