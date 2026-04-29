@@ -382,20 +382,10 @@ fun DashboardScreenWithHeader(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    val stepsValueStr = when {
-                        isConnected -> "${state.steps}"
-                        isUsingPhone && isSupported -> "${state.steps}"
-                        isUsingPhone && !isSupported -> "N/A"
-                        else -> "--"
-                    }
-                    val distanceValueStr = when {
-                        isConnected -> "${state.distance}"
-                        isUsingPhone && isSupported -> "${state.distance}"
-                        isUsingPhone && !isSupported -> "N/A"
-                        else -> "--"
-                    }
-                    val stepsLabel = if (isUsingPhone) "STEPS (PHONE)" else "STEPS"
-                    val distanceLabel = if (isUsingPhone) "DISTANCE (PHONE)" else "DISTANCE"
+                    val stepsValueStr = if (isSupported) "${state.steps}" else "N/A"
+                    val distanceValueStr = if (isSupported) "${state.distance}" else "N/A"
+                    val stepsLabel = "STEPS"
+                    val distanceLabel = "DISTANCE"
 
                     FloatingMetricTile(
                         modifier = Modifier.weight(1f),
