@@ -259,6 +259,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Connect to a scanned device
      */
     fun connectToDevice(ring: Ring, ringType: Int) {
+        android.util.Log.d("RingViewModel", "🔗 connectToDevice called: ${ring.macAddress}, type: $ringType")
         val context = getApplication<Application>()
         val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
         val locationEnabled = isLocationEnabled(context)

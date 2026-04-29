@@ -178,7 +178,7 @@ fun RingSetupScreen(
                 uiState.showPairedRingsList && uiState.pairedRings.isNotEmpty() -> {
                     PairedDevicesContent(
                         pairedRings = uiState.pairedRings,
-                        onDeviceSelected = { pairedRing -> 
+                        onRingSelected = { pairedRing -> 
                             onDeviceSelected(
                                 Ring(macAddress = pairedRing.macAddress, name = pairedRing.name),
                                 pairedRing.type
@@ -691,7 +691,7 @@ private fun ScanContent(
 @Composable
 private fun PairedDevicesContent(
     pairedRings: List<com.dkgs.innerpulse.domain.model.PairedRing>,
-    onDeviceSelected: (com.dkgs.innerpulse.domain.model.PairedRing) -> Unit,
+    onRingSelected: (com.dkgs.innerpulse.domain.model.PairedRing) -> Unit,
     onRemoveDevice: (String) -> Unit,
     onAddNew: () -> Unit
 ) {
@@ -728,8 +728,8 @@ private fun PairedDevicesContent(
                 ) {
                     Row(
                         modifier = Modifier
-                            .padding(16.dp)
-                            .clickable { onDeviceSelected(ring) }, // Whole row (except buttons) is clickable
+                            .clickable { onRingSelected(ring) }
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
@@ -763,7 +763,7 @@ private fun PairedDevicesContent(
                         }
 
                         Button(
-                            onClick = { onDeviceSelected(ring) },
+                            onClick = { onRingSelected(ring) },
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.1f)),
                             border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),

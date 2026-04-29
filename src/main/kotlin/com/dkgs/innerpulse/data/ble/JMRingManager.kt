@@ -110,21 +110,21 @@ class JMRingManager private constructor(private val context: Context) :
     fun connectRing(userId: String, macAddress: String, ringType: Int) {
         connectionRetries = 0
         val formattedMac = RingBleUtils.formatMacAddress(macAddress)
-        val sn = "780901703208128" // Default SN from Demo SDK for compatibility
-        // Demo app ALWAYS hardcodes ringType=2 in setRingData (see MainActivity.kt line 68/84).
-        // Using type=1 triggers an AIZO cloud auth request that rejects our package name,
-        // causing an infinite authentication retry loop that blocks onConnectSuccess.
-        val safeRingType = 2
+        val sn = "780901703208128" // Default SN for compatibility
+        
+        // Use the requested ringType instead of hardcoding 2
+        // Some rings (e.g. Type 1) might require their specific type to authenticate correctly
+        val finalRingType = ringType
         
         currentUserId = userId
         connectedRing = Ring(macAddress = formattedMac, name = "JMRing", isConnected = false)
-        Log.i(TAG, "Connecting to ring: $formattedMac, type: $safeRingType (requested: $ringType), SN: $sn")
+        Log.i(TAG, "Connecting to ring: $formattedMac, type: $finalRingType, SN: $sn")
         
         scope.launch {
-            saveRingType(safeRingType)
+            saveRingType(finalRingType)
         }
 
-        RingBleUtils.setRingData(userId, formattedMac, sn, safeRingType)
+        RingBleUtils.setRingData(userId, formattedMac, sn, finalRingType)
         
         // IMPORTANT: Re-setup listeners here. The SDK swaps the underlying manager 
         // (e.g., to YcbtRingBleManager for Xiaoqi rings) inside setRingData.
