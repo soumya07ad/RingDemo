@@ -6,6 +6,7 @@ import com.dkgs.innerpulse.domain.repository.ISettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.dkgs.innerpulse.domain.model.PairedRing
 
 class SettingsRepository(context: Context) : ISettingsRepository {
     private val prefs: SharedPreferences =
@@ -21,6 +22,7 @@ class SettingsRepository(context: Context) : ISettingsRepository {
         const val PREF_USER_GENDER      = "pref_user_gender"
         const val PREF_RING_TYPE        = "pref_ring_type"
         const val PREF_RING_MAC_ADDRESS = "pref_ring_mac_address"
+        const val PREF_PAIRED_RINGS     = "pref_paired_rings"
     }
 
     // ── Toggle preferences ─────────────────────────────────────────
@@ -68,6 +70,40 @@ class SettingsRepository(context: Context) : ISettingsRepository {
     override fun setRingMacAddress(mac: String) {
         prefs.edit().putString(PREF_RING_MAC_ADDRESS, mac).apply()
         _ringMacAddress.value = mac
+    }
+
+    // ── Paired Rings ───────────────────────────────────────────────
+
+    private val _pairedRings = MutableStateFlow(loadPairedRings())
+    override val pairedRings: StateFlow<List<PairedRing>> = _pairedRings.asStateFlow()
+
+    private fun loadPairedRings(): List<PairedRing> {
+        val set = prefs.getStringSet(PREF_PAIRED_RINGS, emptySet()) ?: emptySet()
+        return set.mapNotNull { str ->
+            val parts = str.split("|")
+            if (parts.size == 3) {
+                PairedRing(macAddress = parts[0], name = parts[1], type = parts[2].toIntOrNull() ?: 2)
+            } else null
+        }
+    }
+
+    private fun savePairedRings(rings: List<PairedRing>) {
+        val set = rings.map { "${it.macAddress}|${it.name}|${it.type}" }.toSet()
+        prefs.edit().putStringSet(PREF_PAIRED_RINGS, set).apply()
+        _pairedRings.value = rings
+    }
+
+    override fun addPairedRing(ring: PairedRing) {
+        val current = _pairedRings.value.toMutableList()
+        current.removeAll { it.macAddress == ring.macAddress } // Prevent duplicates
+        current.add(ring)
+        savePairedRings(current)
+    }
+
+    override fun removePairedRing(macAddress: String) {
+        val current = _pairedRings.value.toMutableList()
+        current.removeAll { it.macAddress == macAddress }
+        savePairedRings(current)
     }
 
     // ── Profile preferences ────────────────────────────────────────

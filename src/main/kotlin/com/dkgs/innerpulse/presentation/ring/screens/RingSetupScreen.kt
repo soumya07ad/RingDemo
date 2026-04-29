@@ -9,6 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -108,7 +109,9 @@ fun RingSetupRoute(
         onMeasureStress = { viewModel.startStressMeasurement() },
         onRequestSleep = { viewModel.requestSleepHistory() },
         onClearError = { viewModel.clearError() },
-        onRefresh = { viewModel.refreshStatus(context) }
+        onRefresh = { viewModel.refreshStatus(context) },
+        onRemovePairedRing = { viewModel.removePairedRing(it) },
+        onTogglePairedRingsList = { viewModel.togglePairedRingsList() }
     )
 }
 
@@ -136,7 +139,9 @@ fun RingSetupScreen(
     onMeasureStress: () -> Unit = {},
     onRequestSleep: () -> Unit = {},
     onClearError: () -> Unit = {},
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
+    onRemovePairedRing: (String) -> Unit = {},
+    onTogglePairedRingsList: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Cinematic background
@@ -167,6 +172,16 @@ fun RingSetupScreen(
                         onRingTypeChange = onRingTypeChange
                     )
                 }
+                uiState.showPairedRingsList && uiState.pairedRings.isNotEmpty() -> {
+                    PairedDevicesContent(
+                        pairedRings = uiState.pairedRings,
+                        onDeviceSelected = { ring -> 
+                            onDeviceSelected(Ring(macAddress = ring.macAddress, name = ring.name, isConnected = false))
+                        },
+                        onRemoveDevice = onRemovePairedRing,
+                        onAddNew = onTogglePairedRingsList
+                    )
+                }
                 uiState.showManualEntry -> {
                     ManualEntryContent(
                         macAddress = uiState.manualMacAddress,
@@ -174,7 +189,7 @@ fun RingSetupScreen(
                         onMacChange = onMacChange,
                         onRingTypeChange = onRingTypeChange,
                         onConnect = onConnectByMac,
-                        onBack = onManualEntry
+                        onBack = if (uiState.pairedRings.isNotEmpty()) onTogglePairedRingsList else onManualEntry
                     )
                 }
                 uiState.isConnecting -> {
@@ -199,7 +214,8 @@ fun RingSetupScreen(
                         onRingTypeChange = onRingTypeChange,
                         onDeviceSelected = onDeviceSelected,
                         onManualEntry = onManualEntry,
-                        onSkip = onSkip
+                        onSkip = onSkip,
+                        onShowPaired = onTogglePairedRingsList
                     )
                 }
             }
@@ -452,7 +468,8 @@ private fun ScanContent(
     onRingTypeChange: (Int) -> Unit,
     onDeviceSelected: (Ring) -> Unit,
     onManualEntry: () -> Unit,
-    onSkip: () -> Unit
+    onSkip: () -> Unit,
+    onShowPaired: () -> Unit = {}
 ) {
     var selectedDevice by remember { mutableStateOf<Ring?>(null) }
 
@@ -629,23 +646,142 @@ private fun ScanContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Bottom buttons
-        Row(
+        Column(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            NeonSecondaryButton(
-                text = "ENTER MAC",
-                onClick = onManualEntry,
-                modifier = Modifier.weight(1f)
-            )
-            NeonSecondaryButton(
-                text = "SKIP",
-                onClick = onSkip,
-                modifier = Modifier.weight(1f)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                NeonSecondaryButton(
+                    text = "ENTER MAC",
+                    onClick = onManualEntry,
+                    modifier = Modifier.weight(1f)
+                )
+                NeonSecondaryButton(
+                    text = "SKIP",
+                    onClick = onSkip,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            if (uiState.pairedRings.isNotEmpty()) {
+                TextButton(onClick = onShowPaired) {
+                    Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("MY PAIRED RINGS", color = NeonCyan, style = MaterialTheme.typography.labelLarge)
+                }
+            }
         }
     }
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// PAIRED DEVICES CONTENT
+// ═══════════════════════════════════════════════════════════════════════
+
+@Composable
+private fun PairedDevicesContent(
+    pairedRings: List<com.dkgs.innerpulse.domain.model.PairedRing>,
+    onDeviceSelected: (com.dkgs.innerpulse.domain.model.PairedRing) -> Unit,
+    onRemoveDevice: (String) -> Unit,
+    onAddNew: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "MY PAIRED DEVICES",
+                style = MaterialTheme.typography.labelLarge,
+                color = NeonCyan,
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            StatusBadge(
+                text = "${pairedRings.size} saved",
+                color = NeonCyan
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(pairedRings) { ring ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+                    border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.2f)),
+                    onClick = { onDeviceSelected(ring) }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(NeonCyan.copy(alpha = 0.1f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.BluetoothConnected, contentDescription = null, tint = NeonCyan)
+                        }
+
+                        Spacer(modifier = Modifier.width(16.dp))
+
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = ring.name,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = ring.macAddress,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+
+                        IconButton(onClick = { onRemoveDevice(ring.macAddress) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Remove", tint = ErrorRed.copy(alpha = 0.6f))
+                        }
+
+                        Button(
+                            onClick = { onDeviceSelected(ring) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.1f)),
+                            border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text("CONNECT", color = NeonCyan, style = MaterialTheme.typography.labelSmall)
+                        }
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        NeonButton(
+            text = "CONNECT NEW DEVICE",
+            onClick = onAddNew,
+            icon = Icons.Default.Add,
+            colors = listOf(PrimaryPurple, NeonPurple)
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // CONNECTING CONTENT — Full-screen cinematic ring animation

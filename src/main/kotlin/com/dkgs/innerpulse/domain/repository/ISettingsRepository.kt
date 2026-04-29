@@ -1,6 +1,7 @@
 package com.dkgs.innerpulse.domain.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import com.dkgs.innerpulse.domain.model.PairedRing
 
 interface ISettingsRepository {
     val notificationsEnabled: StateFlow<Boolean>
@@ -20,4 +21,8 @@ interface ISettingsRepository {
     fun setRingType(type: Int)
     fun setRingMacAddress(mac: String)
     fun saveProfile(name: String, dob: String, gender: String)
+
+    val pairedRings: StateFlow<List<PairedRing>>
+    fun addPairedRing(ring: PairedRing)
+    fun removePairedRing(macAddress: String)
 }

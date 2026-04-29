@@ -26,6 +26,10 @@ data class RingUiState(
     // Ring data
     val ringData: RingHealthData = RingHealthData(),
     
+    // Paired Rings
+    val pairedRings: List<com.dkgs.innerpulse.domain.model.PairedRing> = emptyList(),
+    val showPairedRingsList: Boolean = true,
+    
     // UI state
     val showManualEntry: Boolean = false,
     val manualMacAddress: String = "",

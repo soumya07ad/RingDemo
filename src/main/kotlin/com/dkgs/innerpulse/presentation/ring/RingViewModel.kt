@@ -59,11 +59,30 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             container.ringRepository.connectionStatus.collect { status ->
                 android.util.Log.d("RingViewModel", "📡 Connection status update: $status")
+                
+                // If connected successfully, save it to our paired rings list
+                if (status is ConnectionStatus.Connected) {
+                    val ringType = container.settingsRepository.ringType.value
+                    container.settingsRepository.addPairedRing(
+                        com.dkgs.innerpulse.domain.model.PairedRing(
+                            macAddress = status.ring.macAddress,
+                            name = status.ring.name,
+                            type = ringType
+                        )
+                    )
+                }
+
                 _uiState.update { it.copy(
                     connectionStatus = status,
                     connectedRing = (status as? ConnectionStatus.Connected)?.ring,
                     selectedRingType = container.settingsRepository.ringType.value
                 )}
+            }
+        }
+        
+        viewModelScope.launch {
+            container.settingsRepository.pairedRings.collect { rings ->
+                _uiState.update { it.copy(pairedRings = rings) }
             }
         }
         
@@ -405,7 +424,27 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Show/hide manual MAC entry
      */
     fun toggleManualEntry() {
-        _uiState.update { it.copy(showManualEntry = !it.showManualEntry) }
+        _uiState.update { it.copy(
+            showManualEntry = !it.showManualEntry,
+            showPairedRingsList = false // Hide paired list when entering new device
+        ) }
+    }
+    
+    /**
+     * Show/hide paired rings list
+     */
+    fun togglePairedRingsList() {
+        _uiState.update { it.copy(
+            showPairedRingsList = !it.showPairedRingsList,
+            showManualEntry = false // Hide manual entry when viewing paired list
+        ) }
+    }
+
+    /**
+     * Remove a ring from the paired list
+     */
+    fun removePairedRing(macAddress: String) {
+        container.settingsRepository.removePairedRing(macAddress)
     }
     
     /**
