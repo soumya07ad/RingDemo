@@ -12,6 +12,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -93,7 +94,6 @@ fun RingSetupRoute(
         onStartScan = { viewModel.startScan() },
         onStopScan = { viewModel.stopScan() },
         onRingTypeChange = { viewModel.updateRingType(it) },
-        onDeviceSelected = { viewModel.connectToDevice(it, uiState.selectedRingType) },
         onManualEntry = { viewModel.toggleManualEntry() },
         onMacChange = { viewModel.updateManualMacAddress(it) },
         onConnectByMac = { viewModel.connectByMacAddress(uiState.manualMacAddress) },
@@ -111,7 +111,9 @@ fun RingSetupRoute(
         onClearError = { viewModel.clearError() },
         onRefresh = { viewModel.refreshStatus(context) },
         onRemovePairedRing = { viewModel.removePairedRing(it) },
-        onTogglePairedRingsList = { viewModel.togglePairedRingsList() }
+        onTogglePairedRingsList = { viewModel.togglePairedRingsList() },
+        onDeviceSelected = { ring, type -> viewModel.connectToDevice(ring, type) },
+        onShowManualEntry = { viewModel.showManualEntry() }
     )
 }
 
@@ -129,7 +131,7 @@ fun RingSetupScreen(
     onStartScan: () -> Unit = {},
     onStopScan: () -> Unit = {},
     onRingTypeChange: (Int) -> Unit = {},
-    onDeviceSelected: (Ring) -> Unit = {},
+    onDeviceSelected: (Ring, Int) -> Unit = { _, _ -> },
     onManualEntry: () -> Unit = {},
     onMacChange: (String) -> Unit = {},
     onConnectByMac: () -> Unit = {},
@@ -141,7 +143,8 @@ fun RingSetupScreen(
     onClearError: () -> Unit = {},
     onRefresh: () -> Unit = {},
     onRemovePairedRing: (String) -> Unit = {},
-    onTogglePairedRingsList: () -> Unit = {}
+    onTogglePairedRingsList: () -> Unit = {},
+    onShowManualEntry: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Cinematic background
@@ -175,11 +178,14 @@ fun RingSetupScreen(
                 uiState.showPairedRingsList && uiState.pairedRings.isNotEmpty() -> {
                     PairedDevicesContent(
                         pairedRings = uiState.pairedRings,
-                        onDeviceSelected = { ring -> 
-                            onDeviceSelected(Ring(macAddress = ring.macAddress, name = ring.name, isConnected = false))
+                        onDeviceSelected = { pairedRing -> 
+                            onDeviceSelected(
+                                Ring(macAddress = pairedRing.macAddress, name = pairedRing.name),
+                                pairedRing.type
+                            )
                         },
                         onRemoveDevice = onRemovePairedRing,
-                        onAddNew = onTogglePairedRingsList
+                        onAddNew = onShowManualEntry
                     )
                 }
                 uiState.showManualEntry -> {
@@ -212,7 +218,7 @@ fun RingSetupScreen(
                         onStartScan = onStartScan,
                         onStopScan = onStopScan,
                         onRingTypeChange = onRingTypeChange,
-                        onDeviceSelected = onDeviceSelected,
+                        onDeviceSelected = { ring -> onDeviceSelected(ring, uiState.selectedRingType) },
                         onManualEntry = onManualEntry,
                         onSkip = onSkip,
                         onShowPaired = onTogglePairedRingsList
@@ -718,11 +724,12 @@ private fun PairedDevicesContent(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     color = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
-                    border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.2f)),
-                    onClick = { onDeviceSelected(ring) }
+                    border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.2f))
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .clickable { onDeviceSelected(ring) }, // Whole row (except buttons) is clickable
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(

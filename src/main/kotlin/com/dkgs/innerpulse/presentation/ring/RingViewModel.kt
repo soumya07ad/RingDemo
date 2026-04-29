@@ -448,6 +448,16 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     /**
+     * Show manual MAC entry screen directly
+     */
+    fun showManualEntry() {
+        _uiState.update { it.copy(
+            showManualEntry = true,
+            showPairedRingsList = false
+        ) }
+    }
+
+    /**
      * Update selected ring type
      */
     fun updateRingType(type: Int) {
