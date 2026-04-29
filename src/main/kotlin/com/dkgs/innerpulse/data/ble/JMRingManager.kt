@@ -80,6 +80,7 @@ class JMRingManager private constructor(private val context: Context) :
     private var connectedRing: Ring? = null
     private var currentUserId: String = "12345" // Default or fetched from TokenManager
     private var measurementTimeoutJobs = mutableMapOf<Int, Job>() // type to Job
+    private var autoRefreshJob: Job? = null
     
     private var connectionRetries = 0
     private val MAX_RETRIES = 5
@@ -255,7 +256,28 @@ class JMRingManager private constructor(private val context: Context) :
         RingBleUtils.getRingBleManager().getActivityStressData(today)
     }
 
-    // ═══════════════════════════════════
+    private fun startAutoRefreshLoop() {
+        Log.i(TAG, "Starting 2-minute auto-refresh loop")
+        autoRefreshJob?.cancel()
+        autoRefreshJob = scope.launch {
+            while (true) {
+                delay(120_000) // 2 minutes
+                if (_connectionState.value is BleConnectionState.Connected) {
+                    Log.i(TAG, "⏰ Automatic 2-minute background refresh triggered")
+                    fetchCachedData()
+                } else {
+                    break
+                }
+            }
+        }
+    }
+
+    private fun stopAutoRefreshLoop() {
+        Log.i(TAG, "Stopping auto-refresh loop")
+        autoRefreshJob?.cancel()
+        autoRefreshJob = null
+    }
+      // ═══════════════════════════════════
     // SDK Callbacks
     // ═══════════════════════════════════
 
@@ -285,6 +307,7 @@ class JMRingManager private constructor(private val context: Context) :
         manager.getActivityStressData(midnightTime)
         
         fetchCachedData()
+        startAutoRefreshLoop()
     }
 
     override fun onDisconnect(isCallback: Boolean) {
@@ -297,6 +320,7 @@ class JMRingManager private constructor(private val context: Context) :
             spO2Measuring = false,
             stressMeasuring = false
         )
+        stopAutoRefreshLoop()
     }
 
     override fun onConnectFail() {

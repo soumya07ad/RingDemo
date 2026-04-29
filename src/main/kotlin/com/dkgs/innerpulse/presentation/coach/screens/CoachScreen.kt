@@ -27,6 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import android.view.ContextThemeWrapper
+import com.dkgs.innerpulse.R
 import com.dkgs.innerpulse.presentation.coach.*
 import com.dkgs.innerpulse.domain.model.CoachMessage
 import com.dkgs.innerpulse.domain.model.CoachSession
@@ -395,15 +398,19 @@ fun MessageBubble(message: CoachMessage) {
                         lineHeight = 22.sp
                     )
                 } else {
-                    MarkdownText(
-                        markdown = message.text,
-                        color = textColor,
-                        fontSize = 15.sp,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            lineHeight = 22.sp,
-                            color = textColor
+                    CompositionLocalProvider(
+                        LocalContext provides ContextThemeWrapper(LocalContext.current, androidx.appcompat.R.style.Theme_AppCompat_DayNight)
+                    ) {
+                        MarkdownText(
+                            markdown = message.text,
+                            color = textColor,
+                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                lineHeight = 22.sp,
+                                color = textColor
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
