@@ -327,7 +327,7 @@ fun DashboardScreenWithHeader(
                     FloatingMetricTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Favorite,
-                        label = "HEART RATE",
+                        label = "LIVE",
                         value = if (!isConnected) "--" else if (state.heartRate > 0) "${state.heartRate}" else "--",
                         unit = "bpm",
                         progress = if (isConnected) (state.heartRate / 200f).coerceIn(0f, 1f) else 0f,
@@ -382,13 +382,13 @@ fun DashboardScreenWithHeader(
                         isConnected -> "${state.steps}"
                         isUsingPhone && isSupported -> "${state.steps}"
                         isUsingPhone && !isSupported -> "N/A"
-                        else -> "0"
+                        else -> "--"
                     }
                     val distanceValueStr = when {
                         isConnected -> "${state.distance}"
                         isUsingPhone && isSupported -> "${state.distance}"
                         isUsingPhone && !isSupported -> "N/A"
-                        else -> "0"
+                        else -> "--"
                     }
                     val stepsLabel = if (isUsingPhone) "STEPS (PHONE)" else "STEPS"
                     val distanceLabel = if (isUsingPhone) "DISTANCE (PHONE)" else "DISTANCE"
