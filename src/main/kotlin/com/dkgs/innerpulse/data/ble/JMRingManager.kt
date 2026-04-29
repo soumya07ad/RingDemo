@@ -108,6 +108,12 @@ class JMRingManager private constructor(private val context: Context) :
     // ═══════════════════════════════════
 
     fun connectRing(userId: String, macAddress: String, ringType: Int) {
+        // 1. Force stop any active scans (including SDK internal ones)
+        RingBleUtils.stopScan()
+        
+        // 2. Clear any existing connection state to avoid GATT busy errors
+        RingBleUtils.getRingBleManager().onDisconnect()
+        
         connectionRetries = 0
         val formattedMac = RingBleUtils.formatMacAddress(macAddress)
         val sn = "780901703208128" // Default SN for compatibility

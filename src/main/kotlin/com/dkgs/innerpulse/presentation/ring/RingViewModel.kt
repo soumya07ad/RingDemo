@@ -280,8 +280,12 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         stopScan() // Safely kill any active scans to prevent GATT connection drops
+        
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            
+            // Small delay to allow Bluetooth stack to settle after scan stop
+            kotlinx.coroutines.delay(500)
             
             when (val result = connectRingUseCase.connect(ring, ringType)) {
                 is Result.Success -> {
