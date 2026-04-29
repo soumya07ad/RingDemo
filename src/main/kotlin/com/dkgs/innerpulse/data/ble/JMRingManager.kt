@@ -375,16 +375,14 @@ class JMRingManager private constructor(private val context: Context) :
             _connectionState.value = BleConnectionState.Connected(ring)
         }
 
-        val bean = list.last()
         val currentData = _ringData.value
-        val hrValue = bean.dailyHeartRate?.toInt() ?: 0
-        val spo2Value = bean.spo2?.toFloat() ?: 0f
+        val bean = list.last()
         
-        Log.d(TAG, "Health data update: HR=$hrValue, SpO2=$spo2Value, Steps=${bean.stepDiff}")
+        Log.d(TAG, "Health data update: Steps=${bean.stepDiff}, Calories=${bean.caloriesDiff}")
         
         _ringData.value = currentData.copy(
-            heartRate = if (hrValue > 0) hrValue else currentData.heartRate,
-            spO2 = if (spo2Value > 0f) spo2Value else currentData.spO2,
+            // We intentionally do NOT update HR and SpO2 here from historical data.
+            // The user wants the dashboard to remain "--" until a LIVE measurement is performed.
             steps = bean.stepDiff?.toInt() ?: currentData.steps,
             calories = bean.caloriesDiff?.toInt() ?: currentData.calories,
             distance = bean.distanceDiff?.toInt() ?: currentData.distance,
@@ -397,12 +395,10 @@ class JMRingManager private constructor(private val context: Context) :
         if (list.isEmpty()) return
         val bean = list.last()
         val stressValue = bean.pressureIndex?.toInt() ?: 0
-        Log.i(TAG, "STRESS UPDATE RECEIVED: $stressValue (isRingData=$isRingData)")
+        Log.i(TAG, "STRESS UPDATE RECEIVED (Historical): $stressValue (isRingData=$isRingData)")
         
-        _ringData.value = _ringData.value.copy(
-            stress = if (stressValue > 0) stressValue else _ringData.value.stress,
-            lastUpdate = System.currentTimeMillis()
-        )
+        // Intentionally NOT updating _ringData.value.stress here.
+        // Stress should only update from live measurements per user request.
     }
 
     override fun onSleepAllBeanListener(tag: String, isRingData: Boolean, reqTime: Long?, jmSleepBean: JMSleepBean?) {
