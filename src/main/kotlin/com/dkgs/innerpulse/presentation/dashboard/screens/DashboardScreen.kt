@@ -128,19 +128,16 @@ fun DashboardRoute(
             navController?.navigate(Screen.FitnessHistory.route)
         },
         onMeasureHeartRate = {
-            if (state.heartRateMeasuring) viewModel.stopHeartRateMeasurement()
-            else viewModel.startHeartRateMeasurement()
+            navController?.navigate(Screen.MeasureHR.route)
         },
         onMeasureSpO2 = {
-            if (state.spO2Measuring) viewModel.stopSpO2Measurement()
-            else viewModel.startSpO2Measurement()
+            navController?.navigate(Screen.MeasureSpO2.route)
         },
         onMeasureStress = {
-            if (state.stressMeasuring) viewModel.stopStressMeasurement()
-            else viewModel.startStressMeasurement()
+            navController?.navigate(Screen.MeasureStress.route)
         },
         onSyncSleep = {
-            viewModel.requestSleepHistory()
+            navController?.navigate(Screen.MeasureScore.route)
         },
         onSyncAllData = {
             viewModel.syncAllData()

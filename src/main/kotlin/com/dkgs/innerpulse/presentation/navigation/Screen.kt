@@ -24,6 +24,12 @@ sealed class Screen(val route: String, val label: String, val icon: ImageVector)
         fun createRoute(exerciseId: String, category: String) = "meditation/timer/$exerciseId/$category"
     }
 
+    // Measurement screens
+    object MeasureHR : Screen("measure/hr", "Live HR", Icons.Rounded.Favorite)
+    object MeasureSpO2 : Screen("measure/spo2", "Live SpO2", Icons.Rounded.FavoriteBorder)
+    object MeasureStress : Screen("measure/stress", "Live Stress", Icons.Rounded.Face)
+    object MeasureScore : Screen("measure/score", "Health Score", Icons.Rounded.Star)
+
     companion object {
         val bottomNavItems = listOf(Dashboard, Sleep, Wellness, Streaks)
     }

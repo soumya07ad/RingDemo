@@ -62,6 +62,7 @@ import com.dkgs.innerpulse.presentation.theme.ThemeViewModel
 import com.dkgs.innerpulse.domain.model.AppTheme
 import com.dkgs.innerpulse.ui.theme.*
 import com.dkgs.innerpulse.ui.components.AmbientPulseGlow
+import com.dkgs.innerpulse.presentation.measurements.*
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.shape.RoundedCornerShape
 
@@ -310,10 +311,54 @@ fun AppNavigationFlow(
                             onSkip = { navController.popBackStack() }
                         )
                     }
+
+                    // Measurement Screens
+                    composable(Screen.MeasureHR.route) {
+                        HeartRateMeasurementScreen(
+                            viewModel = rememberMeasurementViewModel(MeasurementType.HEART_RATE),
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable(Screen.MeasureSpO2.route) {
+                        SpO2MeasurementScreen(
+                            viewModel = rememberMeasurementViewModel(MeasurementType.SPO2),
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable(Screen.MeasureStress.route) {
+                        StressMeasurementScreen(
+                            viewModel = rememberMeasurementViewModel(MeasurementType.STRESS),
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    composable(Screen.MeasureScore.route) {
+                        HealthScoreCalculationScreen(
+                            viewModel = rememberMeasurementViewModel(MeasurementType.HEALTH_SCORE),
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+@Composable
+fun rememberMeasurementViewModel(type: MeasurementType): MeasurementViewModel {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val container = remember { com.dkgs.innerpulse.core.di.AppContainer.getInstance(context) }
+    return viewModel(
+        key = type.name,
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return MeasurementViewModel(container.ringRepository, type) as T
+            }
+        }
+    )
 }
 
 
