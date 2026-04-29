@@ -728,7 +728,6 @@ private fun PairedDevicesContent(
                 ) {
                     Row(
                         modifier = Modifier
-                            .clickable { onRingSelected(ring) }
                             .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

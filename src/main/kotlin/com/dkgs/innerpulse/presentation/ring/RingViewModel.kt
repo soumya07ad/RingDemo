@@ -260,6 +260,21 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun connectToDevice(ring: Ring, ringType: Int) {
         android.util.Log.d("RingViewModel", "🔗 connectToDevice called: ${ring.macAddress}, type: $ringType")
+        
+        // Guard 1: Debounce - skip if already processing a connection
+        if (_uiState.value.isLoading) {
+            android.util.Log.d("RingViewModel", "⚠️ Connection already in progress, ignoring duplicate click")
+            return
+        }
+        
+        // Guard 2: Skip if already connected to this same device
+        val currentStatus = _uiState.value.connectionStatus
+        if (currentStatus is ConnectionStatus.Connected && 
+            currentStatus.ring.macAddress.equals(ring.macAddress, ignoreCase = true)) {
+            android.util.Log.d("RingViewModel", "✅ Already connected to ${ring.macAddress}, skipping reconnect")
+            return
+        }
+        
         val context = getApplication<Application>()
         val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
         val locationEnabled = isLocationEnabled(context)
