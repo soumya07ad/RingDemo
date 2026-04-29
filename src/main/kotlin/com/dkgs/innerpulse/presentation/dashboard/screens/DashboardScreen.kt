@@ -331,7 +331,7 @@ fun DashboardScreenWithHeader(
                     FloatingMetricTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Favorite,
-                        label = "LIVE HR",
+                        label = "HEART RATE",
                         value = if (!isConnected) "--" else if (state.heartRate > 0) "${state.heartRate}" else "--",
                         unit = "bpm",
                         progress = if (isConnected) (state.heartRate / 200f).coerceIn(0f, 1f) else 0f,
@@ -342,7 +342,7 @@ fun DashboardScreenWithHeader(
                     FloatingMetricTile(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.FavoriteBorder,
-                        label = "LIVE O₂",
+                        label = "BLOOD O₂",
                         value = if (!isConnected) "--" else if (state.spO2 > 0) "${state.spO2.toInt()}" else "--",
                         unit = "%",
                         progress = if (isConnected) (state.spO2 / 100f).coerceIn(0f, 1f) else 0f,
@@ -358,7 +358,7 @@ fun DashboardScreenWithHeader(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         MeasurementButton(
-                            text = if (state.heartRateMeasuring) "Measuring..." else "Measure HR",
+                            text = if (state.heartRateMeasuring) "Measuring..." else "LIVE HR",
                             icon = Icons.Default.Favorite,
                             color = ErrorRed,
                             onClick = onMeasureHeartRate,
@@ -366,7 +366,7 @@ fun DashboardScreenWithHeader(
                             modifier = Modifier.weight(1f)
                         )
                         MeasurementButton(
-                            text = if (state.spO2Measuring) "Measuring..." else "Measure SpO2",
+                            text = if (state.spO2Measuring) "Measuring..." else "LIVE O₂",
                             icon = Icons.Default.FavoriteBorder,
                             color = NeonCyan,
                             onClick = onMeasureSpO2,
@@ -488,7 +488,7 @@ fun DashboardScreenWithHeader(
                     if (isConnected) {
                         Spacer(modifier = Modifier.height(12.dp))
                         MeasurementButton(
-                            text = if (state.stressMeasuring) "Measuring Stress..." else "Measure Stress Level",
+                            text = if (state.stressMeasuring) "Measuring..." else "LIVE STRESS",
                             icon = Icons.Default.PlayArrow,
                             color = NeonCyan,
                             onClick = onMeasureStress,
