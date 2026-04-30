@@ -70,6 +70,8 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
                             type = ringType
                         )
                     )
+                    // Start foreground service to keep BLE alive in background
+                    com.dkgs.innerpulse.ble.RingService.start(getApplication())
                 }
 
                 _uiState.update { it.copy(
@@ -380,6 +382,8 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      * Disconnect from current device
      */
     fun disconnect() {
+        // Stop foreground service first
+        com.dkgs.innerpulse.ble.RingService.stop(getApplication())
         viewModelScope.launch {
             disconnectRingUseCase()
             _uiState.update { it.copy(
