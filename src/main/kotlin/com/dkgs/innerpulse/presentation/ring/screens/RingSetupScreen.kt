@@ -78,6 +78,15 @@ fun RingSetupRoute(
         viewModel.checkPermissions(context)
     }
 
+    // Auto-navigate to dashboard when successfully connected
+    LaunchedEffect(uiState.isConnected) {
+        if (uiState.isConnected) {
+            // Provide a brief moment for the user to see the "CONNECTED" visual feedback
+            kotlinx.coroutines.delay(1000)
+            onSetupComplete()
+        }
+    }
+
     RingSetupScreen(
         uiState = uiState,
         onSetupComplete = onSetupComplete,
