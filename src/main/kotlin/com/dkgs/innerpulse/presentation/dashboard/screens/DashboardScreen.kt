@@ -203,7 +203,7 @@ fun DashboardScreenWithHeader(
             ) {
                 // Left-aligned Brand Identity (Now simpler without redundant Row)
                 BrandedTopBar(
-                    painter = painterResource(id = R.drawable.ic_premium_logo),
+                    painter = painterResource(id = R.drawable.ic_app_logo),
                     title = "INNERPULSE",
                     isConnected = isConnected,
                     batteryLevel = state.batteryLevel,
