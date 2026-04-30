@@ -74,7 +74,9 @@ class RingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_STOP -> {
-                Log.i(TAG, "Received STOP action — stopping service")
+                Log.i(TAG, "Received STOP action — disconnecting ring and stopping service")
+                // Actually disconnect the BLE ring
+                JMRingManager.getInstance(applicationContext).disconnect()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
