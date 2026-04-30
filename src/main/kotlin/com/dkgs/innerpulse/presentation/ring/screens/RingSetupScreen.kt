@@ -178,6 +178,8 @@ fun RingSetupScreen(
                 uiState.showPairedRingsList && uiState.pairedRings.isNotEmpty() -> {
                     PairedDevicesContent(
                         pairedRings = uiState.pairedRings,
+                        connectionStatus = uiState.connectionStatus,
+                        isLoading = uiState.isLoading,
                         onRingSelected = { pairedRing -> 
                             onDeviceSelected(
                                 Ring(macAddress = pairedRing.macAddress, name = pairedRing.name),
@@ -691,6 +693,8 @@ private fun ScanContent(
 @Composable
 private fun PairedDevicesContent(
     pairedRings: List<com.dkgs.innerpulse.domain.model.PairedRing>,
+    connectionStatus: com.dkgs.innerpulse.domain.model.ConnectionStatus,
+    isLoading: Boolean,
     onRingSelected: (com.dkgs.innerpulse.domain.model.PairedRing) -> Unit,
     onRemoveDevice: (String) -> Unit,
     onAddNew: () -> Unit
@@ -761,14 +765,25 @@ private fun PairedDevicesContent(
                             Icon(Icons.Default.Delete, contentDescription = "Remove", tint = ErrorRed.copy(alpha = 0.6f))
                         }
 
+                        val isThisRingConnected = connectionStatus is com.dkgs.innerpulse.domain.model.ConnectionStatus.Connected && 
+                            connectionStatus.ring.macAddress.equals(ring.macAddress, ignoreCase = true)
+
                         Button(
                             onClick = { onRingSelected(ring) },
+                            enabled = !isLoading && !isThisRingConnected,
                             shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = NeonCyan.copy(alpha = 0.1f)),
-                            border = BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isThisRingConnected) NeonPurple.copy(alpha = 0.2f) else NeonCyan.copy(alpha = 0.1f),
+                                disabledContainerColor = if (isThisRingConnected) NeonPurple.copy(alpha = 0.2f) else Color.Gray.copy(alpha = 0.1f)
+                            ),
+                            border = BorderStroke(1.dp, if (isThisRingConnected) NeonPurple.copy(alpha = 0.5f) else NeonCyan.copy(alpha = 0.5f)),
                             contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                         ) {
-                            Text("CONNECT", color = NeonCyan, style = MaterialTheme.typography.labelSmall)
+                            if (isThisRingConnected) {
+                                Text("CONNECTED", color = NeonPurple, style = MaterialTheme.typography.labelSmall)
+                            } else {
+                                Text("CONNECT", color = if (isLoading) Color.Gray else NeonCyan, style = MaterialTheme.typography.labelSmall)
+                            }
                         }
                     }
                 }
