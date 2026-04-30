@@ -84,6 +84,7 @@ class JMRingManager private constructor(private val context: Context) :
     
     private var connectionRetries = 0
     private val MAX_RETRIES = 5
+    private var isManualDisconnect = false
 
     init {
         Log.i(TAG, "Initializing JMRingManager with official SDK")
@@ -131,6 +132,7 @@ class JMRingManager private constructor(private val context: Context) :
         val finalRingType = ringType
         
         currentUserId = userId
+        isManualDisconnect = false
         connectedRing = Ring(macAddress = formattedMac, name = "JMRing", isConnected = false)
         Log.i(TAG, "Connecting to ring: $formattedMac, type: $finalRingType, SN: $sn")
         
@@ -148,7 +150,8 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     fun disconnect() {
-        Log.i(TAG, "Disconnecting from ring")
+        Log.i(TAG, "Disconnecting from ring (manual)")
+        isManualDisconnect = true
         RingBleUtils.getRingBleManager().onDisconnect()
     }
 
@@ -341,6 +344,10 @@ class JMRingManager private constructor(private val context: Context) :
     }
 
     override fun onConnectFail() {
+        if (isManualDisconnect) {
+            Log.i(TAG, "Connect fail ignored due to manual disconnect")
+            return
+        }
         // Demo SDK behavior: immediately retry connection (see demo MainActivity line 184)
         connectionRetries++
         if (connectionRetries <= MAX_RETRIES) {
