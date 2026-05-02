@@ -1,0 +1,37 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background (Optional, but keeping it black per user design) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M0,0h108v108h-108z" />
+
+    <!-- Outer Circle -->
+    <path
+        android:strokeColor="#B6FF00"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:pathData="M54,54m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0" />
+
+    <!-- 'ip' Ligature -->
+    <!-- Shared Stem for i and p -->
+    <path
+        android:fillColor="#B6FF00"
+        android:pathData="M44,38 L48,38 L48,72 L44,72 Z" />
+    
+    <!-- Dot for 'i' -->
+    <path
+        android:fillColor="#B6FF00"
+        android:pathData="M46,31m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0" />
+        
+    <!-- Bowl for 'p' -->
+    <path
+        android:strokeColor="#B6FF00"
+        android:strokeWidth="4"
+        android:fillColor="#00000000"
+        android:pathData="M48,55a14,14 0,1 1,0,0.1z" />
+        
+</vector>
