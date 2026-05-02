@@ -24,7 +24,9 @@ class DashboardViewModel(
     private val ringRepository: IRingRepository,
     private val fitnessRepository: IFitnessRepository,
     private val stepRepository: StepRepository,
-    private val settingsRepository: com.dkgs.innerpulse.domain.repository.ISettingsRepository
+    private val settingsRepository: com.dkgs.innerpulse.domain.repository.ISettingsRepository,
+    private val moodRepository: com.dkgs.innerpulse.data.repository.MoodRepository,
+    private val meditationRepository: com.dkgs.innerpulse.domain.repository.IMeditationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -109,6 +111,22 @@ class DashboardViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            meditationRepository.getTotalMinutes().collect { minutes ->
+                _uiState.update { state ->
+                    state.copy(meditationMinutes = minutes)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            moodRepository.getChartDataFlow(7).collect { moodTrend ->
+                _uiState.update { state ->
+                    state.copy(weeklyMoodTrend = moodTrend)
+                }
+            }
+        }
     }
 
     val stepTrackingSupported: StateFlow<Boolean> = stepRepository.phoneStepDataSource.isSupported
@@ -122,9 +140,6 @@ class DashboardViewModel(
         stepRepository.phoneStepDataSource.stopListening()
     }
 
-    /**
-     * Load local fitness data (daily summary, etc.)
-     */
     private fun loadFitnessData() {
         viewModelScope.launch {
             try {

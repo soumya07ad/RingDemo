@@ -7,6 +7,7 @@ import com.dkgs.innerpulse.domain.model.DailyHealthSummary
 
 import com.dkgs.innerpulse.domain.model.FirmwareInfo
 import com.dkgs.innerpulse.domain.model.SleepData
+import com.dkgs.innerpulse.data.repository.MoodDayAggregate
 
 /**
  * UI State for the Dashboard screen.
@@ -44,6 +45,10 @@ data class DashboardUiState(
 
     // Daily summary
     val dailySummary: DailyHealthSummary = DailyHealthSummary(),
+    
+    // Insights & Mood
+    val weeklyMoodTrend: List<MoodDayAggregate> = emptyList(),
+    val meditationMinutes: Int = 0,
 
     // Loading / error
     val isLoading: Boolean = false,

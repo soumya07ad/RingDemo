@@ -18,6 +18,9 @@ interface MoodDao {
     @Query("SELECT * FROM mood_entries WHERE date >= :startDate AND date <= :endDate ORDER BY date ASC, timestamp ASC")
     suspend fun getMoodsBetween(startDate: String, endDate: String): List<MoodEntry>
 
+    @Query("SELECT * FROM mood_entries WHERE date >= :startDate AND date <= :endDate ORDER BY date ASC, timestamp ASC")
+    fun getMoodsBetweenFlow(startDate: String, endDate: String): Flow<List<MoodEntry>>
+
     @Query("SELECT * FROM mood_entries ORDER BY timestamp DESC")
     fun getAllMoods(): Flow<List<MoodEntry>>
 }
