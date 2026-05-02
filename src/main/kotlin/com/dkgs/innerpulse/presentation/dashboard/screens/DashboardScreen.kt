@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.dkgs.innerpulse.MockData
 import com.dkgs.innerpulse.PreviewData
 import com.dkgs.innerpulse.presentation.dashboard.DashboardUiState
 import com.dkgs.innerpulse.presentation.dashboard.DashboardViewModel
