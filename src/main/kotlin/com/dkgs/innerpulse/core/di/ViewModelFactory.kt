@@ -32,7 +32,9 @@ class AppViewModelFactory(private val container: AppContainer) : ViewModelProvid
                     ringRepository = container.ringRepository,
                     fitnessRepository = container.fitnessLocalRepository,
                     stepRepository = container.stepRepository,
-                    settingsRepository = container.settingsRepository
+                    settingsRepository = container.settingsRepository,
+                    moodRepository = container.moodRepository,
+                    meditationRepository = container.meditationLocalRepository
                 ) as T
 
 

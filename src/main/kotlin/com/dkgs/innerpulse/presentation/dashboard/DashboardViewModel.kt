@@ -24,7 +24,9 @@ class DashboardViewModel(
     private val ringRepository: IRingRepository,
     private val fitnessRepository: IFitnessRepository,
     private val stepRepository: StepRepository,
-    private val settingsRepository: com.dkgs.innerpulse.domain.repository.ISettingsRepository
+    private val settingsRepository: com.dkgs.innerpulse.domain.repository.ISettingsRepository,
+    private val moodRepository: com.dkgs.innerpulse.data.repository.MoodRepository,
+    private val meditationRepository: com.dkgs.innerpulse.domain.repository.IMeditationRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DashboardUiState())
@@ -109,6 +111,14 @@ class DashboardViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            meditationRepository.getTotalMinutes().collect { minutes ->
+                _uiState.update { state ->
+                    state.copy(meditationMinutes = minutes)
+                }
+            }
+        }
     }
 
     val stepTrackingSupported: StateFlow<Boolean> = stepRepository.phoneStepDataSource.isSupported
@@ -122,15 +132,16 @@ class DashboardViewModel(
         stepRepository.phoneStepDataSource.stopListening()
     }
 
-    /**
-     * Load local fitness data (daily summary, etc.)
-     */
     private fun loadFitnessData() {
         viewModelScope.launch {
             try {
                 val summary = fitnessRepository.getDailySummary()
+                val moodTrend = moodRepository.getChartData(7)
                 _uiState.update { state ->
-                    state.copy(dailySummary = summary)
+                    state.copy(
+                        dailySummary = summary,
+                        weeklyMoodTrend = moodTrend
+                    )
                 }
             } catch (e: Exception) {
                 // Non-critical, dashboard still works with ring data

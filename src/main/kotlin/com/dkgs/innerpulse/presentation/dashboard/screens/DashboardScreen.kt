@@ -502,17 +502,28 @@ fun DashboardScreenWithHeader(
                 }
 
                 // Daily Summary
-                DailySummaryCard()
+                DailySummaryCard(
+                    distanceMeters = state.distance,
+                    activeMinutes = state.dailySummary.activeMinutes,
+                    avgHeartRate = if (state.heartRate > 0) state.heartRate else state.dailySummary.heartRateAvg,
+                    sleepScore = state.sleepData?.quality ?: 0
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Weekly Emotions Chart
-                WeeklyEmotionsChart()
+                WeeklyEmotionsChart(moodTrend = state.weeklyMoodTrend)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Daily Insights
-                DailyInsightsCard()
+                DailyInsightsCard(
+                    activeMinutes = state.dailySummary.activeMinutes,
+                    caloriesBurned = state.calories,
+                    meditationMinutes = state.meditationMinutes,
+                    stepsTaken = state.steps,
+                    avgHeartRate = state.heartRate
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -602,17 +613,24 @@ private fun HeroDashboardHeader(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-fun WeeklyEmotionsChart() {
+fun WeeklyEmotionsChart(moodTrend: List<com.dkgs.innerpulse.data.repository.MoodDayAggregate>) {
     val isDark = AppColors.isDark
-    val moodData = listOf(
-        Triple("Mon", 65f, "Good"),
-        Triple("Tue", 72f, "Great"),
-        Triple("Wed", 58f, "Okay"),
-        Triple("Thu", 85f, "Exc."),
-        Triple("Fri", 78f, "Great"),
-        Triple("Sat", 92f, "Exc."),
-        Triple("Sun", 75f, "Great")
-    )
+    
+    val moodData = if (moodTrend.isNotEmpty() && moodTrend.any { it.entries.isNotEmpty() }) {
+        moodTrend.map {
+            Triple(it.dateLabel, it.avgScore, if (it.avgScore >= 80) "Exc." else if (it.avgScore >= 60) "Great" else "Okay")
+        }
+    } else {
+        listOf(
+            Triple("Mon", 0f, "N/A"),
+            Triple("Tue", 0f, "N/A"),
+            Triple("Wed", 0f, "N/A"),
+            Triple("Thu", 0f, "N/A"),
+            Triple("Fri", 0f, "N/A"),
+            Triple("Sat", 0f, "N/A"),
+            Triple("Sun", 0f, "N/A")
+        )
+    }
 
     val animProgress = remember { Animatable(0f) }
     LaunchedEffect(Unit) {
@@ -768,14 +786,20 @@ fun WeeklyEmotionsChart() {
 }
 
 @Composable
-fun DailyInsightsCard() {
+fun DailyInsightsCard(
+    activeMinutes: Int,
+    caloriesBurned: Int,
+    meditationMinutes: Int,
+    stepsTaken: Int,
+    avgHeartRate: Int
+) {
     data class Insight(val icon: ImageVector, val label: String, val value: String, val color: Color)
     val insights = listOf(
-        Insight(Icons.Rounded.ElectricBolt, "Active Time",     "45 mins",  NeonCyan),
-        Insight(Icons.Rounded.LocalFireDepartment, "Calories Burned",  "524 kcal", NeonOrange),
-        Insight(Icons.Rounded.SelfImprovement, "Meditation",      "12 mins",  PrimaryPurple),
-        Insight(Icons.Rounded.DirectionsRun, "Steps Taken",     "8,432",    NeonGreen),
-        Insight(Icons.Rounded.Favorite, "Heart Rate Avg",  "72 bpm",   NeonPink)
+        Insight(Icons.Rounded.ElectricBolt, "Active Time", if (activeMinutes > 0) "$activeMinutes mins" else "--", NeonCyan),
+        Insight(Icons.Rounded.LocalFireDepartment, "Calories Burned", if (caloriesBurned > 0) "$caloriesBurned kcal" else "--", NeonOrange),
+        Insight(Icons.Rounded.SelfImprovement, "Meditation", if (meditationMinutes > 0) "$meditationMinutes mins" else "--", PrimaryPurple),
+        Insight(Icons.Rounded.DirectionsRun, "Steps Taken", if (stepsTaken > 0) "%,d".format(stepsTaken) else "--", NeonGreen),
+        Insight(Icons.Rounded.Favorite, "Heart Rate Avg", if (avgHeartRate > 0) "$avgHeartRate bpm" else "--", NeonPink)
     )
 
     // 3D Glass card
@@ -934,7 +958,12 @@ fun PremiumBatteryCard(battery: Int, isCharging: Boolean = false) {
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-fun DailySummaryCard() {
+fun DailySummaryCard(
+    distanceMeters: Int,
+    activeMinutes: Int,
+    avgHeartRate: Int,
+    sleepScore: Int
+) {
     MetricGlassCard(modifier = Modifier.padding(horizontal = 0.dp)) {
         Text(
             text = "DAILY SUMMARY",
@@ -944,13 +973,17 @@ fun DailySummaryCard() {
         )
         Spacer(modifier = Modifier.height(16.dp))
         
-        SummaryRow(icon = Icons.Rounded.DirectionsRun, label = "Distance", value = "5.2 km")
+        val distanceStr = if (distanceMeters > 0) String.format(java.util.Locale.US, "%.1f km", distanceMeters / 1000f) else "-- km"
+        SummaryRow(icon = Icons.Rounded.DirectionsRun, label = "Distance", value = distanceStr)
         DividerRow()
-        SummaryRow(icon = Icons.Rounded.Timer, label = "Active Time", value = "1h 23m")
+        val activeStr = if (activeMinutes > 0) "${activeMinutes / 60}h ${activeMinutes % 60}m" else "--"
+        SummaryRow(icon = Icons.Rounded.Timer, label = "Active Time", value = activeStr)
         DividerRow()
-        SummaryRow(icon = Icons.Rounded.Favorite, label = "Avg Heart Rate", value = "68 bpm")
+        val hrStr = if (avgHeartRate > 0) "$avgHeartRate bpm" else "--"
+        SummaryRow(icon = Icons.Rounded.Favorite, label = "Avg Heart Rate", value = hrStr)
         DividerRow()
-        SummaryRow(icon = Icons.Rounded.Bedtime, label = "Sleep Score", value = "85%")
+        val sleepStr = if (sleepScore > 0) "$sleepScore%" else "--"
+        SummaryRow(icon = Icons.Rounded.Bedtime, label = "Sleep Score", value = sleepStr)
     }
 }
 

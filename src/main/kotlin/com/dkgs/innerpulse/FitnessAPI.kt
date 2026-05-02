@@ -81,9 +81,9 @@ class FitnessAPI(context: Context) {
     val stepData: State<StepData> = _stepData
     
     fun getSteps(): StepData {
-        val steps = MockData.steps
-        val goal = 10000
-        val progress = steps.toFloat() / goal
+        val steps = sharedPreferences.getInt("daily_steps", 0)
+        val goal = sharedPreferences.getInt("step_goal", 10000)
+        val progress = if (goal > 0) steps.toFloat() / goal else 0f
         return StepData(steps, goal, progress, System.currentTimeMillis()).also {
             _stepData.value = it
         }
@@ -106,9 +106,9 @@ class FitnessAPI(context: Context) {
     val calorieData: State<CalorieData> = _calorieData
     
     fun getCalories(): CalorieData {
-        val calories = MockData.calories
-        val goal = 750
-        val progress = calories.toFloat() / goal
+        val calories = sharedPreferences.getInt("daily_calories", 0)
+        val goal = sharedPreferences.getInt("calorie_goal", 750)
+        val progress = if (goal > 0) calories.toFloat() / goal else 0f
         return CalorieData(calories, goal, progress, System.currentTimeMillis()).also {
             _calorieData.value = it
         }
@@ -152,10 +152,10 @@ class FitnessAPI(context: Context) {
     val heartRateData: State<HeartRateData> = _heartRateData
     
     fun getHeartRate(): HeartRateData {
-        val currentBPM = MockData.heartRate
-        val avgBPM = MockData.heartRate
-        val minBPM = MockData.heartRate - 10
-        val maxBPM = MockData.heartRate + 15
+        val currentBPM = sharedPreferences.getInt("current_heart_rate", 0)
+        val avgBPM = sharedPreferences.getInt("average_heart_rate", 0)
+        val minBPM = sharedPreferences.getInt("min_heart_rate", 0)
+        val maxBPM = sharedPreferences.getInt("max_heart_rate", 0)
         return HeartRateData(currentBPM, avgBPM, minBPM, maxBPM, System.currentTimeMillis()).also {
             _heartRateData.value = it
         }
@@ -222,12 +222,17 @@ class FitnessAPI(context: Context) {
     
     // Daily Summary API (Local)
     fun getDailySummary(date: String = getTodayDate()): DailySummary {
-        val steps = MockData.steps
-        val calories = MockData.calories
-        val avgHeartRate = MockData.heartRate
-        val activeTime = MockData.workoutMinutes
-        val waterIntake = 6
-        val sleepDuration = (MockData.sleepHours * 60).toInt()
+        val steps = sharedPreferences.getInt("daily_steps", 0)
+        val calories = sharedPreferences.getInt("daily_calories", 0)
+        val avgHeartRate = sharedPreferences.getInt("average_heart_rate", 0)
+        
+        // Sum up workout duration for active time
+        val todayWorkouts = getWorkoutsByDate(date)
+        val calculatedActiveTime = todayWorkouts.sumOf { it.duration }
+        val activeTime = sharedPreferences.getInt("active_time_$date", calculatedActiveTime)
+        
+        val waterIntake = sharedPreferences.getInt("water_intake_$date", 0)
+        val sleepDuration = sharedPreferences.getInt("sleep_duration_$date", 0)
         
         return DailySummary(date, steps, calories, avgHeartRate, activeTime, waterIntake, sleepDuration)
     }
