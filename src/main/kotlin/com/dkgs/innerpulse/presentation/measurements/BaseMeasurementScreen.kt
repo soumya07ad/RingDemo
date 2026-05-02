@@ -30,6 +30,7 @@ fun BaseMeasurementScreen(
     onDone: () -> Unit,
     accentColor: Color,
     gradientColors: List<Color>,
+    showCircularProgress: Boolean = true,
     animationContent: @Composable (Float) -> Unit
 ) {
     Box(
@@ -85,29 +86,31 @@ fun BaseMeasurementScreen(
                 modifier = Modifier.size(280.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Circular Progress Background
-                CircularProgressIndicator(
-                    progress = { 1f },
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.White.copy(alpha = 0.05f),
-                    strokeWidth = 8.dp,
-                    trackColor = Color.Transparent,
-                )
-
-                // Active Progress
                 val animatedProgress by animateFloatAsState(
                     targetValue = state.progress,
                     animationSpec = tween(durationMillis = 500, easing = LinearEasing),
                     label = "Progress"
                 )
 
-                CircularProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier.fillMaxSize(),
-                    color = accentColor,
-                    strokeWidth = 8.dp,
-                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
-                )
+                if (showCircularProgress) {
+                    // Circular Progress Background
+                    CircularProgressIndicator(
+                        progress = { 1f },
+                        modifier = Modifier.fillMaxSize(),
+                        color = Color.White.copy(alpha = 0.05f),
+                        strokeWidth = 8.dp,
+                        trackColor = Color.Transparent,
+                    )
+
+                    // Active Progress
+                    CircularProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.fillMaxSize(),
+                        color = accentColor,
+                        strokeWidth = 8.dp,
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                    )
+                }
 
                 // Custom Animation Content
                 animationContent(animatedProgress)
@@ -155,12 +158,14 @@ fun BaseMeasurementScreen(
                             color = Color.White,
                             fontWeight = FontWeight.Medium
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${(state.progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = accentColor.copy(alpha = 0.8f)
-                        )
+                        if (showCircularProgress) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "${(state.progress * 100).toInt()}%",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = accentColor.copy(alpha = 0.8f)
+                            )
+                        }
                     }
                 }
             }

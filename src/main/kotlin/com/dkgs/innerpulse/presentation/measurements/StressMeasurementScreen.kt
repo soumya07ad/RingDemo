@@ -12,6 +12,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.dkgs.innerpulse.ui.theme.PrimaryPurple
 import com.dkgs.innerpulse.ui.theme.NeonPink
+import com.dkgs.innerpulse.ui.components.NeuralOrbAnimation
+import androidx.compose.foundation.layout.fillMaxSize
 
 @Composable
 fun StressMeasurementScreen(
@@ -29,25 +31,12 @@ fun StressMeasurementScreen(
         onDone = onNavigateBack,
         accentColor = PrimaryPurple,
         gradientColors = listOf(PrimaryPurple, NeonPink),
+        showCircularProgress = false,
         animationContent = { progress ->
-            val infiniteTransition = rememberInfiniteTransition(label = "Zen")
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = 0.3f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "Alpha"
-            )
-
-            Icon(
-                imageVector = Icons.Default.Face,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(120.dp)
-                    .alpha(if (state.isFinished) 1f else alpha),
-                tint = PrimaryPurple
+            NeuralOrbAnimation(
+                modifier = Modifier.fillMaxSize(),
+                progress = progress,
+                isFinished = state.isFinished
             )
         }
     )
