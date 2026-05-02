@@ -3,6 +3,7 @@ package com.dkgs.innerpulse.data.repository
 import com.dkgs.innerpulse.data.local.dao.MoodDao
 import com.dkgs.innerpulse.data.local.entity.MoodEntry
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
@@ -71,6 +72,31 @@ class MoodRepository(private val dao: MoodDao) {
                 avgScore = avg,
                 entries = dayMoods
             )
+        }
+    }
+
+    fun getChartDataFlow(days: Int): Flow<List<MoodDayAggregate>> {
+        val endDate = LocalDate.now()
+        val startDate = endDate.minusDays((days - 1).toLong())
+        val startStr = startDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        val endStr = endDate.format(DateTimeFormatter.ISO_LOCAL_DATE)
+        
+        val formatter = DateTimeFormatter.ofPattern("E")
+        
+        return dao.getMoodsBetweenFlow(startStr, endStr).map { moods ->
+            val grouped = moods.groupBy { it.date }
+            (0 until days).map { i ->
+                val date = startDate.plusDays(i.toLong())
+                val dateStr = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                val dayMoods = grouped[dateStr] ?: emptyList()
+                val avg = if (dayMoods.isNotEmpty()) dayMoods.map { it.score }.average().toFloat() else 0f
+                MoodDayAggregate(
+                    date = dateStr,
+                    dateLabel = date.format(formatter),
+                    avgScore = avg,
+                    entries = dayMoods
+                )
+            }
         }
     }
 

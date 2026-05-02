@@ -138,9 +138,6 @@ fun DashboardRoute(
         onSyncSleep = {
             navController?.navigate(Screen.MeasureScore.route)
         },
-        onSyncAllData = {
-            viewModel.syncAllData()
-        },
         currentTheme = currentTheme,
         onThemeChange = { themeViewModel.setTheme(it) },
         isUsingPhone = isUsingPhone,
@@ -160,7 +157,6 @@ fun DashboardScreenWithHeader(
     onMeasureSpO2: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onSyncSleep: () -> Unit = {},
-    onSyncAllData: () -> Unit = {},
     currentTheme: AppTheme = AppTheme.SYSTEM,
     onThemeChange: (AppTheme) -> Unit = {},
     isUsingPhone: Boolean = false,
@@ -531,15 +527,6 @@ fun DashboardScreenWithHeader(
                     FirmwareCard(firmwareInfo = it)
                 }
                 
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                NeonButton(
-                    text = "SYNC ALL DATA / GET SCORES",
-                    onClick = onSyncAllData,
-                    modifier = Modifier.fillMaxWidth().height(48.dp),
-                    colors = listOf(PrimaryPurple, NeonBlue)
-                )
-
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }

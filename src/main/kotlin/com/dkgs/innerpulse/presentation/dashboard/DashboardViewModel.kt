@@ -119,6 +119,14 @@ class DashboardViewModel(
                 }
             }
         }
+
+        viewModelScope.launch {
+            moodRepository.getChartDataFlow(7).collect { moodTrend ->
+                _uiState.update { state ->
+                    state.copy(weeklyMoodTrend = moodTrend)
+                }
+            }
+        }
     }
 
     val stepTrackingSupported: StateFlow<Boolean> = stepRepository.phoneStepDataSource.isSupported
@@ -136,12 +144,8 @@ class DashboardViewModel(
         viewModelScope.launch {
             try {
                 val summary = fitnessRepository.getDailySummary()
-                val moodTrend = moodRepository.getChartData(7)
                 _uiState.update { state ->
-                    state.copy(
-                        dailySummary = summary,
-                        weeklyMoodTrend = moodTrend
-                    )
+                    state.copy(dailySummary = summary)
                 }
             } catch (e: Exception) {
                 // Non-critical, dashboard still works with ring data
