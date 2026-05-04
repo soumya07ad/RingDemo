@@ -75,10 +75,19 @@ class AppNavigationViewModel(
         val list = mutableListOf(
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
-            android.Manifest.permission.BODY_SENSORS,
             android.Manifest.permission.ACTIVITY_RECOGNITION,
             android.Manifest.permission.RECORD_AUDIO
         )
+
+        // Android 16 (Baklava) Granular Health Permissions
+        if (android.os.Build.VERSION.SDK_INT >= 36) {
+            list.add("android.permission.health.READ_HEART_RATE")
+            list.add("android.permission.health.READ_OXYGEN_SATURATION")
+            list.add("android.permission.health.READ_SKIN_TEMPERATURE")
+            list.add("android.permission.ACCESS_LOCAL_NETWORK")
+        } else {
+            list.add(android.Manifest.permission.BODY_SENSORS)
+        }
         
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             list.add(android.Manifest.permission.BLUETOOTH_SCAN)
