@@ -35,9 +35,8 @@ fun GlobalPermissionScreen(
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
-        val allGranted = results.values.all { it }
-        viewModel.onPermissionsResult(allGranted)
-        if (allGranted) onAllPermissionsGranted()
+        viewModel.onPermissionsResult(results)
+        if (viewModel.checkAllPermissions()) onAllPermissionsGranted()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -137,7 +136,7 @@ fun GlobalPermissionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = onAllPermissionsGranted) {
+            TextButton(onClick = { viewModel.skipPermissions() }) {
                 Text(
                     "I'll do this later",
                     color = Color.White.copy(alpha = 0.5f),

@@ -10,7 +10,7 @@
     <!-- Splash Screen Theme (used only for launch) -->
     <style name="Theme.FitnessApp.Starting" parent="Theme.SplashScreen">
         <!-- Icon drawable -->
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_premium_logo</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
         <!-- Background color of the splash screen -->
         <item name="windowSplashScreenBackground">#050508</item>
         <!-- Duration the splash icon is shown -->

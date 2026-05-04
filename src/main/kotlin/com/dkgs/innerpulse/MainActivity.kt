@@ -144,7 +144,7 @@ fun AppNavigationFlow(
                 }
             )
         }
-        !navState.permissionsGranted -> {
+        !navState.permissionsGranted && !navState.permissionsSkipped -> {
             com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
                 viewModel = navViewModel,
                 onAllPermissionsGranted = { 

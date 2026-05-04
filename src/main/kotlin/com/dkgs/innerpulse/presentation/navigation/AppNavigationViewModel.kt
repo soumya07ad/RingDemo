@@ -18,6 +18,7 @@ import kotlinx.coroutines.tasks.await
 data class AppNavigationUiState(
     val userLoggedIn: Boolean = false,
     val permissionsGranted: Boolean = false,
+    val permissionsSkipped: Boolean = false,
     val setupComplete: Boolean = false,
     val isLoading: Boolean = true
 )
@@ -82,12 +83,16 @@ class AppNavigationViewModel(
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             list.add(android.Manifest.permission.BLUETOOTH_SCAN)
             list.add(android.Manifest.permission.BLUETOOTH_CONNECT)
+            list.add(android.Manifest.permission.BLUETOOTH_ADVERTISE)
         }
         
-        // Storage permissions for reports/logs
+        // Notifications permission for Android 13+
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            // Android 13+ doesn't need generic storage but specific media ones if used
-        } else {
+            list.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        // Storage permissions for older Android versions
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
             list.add(android.Manifest.permission.READ_EXTERNAL_STORAGE)
             list.add(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
         }
@@ -97,14 +102,36 @@ class AppNavigationViewModel(
 
     fun checkAllPermissions(): Boolean {
         val context = com.dkgs.innerpulse.FitnessApplication.getInstance()
-        return getGlobalPermissions().all {
+        val permissions = getGlobalPermissions()
+        
+        // On Android 12+, ACCESS_FINE_LOCATION might be denied while ACCESS_COARSE_LOCATION is granted (Approximate location).
+        // We consider it "granted enough" to proceed, though some features might be limited.
+        val locationGranted = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == 
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+        } else {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == 
+                    android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
+
+        val othersGranted = permissions.filter { 
+            it != android.Manifest.permission.ACCESS_FINE_LOCATION && 
+            it != android.Manifest.permission.ACCESS_COARSE_LOCATION 
+        }.all {
             androidx.core.content.ContextCompat.checkSelfPermission(context, it) == 
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         }
+
+        return locationGranted && othersGranted
     }
 
-    fun onPermissionsResult(allGranted: Boolean) {
+    fun onPermissionsResult(results: Map<String, Boolean>) {
+        val allGranted = checkAllPermissions()
         _uiState.update { it.copy(permissionsGranted = allGranted) }
+    }
+
+    fun skipPermissions() {
+        _uiState.update { it.copy(permissionsSkipped = true) }
     }
 
     fun refreshPermissionStatus() {
