@@ -33,10 +33,12 @@ fun BaseMeasurementScreen(
     showCircularProgress: Boolean = true,
     animationContent: @Composable (Float) -> Unit
 ) {
+    val isDark = AppColors.isDark
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF050508)) // Cinematic deep dark
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Decorative background glow
         Box(
@@ -74,7 +76,11 @@ fun BaseMeasurementScreen(
                 
                 if (!state.isFinished) {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancel", tint = Color.White)
+                        Icon(
+                            Icons.Default.Close, 
+                            contentDescription = "Cancel", 
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -97,7 +103,7 @@ fun BaseMeasurementScreen(
                     CircularProgressIndicator(
                         progress = { 1f },
                         modifier = Modifier.fillMaxSize(),
-                        color = Color.White.copy(alpha = 0.05f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                         strokeWidth = 8.dp,
                         trackColor = Color.Transparent,
                     )
@@ -132,7 +138,7 @@ fun BaseMeasurementScreen(
                             Text(
                                 text = state.resultValue,
                                 style = MaterialTheme.typography.displayLarge,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -155,7 +161,7 @@ fun BaseMeasurementScreen(
                         Text(
                             text = state.statusText,
                             style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         )
                         if (showCircularProgress) {

@@ -591,9 +591,8 @@ private fun JournalInputDialog(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF0F8FF), Color.White)
-                    )
+                    if (AppColors.isDark) androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surface)
+                    else Brush.verticalGradient(listOf(Color(0xFFF0F8FF), Color.White))
                 )
                 .border(1.dp, PremiumGlassBorder, RoundedCornerShape(24.dp))
                 .padding(24.dp)
@@ -604,7 +603,7 @@ private fun JournalInputDialog(
                     text = "What made you feel ${uiState.dialogEmotion.lowercase()}?",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1A1A1A)
+                    color = if (AppColors.isDark) MaterialTheme.colorScheme.onSurface else Color(0xFF1A1A1A)
                 )
                 Spacer(Modifier.height(20.dp))
 
@@ -733,7 +732,7 @@ private fun JournalInputDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
-                            .background(Color(0xFFF1F5F9))
+                            .background(if (AppColors.isDark) MaterialTheme.colorScheme.surfaceVariant else Color(0xFFF1F5F9))
                             .padding(12.dp)
                     ) {
                         Row(
