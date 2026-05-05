@@ -8,7 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dkgs.innerpulse.ui.components.CinematicBackground
@@ -25,6 +26,8 @@ import com.dkgs.innerpulse.ui.components.NeonGlassCard
 import com.dkgs.innerpulse.ui.theme.NeonCyan
 import com.dkgs.innerpulse.ui.theme.NeonPurple
 import com.dkgs.innerpulse.ui.theme.PrimaryPurple
+import com.dkgs.innerpulse.ui.theme.AppColors
+import com.dkgs.innerpulse.ui.theme.FitnessAppTheme
 
 @Composable
 fun GlobalPermissionScreen(
@@ -35,10 +38,22 @@ fun GlobalPermissionScreen(
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { results ->
-        val allGranted = results.values.all { it }
-        viewModel.onPermissionsResult(allGranted)
-        if (allGranted) onAllPermissionsGranted()
+        viewModel.onPermissionsResult(results)
+        if (viewModel.checkAllPermissions()) onAllPermissionsGranted()
     }
+
+    GlobalPermissionContent(
+        onGrantClick = { launcher.launch(permissions) },
+        onSkipClick = { viewModel.skipPermissions() }
+    )
+}
+
+@Composable
+fun GlobalPermissionContent(
+    onGrantClick: () -> Unit = {},
+    onSkipClick: () -> Unit = {}
+) {
+    val isDark = AppColors.isDark
 
     Box(modifier = Modifier.fillMaxSize()) {
         CinematicBackground()
@@ -59,7 +74,10 @@ fun GlobalPermissionScreen(
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
-                            colors = listOf(NeonCyan.copy(alpha = 0.2f), Color.Transparent)
+                            colors = listOf(
+                                (if (isDark) NeonCyan else MaterialTheme.colorScheme.primary).copy(alpha = 0.2f),
+                                Color.Transparent
+                            )
                         )
                     ),
                 contentAlignment = Alignment.Center
@@ -67,7 +85,7 @@ fun GlobalPermissionScreen(
                 Icon(
                     imageVector = Icons.Default.Shield,
                     contentDescription = null,
-                    tint = NeonCyan,
+                    tint = if (isDark) NeonCyan else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(56.dp)
                 )
             }
@@ -77,7 +95,7 @@ fun GlobalPermissionScreen(
             Text(
                 text = "APP PERMISSIONS",
                 style = MaterialTheme.typography.labelLarge,
-                color = NeonCyan,
+                color = if (isDark) NeonCyan else MaterialTheme.colorScheme.primary,
                 letterSpacing = 4.sp
             )
             
@@ -86,7 +104,7 @@ fun GlobalPermissionScreen(
             Text(
                 text = "Unlock Full Potential",
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -96,7 +114,7 @@ fun GlobalPermissionScreen(
             Text(
                 text = "InnerPulse needs access to your phone's sensors and Bluetooth to track your health metrics and sync with your smart ring.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.85f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -131,16 +149,16 @@ fun GlobalPermissionScreen(
 
             NeonButton(
                 text = "GRANT ALL PERMISSIONS",
-                onClick = { launcher.launch(permissions) },
+                onClick = onGrantClick,
                 colors = listOf(PrimaryPurple, NeonPurple)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = onAllPermissionsGranted) {
+            TextButton(onClick = onSkipClick) {
                 Text(
                     "I'll do this later",
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -154,6 +172,7 @@ private fun PermissionSummaryItem(
     title: String,
     description: String
 ) {
+    val isDark = AppColors.isDark
     NeonGlassCard(
         glowColor = NeonCyan,
         showGlow = false,
@@ -167,13 +186,13 @@ private fun PermissionSummaryItem(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(NeonCyan.copy(alpha = 0.1f)),
+                    .background((if (isDark) NeonCyan else MaterialTheme.colorScheme.primary).copy(alpha = 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = NeonCyan,
+                    tint = if (isDark) NeonCyan else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -184,15 +203,35 @@ private fun PermissionSummaryItem(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                 )
             }
         }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// PREVIEWS — Enables UI visualization in Android Studio
+// ═══════════════════════════════════════════════════════════════════════
+
+@Preview(name = "Permissions Dark", showBackground = true, backgroundColor = 0xFF050508)
+@Composable
+fun GlobalPermissionDarkPreview() {
+    FitnessAppTheme(darkTheme = true) {
+        GlobalPermissionContent()
+    }
+}
+
+@Preview(name = "Permissions Light", showBackground = true, backgroundColor = 0xFFF1F5F9)
+@Composable
+fun GlobalPermissionLightPreview() {
+    FitnessAppTheme(darkTheme = false) {
+        GlobalPermissionContent()
     }
 }

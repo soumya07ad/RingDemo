@@ -6,6 +6,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -70,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen BEFORE super.onCreate
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
 
         super.onCreate(savedInstanceState)
 
@@ -84,6 +85,13 @@ class MainActivity : ComponentActivity() {
             val factory = remember { AppContainer.getInstance(this).viewModelFactory }
             val themeViewModel: ThemeViewModel = viewModel(factory = factory)
             val appTheme by themeViewModel.themeState.collectAsState()
+            val navViewModel: AppNavigationViewModel = viewModel(factory = factory)
+            val navState by navViewModel.uiState.collectAsState()
+
+            // Keep the splash screen visible until initial state is loaded
+            splashScreen.setKeepOnScreenCondition {
+                navState.isLoading
+            }
 
             val isDark = when (appTheme) {
                 AppTheme.DARK -> true
@@ -96,7 +104,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    AppNavigationFlow(themeViewModel = themeViewModel)
+                    AppNavigationFlow(
+                        themeViewModel = themeViewModel,
+                        navViewModel = navViewModel
+                    )
                 }
             }
         }
@@ -105,11 +116,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigationFlow(
-    themeViewModel: ThemeViewModel = viewModel()
+    themeViewModel: ThemeViewModel = viewModel(),
+    navViewModel: AppNavigationViewModel
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val factory = remember { AppContainer.getInstance(context).viewModelFactory }
-    val navViewModel: AppNavigationViewModel = viewModel(factory = factory)
     val navState by navViewModel.uiState.collectAsState()
     val navController = rememberNavController()
 
@@ -127,38 +138,36 @@ fun AppNavigationFlow(
         }
     }
 
-    // Don't show anything while loading persistent state
+    // The splash screen handles the loading state natively now.
     if (navState.isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = NeonCyan)
-        }
         return
     }
 
-    when {
-        !navState.userLoggedIn -> {
-            com.dkgs.innerpulse.presentation.auth.screens.AuthNavGraph(
-                viewModel = viewModel(factory = factory),
-                onAuthSuccess = {
-                    navViewModel.onLoginSuccess()
-                }
-            )
-        }
-        !navState.permissionsGranted -> {
-            com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
-                viewModel = navViewModel,
-                onAllPermissionsGranted = { 
-                    // No-op, navState will update automatically via viewModel
-                }
-            )
-        }
-        !navState.setupComplete -> {
-            com.dkgs.innerpulse.presentation.ring.screens.RingSetupRoute(
-                onSetupComplete = { navViewModel.onSetupComplete() },
-                onSkip = { navViewModel.onSkip() }
-            )
-        }
-        else -> {
+    Crossfade(targetState = navState, label = "app_flow") { state ->
+        when {
+            !state.userLoggedIn -> {
+                com.dkgs.innerpulse.presentation.auth.screens.AuthNavGraph(
+                    viewModel = viewModel(factory = factory),
+                    onAuthSuccess = {
+                        navViewModel.onLoginSuccess()
+                    }
+                )
+            }
+            !state.permissionsGranted && !state.permissionsSkipped -> {
+                com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
+                    viewModel = navViewModel,
+                    onAllPermissionsGranted = { 
+                        // State updates automatically
+                    }
+                )
+            }
+            !state.setupComplete -> {
+                com.dkgs.innerpulse.presentation.ring.screens.RingSetupRoute(
+                    onSetupComplete = { navViewModel.onSetupComplete() },
+                    onSkip = { navViewModel.onSkip() }
+                )
+            }
+            else -> {
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.background,
                 bottomBar = { AppBottomNav(navController = navController) }
@@ -344,6 +353,7 @@ fun AppNavigationFlow(
             }
         }
     }
+}
 }
 
 @Composable
@@ -582,36 +592,5 @@ private fun BottomNavItem(
             color = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             letterSpacing = 0.2.sp
         )
-    }
-}
-
-@Composable
-fun FitnessWebView(onLoginSuccess: () -> Unit) {
-    AndroidView(
-        modifier = Modifier.fillMaxSize(),
-        factory = { context ->
-            WebView(context).apply {
-                settings.apply {
-                    javaScriptEnabled = true
-                    mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-                    domStorageEnabled = true
-                    databaseEnabled = true
-                    useWideViewPort = true
-                    loadWithOverviewMode = true
-                }
-                // Add JavaScript bridge for login callback
-                addJavascriptInterface(LoginBridge(onLoginSuccess), "LoginBridge")
-                setBackgroundColor(0xFF050508.toInt())
-                loadUrl("file:///android_asset/index.html?page=login")
-            }
-        }
-    )
-}
-
-// Bridge class for communication between WebView and Kotlin
-class LoginBridge(private val onLoginSuccess: () -> Unit) {
-    @android.webkit.JavascriptInterface
-    fun notifyLoginSuccess() {
-        onLoginSuccess()
     }
 }

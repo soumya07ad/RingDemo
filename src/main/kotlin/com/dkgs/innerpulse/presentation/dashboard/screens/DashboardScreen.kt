@@ -173,14 +173,7 @@ fun DashboardScreenWithHeader(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color(0xFFF8FAFF),  // very light blue-white at top
-                                Color(0xFFF1F5F9)   // light cool grey at bottom
-                            )
-                        )
-                    )
+                    .background(MaterialTheme.colorScheme.background)
             )
         }
 
@@ -634,11 +627,11 @@ fun WeeklyEmotionsChart(moodTrend: List<com.dkgs.innerpulse.data.repository.Mood
             .shadow(elevation = 16.dp, shape = RoundedCornerShape(24.dp), ambientColor = NeonCyan.copy(alpha = 0.25f), spotColor = NeonCyan.copy(alpha = 0.3f))
             .clip(RoundedCornerShape(24.dp))
             .background(
-                AppColors.sectionGradient(NeonCyan)
+                if (AppColors.isDark) AppColors.sectionGradient(NeonCyan) else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surface)
             )
             .border(
                 1.5.dp,
-                AppColors.sectionBorder(NeonCyan),
+                if (AppColors.isDark) AppColors.sectionBorder(NeonCyan) else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                 RoundedCornerShape(24.dp)
             )
             .padding(20.dp)
@@ -740,7 +733,7 @@ fun WeeklyEmotionsChart(moodTrend: List<com.dkgs.innerpulse.data.repository.Mood
                         Text(
                             text = "${value.toInt()}%",
                             fontSize = 10.sp,
-                            color = NeonCyan.copy(alpha = 0.8f),
+                            color = if (isDark) NeonCyan.copy(alpha = 0.8f) else MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -796,7 +789,7 @@ fun DailyInsightsCard(
             .shadow(elevation = 16.dp, shape = RoundedCornerShape(24.dp), ambientColor = PrimaryPurple.copy(alpha = 0.25f), spotColor = PrimaryPurple.copy(alpha = 0.3f))
             .clip(RoundedCornerShape(24.dp))
             .background(
-                AppColors.sectionGradient(PrimaryPurple)
+                if (AppColors.isDark) AppColors.sectionGradient(PrimaryPurple) else androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.surface)
             )
             .border(
                 1.5.dp,

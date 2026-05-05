@@ -667,13 +667,13 @@ fun MeditationTimerScreen(
                             imageVector = it.icon,
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
-                            tint = SkyBlue
+                            tint = if (isDark) SkyBlue else MaterialTheme.colorScheme.primary
                         )
                     } ?: Icon(
                         imageVector = Icons.Rounded.SelfImprovement,
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
-                        tint = SkyBlue
+                        tint = if (isDark) SkyBlue else MaterialTheme.colorScheme.primary
                     )
                     Spacer(Modifier.height(8.dp))
                     
@@ -682,7 +682,11 @@ fun MeditationTimerScreen(
                             text = if (timerState.isRunning) currentPhase else exercise?.name?.uppercase() ?: "BREATHING",
                             fontSize = if (timerState.isRunning) 36.sp else 24.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = if (timerState.isRunning) HighlighterGreen else SkyBlue,
+                            color = if (timerState.isRunning) {
+                                if (isDark) HighlighterGreen else MaterialTheme.colorScheme.primary
+                            } else {
+                                if (isDark) SkyBlue else MaterialTheme.colorScheme.primary
+                            },
                             letterSpacing = 2.sp,
                             textAlign = TextAlign.Center
                         )

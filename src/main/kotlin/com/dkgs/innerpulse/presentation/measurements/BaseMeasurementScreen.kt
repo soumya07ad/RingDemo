@@ -30,12 +30,15 @@ fun BaseMeasurementScreen(
     onDone: () -> Unit,
     accentColor: Color,
     gradientColors: List<Color>,
+    showCircularProgress: Boolean = true,
     animationContent: @Composable (Float) -> Unit
 ) {
+    val isDark = AppColors.isDark
+    
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF050508)) // Cinematic deep dark
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // Decorative background glow
         Box(
@@ -73,7 +76,11 @@ fun BaseMeasurementScreen(
                 
                 if (!state.isFinished) {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.Close, contentDescription = "Cancel", tint = Color.White)
+                        Icon(
+                            Icons.Default.Close, 
+                            contentDescription = "Cancel", 
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             }
@@ -85,29 +92,31 @@ fun BaseMeasurementScreen(
                 modifier = Modifier.size(280.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Circular Progress Background
-                CircularProgressIndicator(
-                    progress = { 1f },
-                    modifier = Modifier.fillMaxSize(),
-                    color = Color.White.copy(alpha = 0.05f),
-                    strokeWidth = 8.dp,
-                    trackColor = Color.Transparent,
-                )
-
-                // Active Progress
                 val animatedProgress by animateFloatAsState(
                     targetValue = state.progress,
                     animationSpec = tween(durationMillis = 500, easing = LinearEasing),
                     label = "Progress"
                 )
 
-                CircularProgressIndicator(
-                    progress = { animatedProgress },
-                    modifier = Modifier.fillMaxSize(),
-                    color = accentColor,
-                    strokeWidth = 8.dp,
-                    strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
-                )
+                if (showCircularProgress) {
+                    // Circular Progress Background
+                    CircularProgressIndicator(
+                        progress = { 1f },
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                        strokeWidth = 8.dp,
+                        trackColor = Color.Transparent,
+                    )
+
+                    // Active Progress
+                    CircularProgressIndicator(
+                        progress = { animatedProgress },
+                        modifier = Modifier.fillMaxSize(),
+                        color = accentColor,
+                        strokeWidth = 8.dp,
+                        strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+                    )
+                }
 
                 // Custom Animation Content
                 animationContent(animatedProgress)
@@ -129,7 +138,7 @@ fun BaseMeasurementScreen(
                             Text(
                                 text = state.resultValue,
                                 style = MaterialTheme.typography.displayLarge,
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontWeight = FontWeight.Black
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -152,15 +161,17 @@ fun BaseMeasurementScreen(
                         Text(
                             text = state.statusText,
                             style = MaterialTheme.typography.headlineSmall,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "${(state.progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = accentColor.copy(alpha = 0.8f)
-                        )
+                        if (showCircularProgress) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "${(state.progress * 100).toInt()}%",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = accentColor.copy(alpha = 0.8f)
+                            )
+                        }
                     }
                 }
             }

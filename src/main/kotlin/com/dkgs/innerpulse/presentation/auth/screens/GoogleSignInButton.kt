@@ -112,9 +112,9 @@ fun GoogleSignInButton(
         border = BorderStroke(1.dp, purpleAccent.copy(alpha = if (enabled) 0.6f else 0.3f)),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = Color.Transparent,
-            contentColor = Color.White,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             disabledContainerColor = Color.Transparent,
-            disabledContentColor = Color.White.copy(alpha = 0.4f)
+            disabledContentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
         )
     ) {
         Row(
@@ -144,17 +144,17 @@ fun OrDivider(modifier: Modifier = Modifier) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
             thickness = 0.5.dp,
-            color = Color.White.copy(alpha = 0.2f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
         )
         Text(
             text = "  or  ",
-            color = Color.White.copy(alpha = 0.5f),
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
             fontSize = 13.sp
         )
         HorizontalDivider(
             modifier = Modifier.weight(1f),
             thickness = 0.5.dp,
-            color = Color.White.copy(alpha = 0.2f)
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
         )
     }
 }
