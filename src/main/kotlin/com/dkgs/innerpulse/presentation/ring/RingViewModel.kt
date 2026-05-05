@@ -148,9 +148,24 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun checkPermissions(context: Context): Boolean {
         val permissions = getRequiredPermissions()
-        val allGranted = permissions.all { permission ->
+        
+        // On Android 12+, we consider location "granted" if EITHER fine or coarse is granted.
+        val locationGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        }
+
+        // Check other permissions (Bluetooth)
+        val othersGranted = permissions.filter { 
+            it != Manifest.permission.ACCESS_FINE_LOCATION && 
+            it != Manifest.permission.ACCESS_COARSE_LOCATION 
+        }.all { permission ->
             ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
         }
+        
+        val allGranted = locationGranted && othersGranted
         
         // Also check if Bluetooth is actually enabled
         val bluetoothEnabled = (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter?.isEnabled == true
@@ -158,11 +173,6 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
         // Check GPS status (Required for Android 11 and below)
         val locationEnabled = isLocationEnabled(context)
         
-        // Log individual permission states for debugging
-        permissions.forEach { perm ->
-            val granted = ContextCompat.checkSelfPermission(context, perm) == PackageManager.PERMISSION_GRANTED
-            Log.d("RingViewModel", "Check Permission: $perm -> ${if (granted) "GRANTED" else "DENIED"}")
-        }
         Log.d("RingViewModel", "Status -> Bluetooth: $bluetoothEnabled, Location Services: $locationEnabled, All Permissions: $allGranted")
         
         val isAndroid11OrBelow = Build.VERSION.SDK_INT <= Build.VERSION_CODES.R
@@ -177,7 +187,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
         
-        return allGranted && bluetoothEnabled && locationEnabled
+        return allGranted && bluetoothEnabled && (if (isAndroid11OrBelow) locationEnabled else true)
     }
 
     /**

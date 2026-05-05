@@ -6,6 +6,7 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -135,30 +136,31 @@ fun AppNavigationFlow(
         return
     }
 
-    when {
-        !navState.userLoggedIn -> {
-            com.dkgs.innerpulse.presentation.auth.screens.AuthNavGraph(
-                viewModel = viewModel(factory = factory),
-                onAuthSuccess = {
-                    navViewModel.onLoginSuccess()
-                }
-            )
-        }
-        !navState.permissionsGranted && !navState.permissionsSkipped -> {
-            com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
-                viewModel = navViewModel,
-                onAllPermissionsGranted = { 
-                    // No-op, navState will update automatically via viewModel
-                }
-            )
-        }
-        !navState.setupComplete -> {
-            com.dkgs.innerpulse.presentation.ring.screens.RingSetupRoute(
-                onSetupComplete = { navViewModel.onSetupComplete() },
-                onSkip = { navViewModel.onSkip() }
-            )
-        }
-        else -> {
+    Crossfade(targetState = navState, label = "app_flow") { state ->
+        when {
+            !state.userLoggedIn -> {
+                com.dkgs.innerpulse.presentation.auth.screens.AuthNavGraph(
+                    viewModel = viewModel(factory = factory),
+                    onAuthSuccess = {
+                        navViewModel.onLoginSuccess()
+                    }
+                )
+            }
+            !state.permissionsGranted && !state.permissionsSkipped -> {
+                com.dkgs.innerpulse.presentation.navigation.GlobalPermissionScreen(
+                    viewModel = navViewModel,
+                    onAllPermissionsGranted = { 
+                        // State updates automatically
+                    }
+                )
+            }
+            !state.setupComplete -> {
+                com.dkgs.innerpulse.presentation.ring.screens.RingSetupRoute(
+                    onSetupComplete = { navViewModel.onSetupComplete() },
+                    onSkip = { navViewModel.onSkip() }
+                )
+            }
+            else -> {
             Scaffold(
                 containerColor = MaterialTheme.colorScheme.background,
                 bottomBar = { AppBottomNav(navController = navController) }

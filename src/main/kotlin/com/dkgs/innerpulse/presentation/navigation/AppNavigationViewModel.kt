@@ -112,10 +112,8 @@ class AppNavigationViewModel(
 
     fun checkAllPermissions(): Boolean {
         val context = com.dkgs.innerpulse.FitnessApplication.getInstance()
-        val permissions = getGlobalPermissions()
         
-        // On Android 12+, ACCESS_FINE_LOCATION might be denied while ACCESS_COARSE_LOCATION is granted (Approximate location).
-        // We consider it "granted enough" to proceed, though some features might be limited.
+        // 1. CRITICAL: Location (Needed for Bluetooth on older versions and some new ones)
         val locationGranted = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == 
                     android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -124,15 +122,27 @@ class AppNavigationViewModel(
                     android.content.pm.PackageManager.PERMISSION_GRANTED
         }
 
-        val othersGranted = permissions.filter { 
-            it != android.Manifest.permission.ACCESS_FINE_LOCATION && 
-            it != android.Manifest.permission.ACCESS_COARSE_LOCATION 
-        }.all {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, it) == 
+        // 2. CRITICAL: Bluetooth (Android 12+)
+        val bluetoothGranted = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_SCAN) == 
+                    android.content.pm.PackageManager.PERMISSION_GRANTED &&
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) == 
                     android.content.pm.PackageManager.PERMISSION_GRANTED
-        }
+        } else true
 
-        return locationGranted && othersGranted
+        // 3. CRITICAL: Body Sensors (Core health tracking)
+        // On Android 16, we consider it granted if EITHER the broad BODY_SENSORS or ALL granular ones are granted.
+        // But for now, we'll just check BODY_SENSORS as the mandatory one to avoid being stuck.
+        val sensorsGranted = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BODY_SENSORS) == 
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        // 4. CRITICAL: Activity Recognition
+        val activityGranted = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) == 
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+
+        // We allow proceeding if all CRITICAL permissions are granted.
+        // Non-critical permissions (Audio, Notifications, Granular Health) are checked but not blocking.
+        return locationGranted && bluetoothGranted && sensorsGranted && activityGranted
     }
 
     fun onPermissionsResult(results: Map<String, Boolean>) {
