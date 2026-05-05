@@ -347,6 +347,7 @@ fun AppNavigationFlow(
         }
     }
 }
+}
 
 @Composable
 fun rememberMeasurementViewModel(type: MeasurementType): MeasurementViewModel {
