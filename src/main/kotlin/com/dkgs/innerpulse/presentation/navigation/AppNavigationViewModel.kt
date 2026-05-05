@@ -113,36 +113,43 @@ class AppNavigationViewModel(
     fun checkAllPermissions(): Boolean {
         val context = com.dkgs.innerpulse.FitnessApplication.getInstance()
         
-        // 1. CRITICAL: Location (Needed for Bluetooth on older versions and some new ones)
-        val locationGranted = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_COARSE_LOCATION) == 
+        val permissions = getGlobalPermissions()
+        val results = mutableMapOf<String, Boolean>()
+        
+        permissions.forEach { perm ->
+            val granted = androidx.core.content.ContextCompat.checkSelfPermission(context, perm) == 
                     android.content.pm.PackageManager.PERMISSION_GRANTED
-        } else {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == 
-                    android.content.pm.PackageManager.PERMISSION_GRANTED
+            results[perm] = granted
+            android.util.Log.d("AppNavVM", "Permission Check: $perm -> ${if (granted) "GRANTED" else "DENIED"}")
         }
+
+        // 1. CRITICAL: Location (Needed for Bluetooth)
+        val locationGranted = results[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
+                             results[android.Manifest.permission.ACCESS_FINE_LOCATION] == true
 
         // 2. CRITICAL: Bluetooth (Android 12+)
         val bluetoothGranted = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_SCAN) == 
-                    android.content.pm.PackageManager.PERMISSION_GRANTED &&
-            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) == 
-                    android.content.pm.PackageManager.PERMISSION_GRANTED
+            results[android.Manifest.permission.BLUETOOTH_SCAN] == true &&
+            results[android.Manifest.permission.BLUETOOTH_CONNECT] == true
         } else true
 
-        // 3. CRITICAL: Body Sensors (Core health tracking)
-        // On Android 16, we consider it granted if EITHER the broad BODY_SENSORS or ALL granular ones are granted.
-        // But for now, we'll just check BODY_SENSORS as the mandatory one to avoid being stuck.
-        val sensorsGranted = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.BODY_SENSORS) == 
-                android.content.pm.PackageManager.PERMISSION_GRANTED
+        // 3. CRITICAL: Sensors (We are more lenient here)
+        val sensorsGranted = results[android.Manifest.permission.BODY_SENSORS] == true
+        
+        // On Android 16, check if ANY granular health permission is granted as a fallback for sensors
+        val healthGranted = if (android.os.Build.VERSION.SDK_INT >= 36) {
+            results["android.permission.health.READ_HEART_RATE"] == true ||
+            results["android.permission.health.READ_OXYGEN_SATURATION"] == true
+        } else false
 
-        // 4. CRITICAL: Activity Recognition
-        val activityGranted = androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACTIVITY_RECOGNITION) == 
-                android.content.pm.PackageManager.PERMISSION_GRANTED
+        // 4. CRITICAL: Activity (We'll make this non-blocking for now if the user is stuck)
+        val activityGranted = results[android.Manifest.permission.ACTIVITY_RECOGNITION] == true
 
-        // We allow proceeding if all CRITICAL permissions are granted.
-        // Non-critical permissions (Audio, Notifications, Granular Health) are checked but not blocking.
-        return locationGranted && bluetoothGranted && sensorsGranted && activityGranted
+        val allCriticalGranted = locationGranted && bluetoothGranted && (sensorsGranted || healthGranted)
+        
+        android.util.Log.d("AppNavVM", "All Critical Granted: $allCriticalGranted (Loc: $locationGranted, BT: $bluetoothGranted, Sensors: $sensorsGranted, Health: $healthGranted)")
+        
+        return allCriticalGranted
     }
 
     fun onPermissionsResult(results: Map<String, Boolean>) {
