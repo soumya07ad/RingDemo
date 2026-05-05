@@ -55,12 +55,14 @@ class AppNavigationViewModel(
             
             val finalToken = tokenManager.getToken()
             val setupCompleteStatus = tokenManager.setupCompleteFlow.first()
+            val skippedStatus = sharedPrefs.getBoolean("permissions_skipped", false)
             val permissionsStatus = checkAllPermissions()
             
             _uiState.update { 
                 it.copy(
                     userLoggedIn = !finalToken.isNullOrEmpty(),
                     permissionsGranted = permissionsStatus,
+                    permissionsSkipped = skippedStatus,
                     setupComplete = setupCompleteStatus,
                     isLoading = false
                 )
@@ -133,21 +135,14 @@ class AppNavigationViewModel(
             results[android.Manifest.permission.BLUETOOTH_CONNECT] == true
         } else true
 
-        // 3. CRITICAL: Sensors (We are more lenient here)
+        // 3. CRITICAL: Sensors
+        // On Android 16, we only require BODY_SENSORS for the core gate.
+        // The granular ones are requested but not mandatory to proceed.
         val sensorsGranted = results[android.Manifest.permission.BODY_SENSORS] == true
-        
-        // On Android 16, check if ANY granular health permission is granted as a fallback for sensors
-        val healthGranted = if (android.os.Build.VERSION.SDK_INT >= 36) {
-            results["android.permission.health.READ_HEART_RATE"] == true ||
-            results["android.permission.health.READ_OXYGEN_SATURATION"] == true
-        } else false
 
-        // 4. CRITICAL: Activity (We'll make this non-blocking for now if the user is stuck)
-        val activityGranted = results[android.Manifest.permission.ACTIVITY_RECOGNITION] == true
-
-        val allCriticalGranted = locationGranted && bluetoothGranted && (sensorsGranted || healthGranted)
+        val allCriticalGranted = locationGranted && bluetoothGranted && sensorsGranted
         
-        android.util.Log.d("AppNavVM", "All Critical Granted: $allCriticalGranted (Loc: $locationGranted, BT: $bluetoothGranted, Sensors: $sensorsGranted, Health: $healthGranted)")
+        android.util.Log.d("AppNavVM", "All Critical Granted: $allCriticalGranted (Loc: $locationGranted, BT: $bluetoothGranted, Sensors: $sensorsGranted)")
         
         return allCriticalGranted
     }
