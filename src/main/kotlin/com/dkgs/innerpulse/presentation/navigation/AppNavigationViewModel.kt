@@ -165,7 +165,10 @@ class AppNavigationViewModel(
     }
 
     fun onLoginSuccess() {
-        _uiState.update { it.copy(userLoggedIn = true, setupComplete = false) }
+        viewModelScope.launch {
+            val isSetup = tokenManager.setupCompleteFlow.first()
+            _uiState.update { it.copy(userLoggedIn = true, setupComplete = isSetup) }
+        }
     }
 
     fun onSetupComplete() {
@@ -185,6 +188,7 @@ class AppNavigationViewModel(
     fun onLogout() {
         viewModelScope.launch {
             tokenManager.clearToken()
+            com.google.firebase.auth.FirebaseAuth.getInstance().signOut()
             _uiState.update { AppNavigationUiState(isLoading = false) }
         }
     }
