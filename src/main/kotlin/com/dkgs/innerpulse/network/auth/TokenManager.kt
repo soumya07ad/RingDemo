@@ -20,6 +20,7 @@ class TokenManager(private val context: Context) {
         private val USER_ID_KEY = stringPreferencesKey("user_id")
         private val PHONE_KEY = stringPreferencesKey("phone_number")
         private val SETUP_COMPLETE_KEY = stringPreferencesKey("setup_complete")
+        private val PERMISSIONS_SKIPPED_KEY = stringPreferencesKey("permissions_skipped")
     }
     
     // Get token as Flow for reactive updates
@@ -30,6 +31,11 @@ class TokenManager(private val context: Context) {
     // Get setup complete as Flow
     val setupCompleteFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[SETUP_COMPLETE_KEY] == "true"
+    }
+
+    // Get permissions skipped as Flow
+    val permissionsSkippedFlow: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[PERMISSIONS_SKIPPED_KEY] == "true"
     }
     
     // Get token synchronously - not recommended, use tokenFlow instead
@@ -48,6 +54,13 @@ class TokenManager(private val context: Context) {
     suspend fun setSetupComplete(complete: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[SETUP_COMPLETE_KEY] = if (complete) "true" else "false"
+        }
+    }
+
+    // Save permissions skipped status
+    suspend fun setPermissionsSkipped(skipped: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PERMISSIONS_SKIPPED_KEY] = if (skipped) "true" else "false"
         }
     }
     
@@ -76,6 +89,7 @@ class TokenManager(private val context: Context) {
             preferences.remove(USER_ID_KEY)
             preferences.remove(PHONE_KEY)
             preferences.remove(SETUP_COMPLETE_KEY)
+            preferences.remove(PERMISSIONS_SKIPPED_KEY)
         }
     }
     

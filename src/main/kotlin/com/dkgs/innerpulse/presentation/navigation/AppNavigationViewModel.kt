@@ -55,7 +55,7 @@ class AppNavigationViewModel(
             
             val finalToken = tokenManager.getToken()
             val setupCompleteStatus = tokenManager.setupCompleteFlow.first()
-            val skippedStatus = sharedPrefs.getBoolean("permissions_skipped", false)
+            val skippedStatus = tokenManager.permissionsSkippedFlow.first()
             val permissionsStatus = checkAllPermissions()
             
             _uiState.update { 
@@ -153,7 +153,10 @@ class AppNavigationViewModel(
     }
 
     fun skipPermissions() {
-        _uiState.update { it.copy(permissionsSkipped = true) }
+        viewModelScope.launch {
+            tokenManager.setPermissionsSkipped(true)
+            _uiState.update { it.copy(permissionsSkipped = true) }
+        }
     }
 
     fun refreshPermissionStatus() {
