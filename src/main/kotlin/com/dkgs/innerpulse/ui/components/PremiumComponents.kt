@@ -319,7 +319,7 @@ fun NeonButton(
                 if (isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = Color.White,
                         strokeWidth = 2.dp
                     )
                     Spacer(modifier = Modifier.width(12.dp))
@@ -330,7 +330,7 @@ fun NeonButton(
                             imageVector = it,
                             contentDescription = null,
                             modifier = Modifier.size(20.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = Color.White
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
@@ -338,7 +338,7 @@ fun NeonButton(
                 Text(
                     text = text,
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                    color = if (enabled) Color.White else Color.White.copy(alpha = 0.5f),
                     letterSpacing = 1.sp
                 )
             }

@@ -85,7 +85,7 @@ fun GlobalPermissionScreen(
             Text(
                 text = "Unlock Full Potential",
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
@@ -95,7 +95,7 @@ fun GlobalPermissionScreen(
             Text(
                 text = "InnerPulse needs access to your phone's sensors and Bluetooth to track your health metrics and sync with your smart ring.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -139,7 +139,7 @@ fun GlobalPermissionScreen(
             TextButton(onClick = { viewModel.skipPermissions() }) {
                 Text(
                     "I'll do this later",
-                    color = Color.White.copy(alpha = 0.5f),
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
@@ -183,13 +183,13 @@ private fun PermissionSummaryItem(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.6f)
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
             }
         }

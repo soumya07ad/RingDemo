@@ -135,12 +135,11 @@ class AppNavigationViewModel(
             results[android.Manifest.permission.BLUETOOTH_CONNECT] == true
         } else true
 
-        // 3. CRITICAL: Sensors
-        // On Android 16, we only require BODY_SENSORS for the core gate.
-        // The granular ones are requested but not mandatory to proceed.
+        // 3. Sensors (Optional for BLE rings)
         val sensorsGranted = results[android.Manifest.permission.BODY_SENSORS] == true
 
-        val allCriticalGranted = locationGranted && bluetoothGranted && sensorsGranted
+        // Only require Location and Bluetooth to proceed to dashboard
+        val allCriticalGranted = locationGranted && bluetoothGranted
         
         android.util.Log.d("AppNavVM", "All Critical Granted: $allCriticalGranted (Loc: $locationGranted, BT: $bluetoothGranted, Sensors: $sensorsGranted)")
         
