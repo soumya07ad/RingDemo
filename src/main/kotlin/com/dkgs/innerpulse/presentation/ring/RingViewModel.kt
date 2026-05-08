@@ -113,7 +113,7 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun getRequiredPermissions(): Array<String> {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            // Android 12+: Match Demo SDK exactly — include location for JMRing SDK
+            // Android 12+: Crrepa SDK requires Bluetooth and Location
             arrayOf(
                 Manifest.permission.BLUETOOTH_SCAN,
                 Manifest.permission.BLUETOOTH_ADVERTISE,
@@ -123,12 +123,14 @@ class RingViewModel(application: Application) : AndroidViewModel(application) {
             )
         } else {
             // Android 11 and below: Need FINE location specifically for BLE scan
-            // We also include legacy Bluetooth permissions just in case the SDK checks for them
+            // Also adding storage permissions as requested by SDK docs
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE
             )
         }
     }

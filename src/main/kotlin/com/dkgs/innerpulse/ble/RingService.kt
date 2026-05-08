@@ -13,7 +13,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.dkgs.innerpulse.MainActivity
 import com.dkgs.innerpulse.R
-import com.dkgs.innerpulse.data.ble.JMRingManager
+import com.dkgs.innerpulse.data.ble.CrrepaRingManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -76,7 +76,7 @@ class RingService : Service() {
             ACTION_STOP -> {
                 Log.i(TAG, "Received STOP action — disconnecting ring and stopping service")
                 // Actually disconnect the BLE ring
-                JMRingManager.getInstance(applicationContext).disconnect()
+                CrrepaRingManager.getInstance(applicationContext).disconnect()
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
@@ -164,7 +164,7 @@ class RingService : Service() {
     // ═══════════════════════════════════
 
     private fun observeConnectionState() {
-        val ringManager = JMRingManager.getInstance(applicationContext)
+        val ringManager = CrrepaRingManager.getInstance(applicationContext)
 
         serviceScope.launch {
             ringManager.connectionState.collectLatest { state ->

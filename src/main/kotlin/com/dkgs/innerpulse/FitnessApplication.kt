@@ -3,16 +3,18 @@ package com.dkgs.innerpulse
 import android.app.Application
 import android.util.Log
 import com.dkgs.innerpulse.core.di.AppContainer
-import com.gps.track.jmring.ble.RingBleUtils
+import com.crrepa.ble.CRPBleClient
 
 /**
  * Application class for one-time initialization
  * 
- * JMRing SDK APPROACH:
- * 1. Official SDK initialized via RingBleUtils.initBle(this)
- * 2. BLE operations handled through JMRing SDK
+ * CRREPA SDK APPROACH:
+ * 1. Official SDK initialized via CRPBleClient.create(this)
+ * 2. BLE operations handled through CrrepaRingManager
  */
 class FitnessApplication : Application() {
+
+    private var bleClient: CRPBleClient? = null
 
     companion object {
         private const val TAG = "FitnessApplication"
@@ -23,6 +25,8 @@ class FitnessApplication : Application() {
         fun getInstance(): FitnessApplication = instance!!
     }
 
+    fun getBleClient(): CRPBleClient? = bleClient
+
     override fun onCreate() {
         super.onCreate()
         instance = this
@@ -31,12 +35,12 @@ class FitnessApplication : Application() {
         AppContainer.initialize(this)
         Log.i(TAG, "✓ MVVM DI Container initialized")
         
-        // Initialize JMRing SDK
-        RingBleUtils.initBle(this)
-        Log.i(TAG, "✓ JMRing SDK initialized")
+        // Initialize Crrepa SDK
+        bleClient = CRPBleClient.create(this)
+        Log.i(TAG, "✓ Crrepa Smart Ring SDK initialized")
         
         Log.i(TAG, "═══════════════════════════════════")
-        Log.i(TAG, "✓ App started — JMRing SDK mode")
+        Log.i(TAG, "✓ App started — Crrepa SDK mode")
         Log.i(TAG, "═══════════════════════════════════")
 
         setupBackgroundSync()
