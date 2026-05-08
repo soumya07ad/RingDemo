@@ -246,7 +246,14 @@ class CrrepaRingManager private constructor(private val context: Context) {
         Log.i(TAG, "Starting SDK BLE scan")
         client.scanDevice(object : CRPScanCallback {
             override fun onScanning(device: CRPScanDevice) {
-                addScanResult(device)
+                val name = device.device.name
+                // Filter out dummy/unrelated BLE devices
+                if (!name.isNullOrBlank() && 
+                    (name.contains("Ring", ignoreCase = true) || 
+                     name.contains("MY", ignoreCase = true) || 
+                     name.contains("CR", ignoreCase = true))) {
+                    addScanResult(device)
+                }
             }
 
             override fun onScanComplete(results: MutableList<CRPScanDevice>?) {}

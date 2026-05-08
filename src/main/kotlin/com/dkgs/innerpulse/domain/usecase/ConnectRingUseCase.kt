@@ -40,18 +40,16 @@ class ConnectRingUseCase(
      * Check if MAC address is a valid 12-character hex string (after formatting)
      */
     private fun isValidMacAddress(mac: String): Boolean {
-        // Allow both 12-char hex and colon-separated formats
-        val regex = "^([0-9a-f]{2}:){5}[0-9a-f]{2}$|^[0-9a-f]{12}$".toRegex()
+        // Allow both 12-char hex and colon-separated formats, case-insensitive
+        val regex = "^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$|^[0-9A-Fa-f]{12}$".toRegex()
         return mac.matches(regex)
     }
 
     /**
-     * Parse any user input into the raw format expected by the SDK's internal formatter.
-     * The Demo app successfully connects when passing lowercase, colon-less strings
-     * to RingBleUtils.formatMacAddress().
+     * Format the MAC address to uppercase as required by Android's BluetoothAdapter
+     * (The legacy SDK used lowercase, but Crrepa requires standard uppercase)
      */
     private fun formatMacAddress(mac: String): String {
-        // Keep colons if present, just trim and lowercase
-        return mac.trim().lowercase()
+        return mac.trim().uppercase()
     }
 }
