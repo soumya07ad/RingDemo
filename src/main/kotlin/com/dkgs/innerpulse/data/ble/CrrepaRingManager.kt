@@ -141,7 +141,6 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 updateStepsInfo(info)
             }
 
-            override fun onStepsCategoryChange(p0: IntArray?) {}
             override fun onHistorySteps(p0: com.crrepa.ble.conn.type.CRPHistoryDay?, p1: CRPStepsInfo?) {}
             override fun onHistoryStepsDetails(p0: com.crrepa.ble.conn.bean.CRPStepsDetailsInfo?) {}
         })
@@ -155,16 +154,6 @@ class CrrepaRingManager private constructor(private val context: Context) {
 
             override fun onHeartRate(hr: Int) {
                 _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
-            }
-
-            override fun onOnceHeartRate(info: CRPHeartRateInfo?) {
-                info?.let {
-                    _ringData.value = _ringData.value.copy(heartRate = it.measureHeartRate, lastUpdate = System.currentTimeMillis())
-                }
-            }
-
-            override fun onMeasureComplete() {
-                _ringData.value = _ringData.value.copy(heartRateMeasuring = false)
             }
 
             override fun onTimingHeartRate(p0: CRPHeartRateInfo?) {}
@@ -182,7 +171,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
             override fun onHistoryBloodOxygen(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryBloodOxygenInfo>?) {}
             override fun onTimingBloodOxygen(p0: com.crrepa.ble.conn.bean.CRPTimingBloodOxygenInfo?) {}
             override fun onTimingInterval(p0: Int) {}
-            override fun onSupportSleepBloodOxygen(p0: Boolean) {}
+            override fun onSupportBloodOxygenType(p0: com.crrepa.ble.conn.type.CRPBloodOxygenType?) {}
         })
 
         // 5. Stress
@@ -193,14 +182,12 @@ class CrrepaRingManager private constructor(private val context: Context) {
             }
 
             override fun onHistoryStressChange(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryStressInfo>?) {}
+            override fun onTimingInterval(p0: Int) {}
+            override fun onTimingStress(p0: com.crrepa.ble.conn.bean.CRPTimingStressInfo?) {}
         })
 
         // 6. Sleep
         conn.setSleepChangeListener(object : CRPSleepChangeListener {
-            override fun onSleepChange(info: CRPSleepInfo) {
-                // Not in interface? Let's check sample
-            }
-
             override fun onSleepInfo(info: CRPSleepInfo) {
                 Log.d(TAG, "Sleep update: ${info.totalTime} mins")
                 _ringData.value = _ringData.value.copy(
@@ -213,7 +200,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
             }
 
             override fun onHistorySleepChange(p0: com.crrepa.ble.conn.type.CRPHistoryDay?, p1: CRPSleepInfo?) {}
-            override fun onHistorySleepListChange(p0: MutableList<java.lang.Long>?) {}
+            override fun onHistorySleepListChange(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistorySleepTimeInfo>?) {}
             override fun onSleepDetails(p0: com.crrepa.ble.conn.bean.CRPSleepDetailsInfo?) {}
             override fun onSleepChronotype(p0: com.crrepa.ble.conn.bean.CRPSleepChronotypeInfo?) {}
             override fun onSleepEnd(p0: Boolean) {}
@@ -257,7 +244,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
     private fun startSdkScan() {
         val client = bleClient ?: return
         Log.i(TAG, "Starting SDK BLE scan")
-        client.scanDevice(object : CRPScanCallback() {
+        client.scanDevice(object : CRPScanCallback {
             override fun onScanning(device: CRPScanDevice) {
                 addScanResult(device)
             }
