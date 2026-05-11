@@ -40,7 +40,7 @@ class SmartRingViewModel(
     private val _isAutoReconnecting = MutableStateFlow(false)
     val isAutoReconnecting: StateFlow<Boolean> = _isAutoReconnecting.asStateFlow()
 
-    private var autoReconnectAttempted = false
+    val pairedRing = settingsRepository.pairedRings
 
     init {
         observeConnectionStatus()
@@ -76,27 +76,46 @@ class SmartRingViewModel(
      *
      * This is called once per Dashboard lifecycle to avoid repeated scans.
      */
+    private var autoReconnectAttempted = false
+
     fun autoReconnect() {
-        // Only attempt once per ViewModel lifecycle
         if (autoReconnectAttempted) return
         autoReconnectAttempted = true
+        attemptSmartConnect(onReconnectFailed = {})
+    }
+
+    /**
+     * Manually trigger a smart connection attempt.
+     */
+    fun manualReconnect(onReconnectFailed: () -> Unit) {
+        attemptSmartConnect(onReconnectFailed = onReconnectFailed)
+    }
+
+    private var lastAttemptTime = 0L
+
+    private fun attemptSmartConnect(onReconnectFailed: () -> Unit) {
+        // Prevent spamming attempts (at least 2 seconds between starts)
+        val now = System.currentTimeMillis()
+        if (now - lastAttemptTime < 2000) return
+        lastAttemptTime = now
 
         val savedMac = settingsRepository.ringMacAddress.value
         val savedRingType = settingsRepository.ringType.value
 
         // No saved ring — first-time user, skip
         if (savedMac.isBlank()) {
-            Log.d(TAG, "No saved MAC address found. Skipping auto-reconnect.")
+            Log.d(TAG, "No saved MAC address found. Skipping smart connect.")
+            onReconnectFailed()
             return
         }
 
         // Already connected — nothing to do
         if (ringRepository.isConnected()) {
-            Log.d(TAG, "Ring already connected. Skipping auto-reconnect.")
+            Log.d(TAG, "Ring already connected. Skipping smart connect.")
             return
         }
 
-        Log.i(TAG, "Auto-reconnect: Starting BLE scan to find saved ring ($savedMac)")
+        Log.i(TAG, "Smart Connect: Starting BLE scan to find saved ring ($savedMac)")
         _isAutoReconnecting.value = true
 
         viewModelScope.launch {
@@ -114,7 +133,7 @@ class SmartRingViewModel(
 
                     // If connected during scan (e.g., SDK auto-reconnected), stop
                     if (ringRepository.isConnected()) {
-                        Log.i(TAG, "Ring connected during scan. Stopping auto-reconnect scan.")
+                        Log.i(TAG, "Ring connected during scan. Stopping smart connect scan.")
                         found = true
                         break
                     }
@@ -129,7 +148,7 @@ class SmartRingViewModel(
                     }
 
                     if (matchingDevice != null) {
-                        Log.i(TAG, "Auto-reconnect: Found saved ring! Connecting to ${matchingDevice.macAddress}")
+                        Log.i(TAG, "Smart Connect: Found saved ring! Connecting to ${matchingDevice.macAddress}")
                         ringRepository.stopScan()
                         ringRepository.connect(savedMac, matchingDevice.name, savedRingType)
                         found = true
@@ -137,14 +156,16 @@ class SmartRingViewModel(
                 }
 
                 if (!found) {
-                    Log.w(TAG, "Auto-reconnect: Saved ring not found within timeout. Will retry on next app launch.")
+                    Log.w(TAG, "Smart Connect: Saved ring not found within timeout.")
                     ringRepository.stopScan()
                     _isAutoReconnecting.value = false
+                    onReconnectFailed()
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG, "Auto-reconnect failed", e)
+                Log.e(TAG, "Smart Connect failed", e)
                 _isAutoReconnecting.value = false
+                onReconnectFailed()
             }
         }
     }

@@ -33,6 +33,7 @@ fun SmartRingCard(
     connectionState: RingConnectionState,
     ringName: String = "Smart Ring",
     batteryLevel: Int? = null,
+    isConnecting: Boolean = false,
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -121,12 +122,12 @@ fun SmartRingCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isConnected) "CONNECTED" else "DISCONNECTED",
+                        text = if (isConnecting) "SCANNING..." else if (isConnected) "CONNECTED" else "DISCONNECTED",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.5.sp
                         ),
-                        color = glowColor
+                        color = if (isConnecting) NeonCyan else glowColor
                     )
                     
                     if (isConnected && batteryLevel != null) {
@@ -172,22 +173,23 @@ fun SmartRingCard(
                 val buttonShape = RoundedCornerShape(10.dp)
                 Button(
                     onClick = onConnectClick,
+                    enabled = !isConnecting,
                     modifier = Modifier
                         .height(36.dp)
                         .shadow(
-                            10.dp,
+                            if (isConnecting) 0.dp else 10.dp,
                             buttonShape,
                             ambientColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f),
                             spotColor = (if (AppColors.isDark) SkyBlue else LightPrimary).copy(alpha = 0.3f)
                         ),
                     shape = buttonShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (AppColors.isDark) SkyBlue else LightPrimary,
-                        contentColor = Color.White
+                        containerColor = if (isConnecting) (if (AppColors.isDark) SkyBlue.copy(alpha = 0.2f) else LightPrimary.copy(alpha = 0.2f)) else (if (AppColors.isDark) SkyBlue else LightPrimary),
+                        contentColor = if (isConnecting) (if (AppColors.isDark) SkyBlue else LightPrimary) else Color.White
                     ),
                     contentPadding = PaddingValues(horizontal = 12.dp)
                 ) {
-                    Text("CONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                    Text(if (isConnecting) "SCANNING" else "CONNECT", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                 }
             }
         }

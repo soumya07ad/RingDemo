@@ -39,13 +39,28 @@ fun NeonGlassCard(
     modifier: Modifier = Modifier,
     glowColor: Color = NeonCyan,
     showGlow: Boolean = true,
-    cornerRadius: Dp = 24.dp,
+    cornerRadius: Dp = 28.dp, // Increased for a more premium look
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = RoundedCornerShape(cornerRadius)
     val isDark = AppColors.isDark
 
     Box(modifier = modifier) {
+        // Subtle background glow for dark mode
+        if (isDark && showGlow) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .blur(40.dp)
+                    .background(
+                        brush = Brush.radialGradient(
+                            colors = listOf(glowColor.copy(alpha = 0.08f), Color.Transparent),
+                            center = Offset(0f, 0f)
+                        )
+                    )
+            )
+        }
+
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,30 +75,26 @@ fun NeonGlassCard(
                                         glowColor.copy(alpha = 0.4f),
                                         glowColor.copy(alpha = 0.05f),
                                         Color.Transparent,
-                                        glowColor.copy(alpha = 0.1f)
+                                        glowColor.copy(alpha = 0.15f)
                                     )
                                 ),
                                 shape = shape
                             )
                         } else {
-                            Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
+                            Modifier.border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), shape)
                         }
                     } else {
-                        // Glass border for light mode
                         Modifier.border(1.dp, LightBorderSubtle, shape)
                     }
                 ),
             shape = shape,
-            color = if (isDark) MaterialTheme.colorScheme.surface else LightCard,
+            color = if (isDark) Color(0xFF0C0C12).copy(alpha = 0.8f) else LightCard,
             shadowElevation = if (isDark) 0.dp else 4.dp
         ) {
             Column(
                 modifier = Modifier
                     .background(if (isDark) CardGlassBrush else Brush.verticalGradient(
-                        listOf(
-                            Color(0xFFFFFFFF),  // Pure white top
-                            Color(0xFFF8FAFF)   // Very light blue-white bottom
-                        )
+                        listOf(Color(0xFFFFFFFF), Color(0xFFF8FAFF))
                     ))
                     .padding(20.dp),
                 content = content
@@ -97,7 +108,7 @@ fun NeonGlassCard(
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-fun FloatingMetricTile(
+fun BentoMetricCard(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
@@ -105,109 +116,155 @@ fun FloatingMetricTile(
     unit: String = "",
     progress: Float = 0f,
     gradientColors: List<Color> = listOf(NeonCyan, NeonBlue),
-    glowColor: Color = gradientColors.first(),
-    iconBgColor: Color = Color.Transparent,
+    isMeasuring: Boolean = false,
+    onMeasureClick: (() -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
     val isDark = AppColors.isDark
-    val shape = RoundedCornerShape(18.dp)
-
-    Surface(
+    val glowColor = gradientColors.first()
+    
+    NeonGlassCard(
         modifier = modifier
-            .fillMaxWidth()
-            // Outer 3D shadow (Light mode)
-            .shadow(
-                elevation = if (isDark) 0.dp else 6.dp,
-                shape = shape,
-                ambientColor = if (isDark) Color.Transparent else LightCardShadow,
-                spotColor = if (isDark) Color.Transparent else LightCardShadow
-            )
-            .clip(shape)
-            .then(
-                if (isDark) {
-                    Modifier.border(1.dp, MaterialTheme.colorScheme.outline, shape)
-                } else {
-                    Modifier.border(1.dp, LightBorderSubtle, shape)
-                }
-            )
-            .then(
-                if (onClick != null) Modifier.clickable { onClick() } else Modifier
-            ),
-        shape = shape,
-        color = if (isDark) MaterialTheme.colorScheme.surface else LightCard,
-        shadowElevation = 0.dp
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
+        glowColor = glowColor,
+        cornerRadius = 24.dp
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .background(if (isDark) CardGlassBrush else Brush.verticalGradient(
-                    listOf(
-                        LightSurface,        // Pure white top
-                        LightSurfaceVariant  // Subtle blue-tint white bottom
-                    )
-                ))
-                .padding(16.dp)
-        ) {
-            // Icon inside a colored circle
-            Box(
-                modifier = Modifier.size(48.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                // Pastel circle bg (light mode) or radial chart (dark mode)
-                if (!isDark && iconBgColor != Color.Transparent) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                // Header with icon and integrated LIVE button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Icon Container
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
+                            .size(42.dp)
                             .clip(CircleShape)
-                            .background(iconBgColor)
-                    )
-                } else {
-                    AnimatedRadialChart(
-                        modifier = Modifier.fillMaxSize(),
-                        progress = progress,
-                        gradientColors = gradientColors,
-                        strokeWidth = 6f,
-                        glowRadius = 4f
-                    )
+                            .background(glowColor.copy(alpha = 0.15f))
+                            .border(1.dp, glowColor.copy(alpha = 0.3f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isMeasuring) {
+                            LivePulseWave(color = glowColor)
+                        } else {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = glowColor,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+
+                    // Integrated Live Button
+                    if (onMeasureClick != null) {
+                        Surface(
+                            onClick = onMeasureClick,
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (isMeasuring) glowColor else glowColor.copy(alpha = 0.1f),
+                            border = BorderStroke(1.dp, glowColor.copy(alpha = 0.4f))
+                        ) {
+                            Text(
+                                text = if (isMeasuring) "LIVE..." else "LIVE",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 10.sp
+                                ),
+                                color = if (isMeasuring) Color.White else glowColor,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
                 }
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = gradientColors.first(),
-                    modifier = Modifier.size(22.dp)
-                )
-            }
 
-            Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+                // Label
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.labelMedium,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+
+                // Value and Unit
                 Row(
-                    verticalAlignment = Alignment.Bottom
+                    verticalAlignment = Alignment.Bottom,
+                    modifier = Modifier.padding(top = 4.dp)
                 ) {
                     Text(
                         text = value,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = if (isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Black
+                        ),
+                        color = if (isDark) MaterialTheme.colorScheme.onSurface else LightTextPrimary
                     )
                     if (unit.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = unit,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant else LightTextSecondary,
-                            modifier = Modifier.padding(bottom = 3.dp)
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isDark) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f) else LightTextSecondary,
+                            modifier = Modifier.padding(bottom = 6.dp)
                         )
                     }
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Subtle progress line at the bottom
+                LinearProgressIndicator(
+                    progress = progress,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .clip(CircleShape),
+                    color = glowColor,
+                    trackColor = if (isDark) Color.White.copy(alpha = 0.05f) else Color.Black.copy(alpha = 0.05f)
+                )
             }
+        }
+    }
+}
+
+@Composable
+fun LivePulseWave(color: Color) {
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val scale1 by infiniteTransition.animateFloat(
+        initialValue = 0.5f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "scale1"
+    )
+    val alpha1 by infiniteTransition.animateFloat(
+        initialValue = 0.8f,
+        targetValue = 0f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "alpha1"
+    )
+
+    Box(contentAlignment = Alignment.Center) {
+        Canvas(modifier = Modifier.size(24.dp)) {
+            drawCircle(
+                color = color,
+                radius = size.minDimension / 2 * scale1,
+                alpha = alpha1,
+                style = Stroke(width = 2.dp.toPx())
+            )
+            drawCircle(
+                color = color,
+                radius = 4.dp.toPx()
+            )
         }
     }
 }

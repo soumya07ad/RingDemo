@@ -72,6 +72,8 @@ fun DashboardRoute(
 ) {
     val state by viewModel.uiState.collectAsState()
     val ringConnectionState by smartRingViewModel.connectionState.collectAsState()
+    val isAutoReconnecting by smartRingViewModel.isAutoReconnecting.collectAsState()
+    val pairedRing by smartRingViewModel.pairedRing.collectAsState(initial = null)
     val currentTheme by themeViewModel.themeState.collectAsState()
     
     val isUsingPhone by viewModel.isUsingPhone.collectAsState()
@@ -114,8 +116,12 @@ fun DashboardRoute(
     DashboardScreenWithHeader(
         state = state,
         ringConnectionState = ringConnectionState,
+        isReconnecting = isAutoReconnecting,
+        pairedRing = pairedRing,
         onConnectClick = {
-            navController?.navigate("ringSetup")
+            smartRingViewModel.manualReconnect(onReconnectFailed = {
+                navController?.navigate("ringSetup")
+            })
         },
         onDisconnectClick = {
             smartRingViewModel.disconnectRing()
@@ -155,6 +161,8 @@ fun DashboardRoute(
 fun DashboardScreenWithHeader(
     state: DashboardUiState,
     ringConnectionState: RingConnectionState = if (state.isConnected) RingConnectionState.CONNECTED else RingConnectionState.DISCONNECTED,
+    isReconnecting: Boolean = false,
+    pairedRing: Ring? = null,
     onConnectClick: () -> Unit = {},
     onDisconnectClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
@@ -171,7 +179,6 @@ fun DashboardScreenWithHeader(
     isSupported: Boolean = true
 ) {
     val stressLevel = state.stressLevel.coerceIn(0, 100)
-    val pairedRing = state.connectedRing
     val isConnected = ringConnectionState == RingConnectionState.CONNECTED
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -280,8 +287,9 @@ fun DashboardScreenWithHeader(
 
             // Hero Section
             HeroDashboardHeader(
-                pairedRing = pairedRing,
+                pairedRing = pairedRing ?: state.connectedRing,
                 isConnected = isConnected,
+                isReconnecting = isReconnecting,
                 batteryLevel = state.batteryLevel,
                 ringConnectionState = ringConnectionState,
                 onConnectClick = onConnectClick,
@@ -312,12 +320,12 @@ fun DashboardScreenWithHeader(
                     )
                 }
 
-                // 2-column metric grid
+                // 2-column bento grid
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Favorite,
                         label = "HEART RATE",
@@ -325,10 +333,10 @@ fun DashboardScreenWithHeader(
                         unit = "bpm",
                         progress = if (isConnected) (state.heartRate / 200f).coerceIn(0f, 1f) else 0f,
                         gradientColors = listOf(ErrorRed, NeonPink),
-                        glowColor = ErrorRed,
-                        iconBgColor = HeartRateIconBg
+                        isMeasuring = state.heartRateMeasuring,
+                        onMeasureClick = if (isConnected) onMeasureHeartRate else null
                     )
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.FavoriteBorder,
                         label = "BLOOD O₂",
@@ -336,8 +344,8 @@ fun DashboardScreenWithHeader(
                         unit = "%",
                         progress = if (isConnected) (state.spO2 / 100f).coerceIn(0f, 1f) else 0f,
                         gradientColors = listOf(NeonCyan, NeonBlue),
-                        glowColor = NeonCyan,
-                        iconBgColor = BloodOxygenIconBg
+                        isMeasuring = state.spO2Measuring,
+                        onMeasureClick = if (isConnected) onMeasureSpO2 else null
                     )
                 }
 
@@ -345,7 +353,7 @@ fun DashboardScreenWithHeader(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Favorite,
                         label = "HRV",
@@ -353,10 +361,10 @@ fun DashboardScreenWithHeader(
                         unit = "ms",
                         progress = if (isConnected) (state.hrv / 150f).coerceIn(0f, 1f) else 0f,
                         gradientColors = listOf(PrimaryPurple, NeonBlue),
-                        glowColor = PrimaryPurple,
-                        iconBgColor = StepsIconBg
+                        isMeasuring = state.hrvMeasuring,
+                        onMeasureClick = if (isConnected) onMeasureHRV else null
                     )
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.FavoriteBorder,
                         label = "BLOOD PRESSURE",
@@ -364,55 +372,9 @@ fun DashboardScreenWithHeader(
                         unit = "mmHg",
                         progress = if (isConnected) (state.bloodPressureSystolic / 180f).coerceIn(0f, 1f) else 0f,
                         gradientColors = listOf(NeonOrange, ErrorRed),
-                        glowColor = NeonOrange,
-                        iconBgColor = DistanceIconBg
+                        isMeasuring = state.bloodPressureMeasuring,
+                        onMeasureClick = if (isConnected) onMeasureBP else null
                     )
-                }
-
-                if (isConnected) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MeasurementButton(
-                            text = if (state.heartRateMeasuring) "Measuring..." else "LIVE HR",
-                            icon = Icons.Default.Favorite,
-                            color = ErrorRed,
-                            onClick = onMeasureHeartRate,
-                            enabled = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MeasurementButton(
-                            text = if (state.spO2Measuring) "Measuring..." else "LIVE O₂",
-                            icon = Icons.Default.FavoriteBorder,
-                            color = NeonCyan,
-                            onClick = onMeasureSpO2,
-                            enabled = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        MeasurementButton(
-                            text = if (state.hrvMeasuring) "Measuring..." else "LIVE HRV",
-                            icon = Icons.Default.Favorite,
-                            color = PrimaryPurple,
-                            onClick = onMeasureHRV,
-                            enabled = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                        MeasurementButton(
-                            text = if (state.bloodPressureMeasuring) "Measuring..." else "LIVE BP",
-                            icon = Icons.Default.FavoriteBorder,
-                            color = NeonOrange,
-                            onClick = onMeasureBP,
-                            enabled = true,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
                 }
 
                 // Steps & Calories Row
@@ -423,31 +385,25 @@ fun DashboardScreenWithHeader(
                 ) {
                     val stepsValueStr = if (isSupported) "${state.steps}" else "N/A"
                     val distanceValueStr = if (isSupported) "${state.distance}" else "N/A"
-                    val stepsLabel = "STEPS"
-                    val distanceLabel = "DISTANCE"
 
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Star,
-                        label = stepsLabel,
+                        label = "STEPS",
                         value = stepsValueStr,
                         unit = "",
                         progress = (state.steps / 10000f).coerceIn(0f, 1f),
                         gradientColors = listOf(PrimaryPurple, NeonPink),
-                        glowColor = PrimaryPurple,
-                        iconBgColor = StepsIconBg,
                         onClick = onFitnessHistoryClick
                     )
-                    FloatingMetricTile(
+                    BentoMetricCard(
                         modifier = Modifier.weight(1f),
                         icon = Icons.Default.Build,
-                        label = distanceLabel,
+                        label = "DISTANCE",
                         value = distanceValueStr,
                         unit = "m",
                         progress = (state.distance / 5000f).coerceIn(0f, 1f),
                         gradientColors = listOf(NeonOrange, WarningAmber),
-                        glowColor = NeonOrange,
-                        iconBgColor = DistanceIconBg,
                         onClick = onFitnessHistoryClick
                     )
                 }
@@ -586,6 +542,7 @@ private fun HeroDashboardHeader(
     pairedRing: Ring?,
     isConnected: Boolean,
     batteryLevel: Int?,
+    isReconnecting: Boolean = false,
     ringConnectionState: RingConnectionState = if (isConnected) RingConnectionState.CONNECTED else RingConnectionState.DISCONNECTED,
     onConnectClick: () -> Unit = {},
     onDisconnectClick: () -> Unit = {}
@@ -627,6 +584,7 @@ private fun HeroDashboardHeader(
                 connectionState = ringConnectionState,
                 ringName = pairedRing?.name ?: "Smart Ring",
                 batteryLevel = batteryLevel,
+                isConnecting = isReconnecting,
                 onConnectClick = onConnectClick,
                 onDisconnectClick = onDisconnectClick,
                 modifier = Modifier
