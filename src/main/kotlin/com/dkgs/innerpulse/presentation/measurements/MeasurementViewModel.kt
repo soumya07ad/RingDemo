@@ -53,10 +53,10 @@ class MeasurementViewModel(
 
     private fun startProgressSimulation() {
         val duration = when (type) {
-            MeasurementType.HEART_RATE -> 15_000L
-            MeasurementType.SPO2 -> 20_000L
-            MeasurementType.STRESS -> 30_000L
-            MeasurementType.HEALTH_SCORE -> 5_000L
+            MeasurementType.HEART_RATE -> 12_000L
+            MeasurementType.SPO2 -> 15_000L
+            MeasurementType.STRESS -> 20_000L
+            MeasurementType.HEALTH_SCORE -> 3_000L
         }
 
         simulationJob = viewModelScope.launch {
@@ -93,7 +93,7 @@ class MeasurementViewModel(
                 }
 
                 // Or finish if we have a value and progress is high enough
-                val forcedFinish = current != null && _uiState.value.progress >= 0.8f
+                val forcedFinish = current != null && _uiState.value.progress >= 0.4f
 
                 if (isFinishedResult || forcedFinish) {
                     finishMeasurement(current ?: _uiState.value.currentValue)

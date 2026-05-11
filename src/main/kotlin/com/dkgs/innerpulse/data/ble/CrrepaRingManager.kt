@@ -49,6 +49,8 @@ import com.crrepa.ble.conn.listener.CRPBloodOxygenChangeListener
 import com.crrepa.ble.conn.listener.CRPBloodPressureChangeListener
 import com.crrepa.ble.conn.listener.CRPHrvChangeListener
 import com.crrepa.ble.conn.listener.CRPStressChangeListener
+import com.crrepa.ble.conn.callback.CRPFirmwareVersionCallback
+import com.dkgs.innerpulse.domain.model.FirmwareInfo
 
 /**
  * Manager for Crrepa Smart Ring SDK (MYRingSDK).
@@ -171,7 +173,14 @@ class CrrepaRingManager private constructor(private val context: Context) {
 
             override fun onHeartRate(hr: Int) {
                 if (hr > 0 && hr < 255) {
-                    _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
+                    Log.d(TAG, "Heart rate result: $hr")
+                    _ringData.value = _ringData.value.copy(
+                        heartRate = hr, 
+                        heartRateMeasuring = false,
+                        lastUpdate = System.currentTimeMillis()
+                    )
+                } else {
+                    Log.d(TAG, "Heart rate ignored (invalid): $hr")
                 }
             }
 
@@ -203,6 +212,8 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 if (stress > 0 && stress < 255) {
                     Log.d(TAG, "Stress update: $stress")
                     _ringData.value = _ringData.value.copy(stress = stress, stressMeasuring = false)
+                } else {
+                    Log.d(TAG, "Stress ignored (invalid): $stress")
                 }
             }
 
@@ -237,6 +248,8 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 if (hrv > 0 && hrv < 255) {
                     Log.d(TAG, "HRV update: $hrv")
                     _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
+                } else {
+                    Log.d(TAG, "HRV ignored (invalid): $hrv")
                 }
             }
 
@@ -248,11 +261,28 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 8. Blood Pressure
         conn.setBloodPressureListener(object : CRPBloodPressureChangeListener {
             override fun onBloodPressureChange(systolic: Int, diastolic: Int) {
-                Log.d(TAG, "Blood pressure update: $systolic/$diastolic")
+                if (systolic > 0 && systolic < 255 && diastolic > 0 && diastolic < 255) {
+                    Log.d(TAG, "Blood pressure update: $systolic/$diastolic")
+                    _ringData.value = _ringData.value.copy(
+                        bloodPressureSystolic = systolic,
+                        bloodPressureDiastolic = diastolic,
+                        bloodPressureMeasuring = false
+                    )
+                } else {
+                    Log.d(TAG, "Blood pressure ignored (invalid): $systolic/$diastolic")
+                }
+            }
+        })
+
+        // 9. Firmware Info (Initial Query)
+        conn.queryFirmwareVersion(object : CRPFirmwareVersionCallback {
+            override fun onVersion(version: String) {
+                Log.i(TAG, "Firmware version: $version")
                 _ringData.value = _ringData.value.copy(
-                    bloodPressureSystolic = systolic,
-                    bloodPressureDiastolic = diastolic,
-                    bloodPressureMeasuring = false
+                    firmwareInfo = _ringData.value.firmwareInfo.copy(
+                        version = version,
+                        lastUpdate = System.currentTimeMillis()
+                    )
                 )
             }
         })
@@ -419,5 +449,15 @@ class CrrepaRingManager private constructor(private val context: Context) {
         conn.queryBattery()
         conn.queryCurrentSteps()
         conn.queryHistorySleep(com.crrepa.ble.conn.type.CRPHistoryDay.TODAY)
+        conn.queryFirmwareVersion(object : CRPFirmwareVersionCallback {
+            override fun onVersion(version: String) {
+                _ringData.value = _ringData.value.copy(
+                    firmwareInfo = _ringData.value.firmwareInfo.copy(
+                        version = version,
+                        lastUpdate = System.currentTimeMillis()
+                    )
+                )
+            }
+        })
     }
 }

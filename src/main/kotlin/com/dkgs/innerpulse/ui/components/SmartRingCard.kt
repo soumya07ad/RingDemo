@@ -33,6 +33,7 @@ fun SmartRingCard(
     connectionState: RingConnectionState,
     ringName: String = "Smart Ring",
     batteryLevel: Int? = null,
+    firmwareVersion: String? = null,
     isConnecting: Boolean = false,
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit,
@@ -130,23 +131,36 @@ fun SmartRingCard(
                         color = if (isConnecting) NeonCyan else glowColor
                     )
                     
-                    if (isConnected && batteryLevel != null) {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        
-                        // Battery Badge (Icon removed as requested)
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        ) {
+                    if (isConnected) {
+                        if (batteryLevel != null) {
+                            Spacer(modifier = Modifier.width(12.dp))
+                            
+                            // Battery Badge
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.08f),
+                                modifier = Modifier.padding(vertical = 2.dp)
+                            ) {
+                                Text(
+                                    text = "$batteryLevel%",
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 11.sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
+
+                        if (!firmwareVersion.isNullOrBlank()) {
+                            Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "$batteryLevel%",
+                                text = "v$firmwareVersion",
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp
-                                ),
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    fontSize = 10.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
                             )
                         }
                     }

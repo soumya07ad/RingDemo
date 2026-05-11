@@ -73,7 +73,7 @@ fun DashboardRoute(
     val state by viewModel.uiState.collectAsState()
     val ringConnectionState by smartRingViewModel.connectionState.collectAsState()
     val isAutoReconnecting by smartRingViewModel.isAutoReconnecting.collectAsState()
-    val pairedRing by smartRingViewModel.pairedRing.collectAsState(initial = null)
+    val pairedRingsList by smartRingViewModel.pairedRing.collectAsState(initial = null)
     val currentTheme by themeViewModel.themeState.collectAsState()
     
     val isUsingPhone by viewModel.isUsingPhone.collectAsState()
@@ -117,7 +117,7 @@ fun DashboardRoute(
         state = state,
         ringConnectionState = ringConnectionState,
         isReconnecting = isAutoReconnecting,
-        pairedRing = pairedRing?.firstOrNull()?.let { Ring(it.macAddress, it.name) },
+        pairedRing = pairedRingsList?.firstOrNull()?.let { Ring(it.macAddress, it.name) },
         onConnectClick = {
             smartRingViewModel.manualReconnect(onReconnectFailed = {
                 navController?.navigate("ringSetup")
@@ -291,6 +291,7 @@ fun DashboardScreenWithHeader(
                 isConnected = isConnected,
                 isReconnecting = isReconnecting,
                 batteryLevel = state.batteryLevel,
+                firmwareVersion = state.firmwareInfo?.version,
                 ringConnectionState = ringConnectionState,
                 onConnectClick = onConnectClick,
                 onDisconnectClick = onDisconnectClick
@@ -523,9 +524,6 @@ fun DashboardScreenWithHeader(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Firmware Info
-                state.firmwareInfo?.let { 
-                    FirmwareCard(firmwareInfo = it)
-                }
                 
                 Spacer(modifier = Modifier.height(32.dp))
             }
@@ -542,6 +540,7 @@ private fun HeroDashboardHeader(
     pairedRing: Ring?,
     isConnected: Boolean,
     batteryLevel: Int?,
+    firmwareVersion: String? = null,
     isReconnecting: Boolean = false,
     ringConnectionState: RingConnectionState = if (isConnected) RingConnectionState.CONNECTED else RingConnectionState.DISCONNECTED,
     onConnectClick: () -> Unit = {},
@@ -584,6 +583,7 @@ private fun HeroDashboardHeader(
                 connectionState = ringConnectionState,
                 ringName = pairedRing?.name ?: "Smart Ring",
                 batteryLevel = batteryLevel,
+                firmwareVersion = firmwareVersion,
                 isConnecting = isReconnecting,
                 onConnectClick = onConnectClick,
                 onDisconnectClick = onDisconnectClick,
