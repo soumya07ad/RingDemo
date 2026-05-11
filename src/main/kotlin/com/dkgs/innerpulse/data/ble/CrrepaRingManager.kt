@@ -13,6 +13,18 @@ import com.crrepa.ble.conn.listener.CRPBleConnectionStateListener
 import com.crrepa.ble.conn.listener.CRPHeartRateChangeListener
 import com.crrepa.ble.conn.listener.CRPSleepChangeListener
 import com.crrepa.ble.conn.listener.CRPStepsChangeListener
+import com.crrepa.ble.conn.bean.CRPHistoryHeartRateInfo
+import com.crrepa.ble.conn.bean.CRPHistoryBloodOxygenInfo
+import com.crrepa.ble.conn.bean.CRPHistoryStressInfo
+import com.crrepa.ble.conn.bean.CRPHistoryHrvInfo
+import com.crrepa.ble.conn.bean.CRPTimingBloodOxygenInfo
+import com.crrepa.ble.conn.bean.CRPTimingStressInfo
+import com.crrepa.ble.conn.bean.CRPTimingHrvInfo
+import com.crrepa.ble.conn.bean.CRPStepsDetailsInfo
+import com.crrepa.ble.conn.bean.CRPSleepDetailsInfo
+import com.crrepa.ble.conn.bean.CRPSleepChronotypeInfo
+import com.crrepa.ble.conn.type.CRPHistoryDay
+import com.crrepa.ble.conn.type.CRPBloodOxygenType
 import com.crrepa.ble.scan.bean.CRPScanDevice
 import com.crrepa.ble.scan.callback.CRPScanCallback
 import com.dkgs.innerpulse.FitnessApplication
@@ -87,6 +99,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
     // Connectivity
     // ═══════════════════════════════════
 
+    @SuppressLint("MissingPermission")
     fun connectRing(macAddress: String) {
         val client = bleClient ?: return
         
@@ -142,8 +155,8 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 updateStepsInfo(info)
             }
 
-            override fun onHistorySteps(p0: com.crrepa.ble.conn.type.CRPHistoryDay?, p1: CRPStepsInfo?) {}
-            override fun onHistoryStepsDetails(p0: com.crrepa.ble.conn.bean.CRPStepsDetailsInfo?) {}
+            override fun onHistorySteps(p0: CRPHistoryDay?, p1: CRPStepsInfo?) {}
+            override fun onHistoryStepsDetails(p0: CRPStepsDetailsInfo?) {}
         })
 
         // 3. Heart Rate
@@ -158,7 +171,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
             }
 
             override fun onTimingHeartRate(p0: CRPHeartRateInfo?) {}
-            override fun onHistoryHeartRate(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryHeartRateInfo>?) {}
+            override fun onHistoryHeartRate(p0: MutableList<CRPHistoryHeartRateInfo>?) {}
             override fun onTimingInterval(p0: Int) {}
         })
 
@@ -169,10 +182,10 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 _ringData.value = _ringData.value.copy(spO2 = bloodOxygen.toFloat(), spO2Measuring = false)
             }
 
-            override fun onHistoryBloodOxygen(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryBloodOxygenInfo>?) {}
-            override fun onTimingBloodOxygen(p0: com.crrepa.ble.conn.bean.CRPTimingBloodOxygenInfo?) {}
+            override fun onHistoryBloodOxygen(p0: MutableList<CRPHistoryBloodOxygenInfo>?) {}
+            override fun onTimingBloodOxygen(p0: CRPTimingBloodOxygenInfo?) {}
             override fun onTimingInterval(p0: Int) {}
-            override fun onSupportBloodOxygenType(p0: com.crrepa.ble.conn.type.CRPBloodOxygenType?) {}
+            override fun onSupportSleepBloodOxygen(p0: Boolean) {}
         })
 
         // 5. Stress
@@ -182,9 +195,9 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 _ringData.value = _ringData.value.copy(stress = stress, stressMeasuring = false)
             }
 
-            override fun onHistoryStressChange(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryStressInfo>?) {}
+            override fun onHistoryStressChange(p0: MutableList<CRPHistoryStressInfo>?) {}
             override fun onTimingInterval(p0: Int) {}
-            override fun onTimingStress(p0: com.crrepa.ble.conn.bean.CRPTimingStressInfo?) {}
+            override fun onTimingStress(p0: CRPTimingStressInfo?) {}
         })
 
         // 6. Sleep
@@ -200,10 +213,10 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 )
             }
 
-            override fun onHistorySleepChange(p0: com.crrepa.ble.conn.type.CRPHistoryDay?, p1: CRPSleepInfo?) {}
-            override fun onHistorySleepListChange(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistorySleepTimeInfo>?) {}
-            override fun onSleepDetails(p0: com.crrepa.ble.conn.bean.CRPSleepDetailsInfo?) {}
-            override fun onSleepChronotype(p0: com.crrepa.ble.conn.bean.CRPSleepChronotypeInfo?) {}
+            override fun onHistorySleepChange(p0: CRPHistoryDay?, p1: CRPSleepInfo?) {}
+            override fun onHistorySleepListChange(p0: MutableList<Long>?) {}
+            override fun onSleepDetails(p0: CRPSleepDetailsInfo?) {}
+            override fun onSleepChronotype(p0: CRPSleepChronotypeInfo?) {}
             override fun onSleepEnd(p0: Boolean) {}
         })
 
@@ -214,8 +227,9 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
             }
 
-            override fun onHistoryHrv(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryHrvInfo>?) {}
+            override fun onHistoryHrv(p0: MutableList<CRPHistoryHrvInfo>?) {}
             override fun onTimingInterval(p0: Int) {}
+            override fun onTimingHrv(p0: CRPTimingHrvInfo?) {}
         })
 
         // 8. Blood Pressure
@@ -240,6 +254,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         )
     }
 
+    @SuppressLint("MissingPermission")
     fun disconnect() {
         Log.i(TAG, "Disconnecting from ring")
         bleDevice?.disconnect()
@@ -247,6 +262,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         _connectionState.value = BleConnectionState.Disconnected
     }
 
+    @SuppressLint("MissingPermission")
     private fun syncTime() {
         Log.i(TAG, "Syncing time with ring")
         bleConnection?.syncTime()
@@ -265,6 +281,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         startNativeScan()
     }
 
+    @SuppressLint("MissingPermission")
     private fun startSdkScan() {
         val client = bleClient ?: return
         Log.i(TAG, "Starting SDK BLE scan")
@@ -284,6 +301,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         }, 15000)
     }
 
+    @SuppressLint("MissingPermission")
     private fun startNativeScan() {
         val scanner = bluetoothAdapter?.bluetoothLeScanner ?: return
         Log.i(TAG, "Starting Native BLE scan")
@@ -311,6 +329,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun stopScan() {
         Log.i(TAG, "Stopping scans")
         bleClient?.cancelScan()
@@ -324,6 +343,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
     // Measurements
     // ═══════════════════════════════════
 
+    @SuppressLint("MissingPermission")
     fun startMeasurement(type: Int) {
         val conn = bleConnection ?: return
         Log.i(TAG, "Starting measurement type: $type")
@@ -351,6 +371,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun stopMeasurement(type: Int) {
         val conn = bleConnection ?: return
         Log.i(TAG, "Stopping measurement type: $type")
@@ -378,6 +399,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun fetchCachedData() {
         val conn = bleConnection ?: return
         Log.i(TAG, "Fetching cached data")
