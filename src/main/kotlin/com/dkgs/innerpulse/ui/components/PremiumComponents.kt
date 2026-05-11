@@ -29,6 +29,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import com.dkgs.innerpulse.ui.theme.*
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.graphics.drawscope.Stroke
 
 // ═══════════════════════════════════════════════════════════════════════
 // NEON GLASS CARD — Floating card with neon edge glow + depth
@@ -255,9 +259,10 @@ fun LivePulseWave(color: Color) {
 
     Box(contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.size(24.dp)) {
+            val centerRadius = this.size.minDimension / 2f
             drawCircle(
                 color = color,
-                radius = size.minDimension / 2 * scale1,
+                radius = centerRadius * scale1,
                 alpha = alpha1,
                 style = Stroke(width = 2.dp.toPx())
             )
@@ -823,11 +828,11 @@ private fun NeonGlassCardPreview() {
     }
 }
 
-@Preview(name = "Floating Metric Tile", showBackground = true, backgroundColor = 0xFF050508)
+@Preview(name = "Bento Metric Card", showBackground = true, backgroundColor = 0xFF050508)
 @Composable
-private fun FloatingMetricTilePreview() {
+private fun BentoMetricCardPreview() {
     FitnessAppTheme(darkTheme = true) {
-        FloatingMetricTile(
+        BentoMetricCard(
             icon = Icons.Filled.Favorite,
             label = "Heart Rate",
             value = "72",

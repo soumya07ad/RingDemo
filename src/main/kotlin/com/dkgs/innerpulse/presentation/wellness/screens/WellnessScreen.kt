@@ -48,7 +48,8 @@ import com.dkgs.innerpulse.domain.model.Emotion
 import com.dkgs.innerpulse.domain.model.MeditationItem
 import com.dkgs.innerpulse.domain.model.ActiveTimer
 import com.dkgs.innerpulse.ui.theme.*
-import com.dkgs.innerpulse.ui.components.GlowDivider
+import com.dkgs.innerpulse.ui.components.*
+import androidx.compose.foundation.lazy.staggeredgrid.*
 
 // ═══════════════════════════════════════════════════════════════════════
 // WELLNESS SCREEN
@@ -77,87 +78,113 @@ fun WellnessScreen(
         hasAudioPermission = granted
     }
 
-    Scaffold(containerColor = MaterialTheme.colorScheme.background) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(bottom = 40.dp)
-        ) {
-            // ── Header ────────────────────────────────────────────
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Icon(
-                            imageVector = Icons.Rounded.SelfImprovement,
-                            contentDescription = null,
-                            modifier = Modifier.size(22.dp),
-                            tint = NeonCyan
-                        )
-                        Text(
-                            text = "Wellness",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                        Text(
-                            text = "Track your mind, body & spirit",
-                            fontSize = 13.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                GlowDivider(color = NeonCyan.copy(alpha = 0.4f))
-            }
-
-            // ── Section 1: Mental Wellness ────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    SectionHeader(
-                        title = "Mental Wellness",
-                        dotColor = NeonPink
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "How are you feeling?",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Select an emotion that best describes your current state",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            item {
-                EmotionDropdownSelector(
-                    emotions = uiState.emotions,
-                    selectedEmotion = uiState.selectedEmotion,
-                    onSelect = { viewModel.selectEmotion(it) }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppColors.backgroundGradient)
+    ) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                BrandedTopBar(
+                    painter = androidx.compose.ui.res.painterResource(id = com.dkgs.innerpulse.R.drawable.logo_ring),
+                    title = "Wellness Hub",
+                    modifier = Modifier.statusBarsPadding()
                 )
             }
+        ) { paddingValues ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                // ── HERO: EMOTION CHECK-IN ──
+                item {
+                    NeonGlassCard(
+                        glowColor = NeonPink,
+                        cornerRadius = 32.dp
+                    ) {
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(CircleShape)
+                                        .background(NeonPink.copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Face,
+                                        contentDescription = null,
+                                        tint = NeonPink,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                Column {
+                                    Text(
+                                        text = "How are you feeling?",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = "Sync your mind with your body",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
+
+                            // Horizontal Emotion Picker (Premium Pills)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .horizontalScroll(rememberScrollState()),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                uiState.emotions.forEach { emotion ->
+                                    val isSelected = uiState.selectedEmotion?.id == emotion.id
+                                    EmotionPill(
+                                        emotion = emotion,
+                                        isSelected = isSelected,
+                                        onClick = { viewModel.selectEmotion(emotion) }
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ── BENTO GRID: METRICS & SCORE ──
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        // Wellness Score Tile (Square-ish)
+                        BentoScoreTile(
+                            modifier = Modifier.weight(1f),
+                            score = uiState.wellnessScore
+                        )
+
+                        // Quick Action: Journal Tile
+                        BentoActionTile(
+                            modifier = Modifier.weight(1f),
+                            title = "Journal",
+                            subtitle = "Voice log",
+                            icon = Icons.Rounded.Mic,
+                            color = NeonOrange,
+                            onClick = { viewModel.saveJournalEntry("") /* Opens dialog if handled in VM */ }
+                        )
+                    }
+                }
 
             // Journal Input Dialog
             if (uiState.showJournalDialog) {
@@ -182,134 +209,61 @@ fun WellnessScreen(
                 }
             }
 
-            // ── Section 2: Mood Meter ─────────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                MoodMeterSection(uiState = uiState, viewModel = viewModel)
-            }
-
-            // ── Section 3: Meditation ─────────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    SectionHeader(
-                        title = "Meditation",
-                        dotColor = PrimaryPurple
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                // ── SECTION: MOOD INSIGHTS ──
+                item {
+                    SectionHeader(title = "Mind State Insights", dotColor = NeonCyan)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    MoodBentoTile(uiState = uiState, viewModel = viewModel)
                 }
-            }
 
-            // Active Timer Card
-            val activeTimer = uiState.activeTimer
-            if (activeTimer != null) {
-                item(key = "active_timer") {
-                    ActiveTimerCard(
-                        timer = activeTimer,
-                        formattedTime = viewModel.formatTime(activeTimer.remainingSeconds),
-                        onPause = { viewModel.pauseTimer() },
-                        onResume = { viewModel.resumeTimer() },
-                        onStop = { viewModel.stopTimer() }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-            }
-
-            items(uiState.meditations, key = { it.id }) { meditation ->
-                val isActive = uiState.activeTimer?.meditationId == meditation.id
-                MeditationCard(
-                    meditation = meditation,
-                    isActive = isActive,
-                    onStart = {
-                        val category = when (meditation.id) {
-                            "1" -> "morning_calm"
-                            "2" -> "breathing"
-                            "3" -> "sleep"
-                            else -> "morning_calm"
-                        }
-                        onMeditationClick(category)
-                    }
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            // ── Section 4: Journal ──────────────────────────────
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-                    SectionHeader(
-                        title = "Journal",
-                        dotColor = NeonOrange
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                // ── SECTION: MEDITATION GRID ──
+                item {
+                    SectionHeader(title = "Restorative Practice", dotColor = PrimaryPurple)
+                    Spacer(modifier = Modifier.height(12.dp))
                     
-                    Box(
+                    // 2-Column Staggered or Grid for meditations
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(2),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .shadow(
-                                8.dp, RoundedCornerShape(20.dp),
-                                ambientColor = NeonOrange.copy(alpha = 0.2f),
-                                spotColor = NeonOrange.copy(alpha = 0.3f)
-                            )
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(
-                                        MaterialTheme.colorScheme.surfaceVariant,
-                                        MaterialTheme.colorScheme.surface
-                                    )
-                                )
-                            )
-                            .border(
-                                1.5.dp,
-                                AppColors.sectionBorder(NeonOrange),
-                                RoundedCornerShape(20.dp)
-                            )
-                            .clickable { onJournalClick() }
-                            .padding(20.dp)
+                            .height(420.dp), // Fixed height or adjust based on content
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalItemSpacing = 16.dp,
+                        userScrollEnabled = false // Nested scroll handling
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                                    .background(NeonOrange.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.MenuBook,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(26.dp),
-                                    tint = NeonOrange
-                                )
-                            }
-                            Spacer(Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = "Open My Journal",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Spacer(Modifier.height(4.dp))
-                                Text(
-                                    text = "View and reflect on past entries",
-                                    fontSize = 13.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Icon(
-                                Icons.Default.ArrowForward,
-                                contentDescription = "Open Journal",
-                                tint = NeonOrange
+                        items(uiState.meditations) { meditation ->
+                            BentoMeditationTile(
+                                meditation = meditation,
+                                isActive = uiState.activeTimer?.meditationId == meditation.id,
+                                onClick = {
+                                    val category = when (meditation.id) {
+                                        "1" -> "morning_calm"
+                                        "2" -> "breathing"
+                                        "3" -> "sleep"
+                                        else -> "morning_calm"
+                                    }
+                                    onMeditationClick(category)
+                                }
                             )
                         }
                     }
                 }
+
+                // Active Timer (Floating Bento Overlay or Bottom Item)
+                uiState.activeTimer?.let { activeTimer ->
+                    item {
+                        ActiveTimerBento(
+                            timer = activeTimer,
+                            formattedTime = viewModel.formatTime(activeTimer.remainingSeconds),
+                            onPause = { viewModel.pauseTimer() },
+                            onResume = { viewModel.resumeTimer() },
+                            onStop = { viewModel.stopTimer() }
+                        )
+                    }
+                }
             }
+        }
+    }
         }
     }
 }
@@ -1054,487 +1008,436 @@ private fun JournalEntryCard(
         }
     }
 }
-
-// ═══════════════════════════════════════════════════════════════════════
-// MOOD METER SECTION
+// BENTO HELPER COMPONENTS
 // ═══════════════════════════════════════════════════════════════════════
 
 @Composable
-private fun MoodMeterSection(uiState: WellnessUiState, viewModel: WellnessViewModel) {
-    Column(modifier = Modifier.padding(horizontal = 20.dp)) {
-        SectionHeader(title = "Mood Meter", dotColor = NeonCyan)
-        Spacer(Modifier.height(16.dp))
-
-        // Tabs
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(AppColors.cardBackground)
-                .padding(4.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
+private fun EmotionPill(
+    emotion: Emotion,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val color = getEmotionColor(emotion.name)
+    val scale by animateFloatAsState(if (isSelected) 1.05f else 1f)
+    
+    Surface(
+        onClick = onClick,
+        modifier = Modifier
+            .scale(scale)
+            .width(100.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = if (isSelected) color.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(
+            width = if (isSelected) 2.dp else 1.dp,
+            brush = if (isSelected) Brush.linearGradient(listOf(color, color.copy(alpha = 0.5f)))
+                    else SolidColor(MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            val tabs = listOf("Daily", "Weekly", "Monthly")
-            tabs.forEachIndexed { index, title ->
-                val isSelected = uiState.selectedTab == index
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(8.dp))
-                        .then(
-                            if (isSelected) Modifier.background(AppColors.sectionGradient(NeonCyan))
-                            else Modifier.background(Color.Transparent)
-                        )
-                        .clickable { viewModel.setTab(index) }
-                        .padding(vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = title,
-                        fontSize = 13.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
+            Text(text = emotion.emoji, fontSize = 28.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = emotion.name,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                color = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun BentoScoreTile(
+    modifier: Modifier = Modifier,
+    score: Int
+) {
+    NeonGlassCard(
+        modifier = modifier.aspectRatio(1f),
+        glowColor = PrimaryPurple,
+        cornerRadius = 28.dp
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "WELLNESS\nSCORE",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Black,
+                letterSpacing = 1.2.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+                CircularProgressIndicator(
+                    progress = score / 100f,
+                    modifier = Modifier.size(80.dp),
+                    color = PrimaryPurple,
+                    strokeWidth = 8.dp,
+                    trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                )
+                Text(
+                    text = "$score",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            Text(
+                text = "Optimal",
+                style = MaterialTheme.typography.labelSmall,
+                color = NeonGreen,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun BentoActionTile(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    color: Color,
+    onClick: () -> Unit
+) {
+    NeonGlassCard(
+        modifier = modifier
+            .aspectRatio(1f)
+            .clickable { onClick() },
+        glowColor = color,
+        cornerRadius = 28.dp
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
+            }
+            
+            Column {
+                Text(
+                    text = title.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
-        
-        Spacer(Modifier.height(16.dp))
-        
-        // Stacked Chart
-        StackedMoodBarChart(uiState.chartData)
-        
-        Spacer(Modifier.height(16.dp))
-        
-        // Metrics Row
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            val avgStr = if (uiState.averageMoodScore > 0) "+${String.format("%.1f", uiState.averageMoodScore)}" else String.format("%.1f", uiState.averageMoodScore)
-            MoodMetricCard(Modifier.weight(1f), "Average Mood", avgStr)
-            MoodMetricCard(Modifier.weight(1f), "Best Day", uiState.bestDay?.dateLabel ?: "-")
-            MoodMetricCard(Modifier.weight(1f), "Worst Day", uiState.worstDay?.dateLabel ?: "-")
-        }
-
-        Spacer(Modifier.height(24.dp))
-        WellnessScoreCard(score = uiState.wellnessScore)
     }
 }
 
 @Composable
-private fun MoodMetricCard(modifier: Modifier = Modifier, title: String, value: String) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.surface)))
-            .border(1.dp, AppColors.dividerColor, RoundedCornerShape(16.dp))
-            .padding(12.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(title, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
-            Spacer(Modifier.height(4.dp))
-            Text(value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
-        }
-    }
-}
-
-private fun getEmotionColor(emotion: String): Color = when (emotion) {
-    "Happy" -> Color(0xFFFFD60A) // Yellow
-    "Calm" -> NeonBlue
-    "Excited" -> NeonOrange
-    "Grateful" -> NeonPurple
-    "Peaceful" -> NeonGreen
-    "Anxious" -> Color(0xFF64D2FF) // Light Blue
-    "Sad" -> Color(0xFF0040DD) // Dark Blue
-    "Frustrated" -> ErrorRed
-    else -> Color.Gray
-}
-
-@Composable
-fun StackedMoodBarChart(data: List<MoodDayAggregate>) {
-    val dividerColor = AppColors.dividerColor
-    
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(12.dp, RoundedCornerShape(20.dp), ambientColor = NeonCyan.copy(alpha=0.2f), spotColor = NeonCyan.copy(alpha=0.3f))
-            .clip(RoundedCornerShape(20.dp))
-            .background(AppColors.sectionGradient(NeonCyan))
-            .border(1.5.dp, AppColors.sectionBorder(NeonCyan), RoundedCornerShape(20.dp))
-            .padding(16.dp)
+private fun MoodBentoTile(
+    uiState: WellnessUiState,
+    viewModel: WellnessViewModel
+) {
+    NeonGlassCard(
+        glowColor = NeonCyan,
+        cornerRadius = 28.dp
     ) {
         Column {
-            Canvas(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                val w = size.width
-                val h = size.height
-                val padBottom = 30f
-                val chartH = h - padBottom
+                Text(
+                    text = "MOOD TRENDS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.sp
+                )
                 
-                if (data.isEmpty()) return@Canvas
-                
-                val slotW = w / data.size
-                val barW = (slotW * 0.6f).coerceAtMost(40f)
-                
-                for (i in 0..4) {
-                    val y = chartH * i / 4f
-                    drawLine(dividerColor.copy(alpha = 0.5f), Offset(0f, y), Offset(w, y), strokeWidth = 1f)
-                }
-
-                val maxEntries = data.maxOfOrNull { it.entries.size } ?: 1
-                val maxVisible = maxEntries.coerceAtLeast(5)
-
-                data.forEachIndexed { i, day ->
-                    val cx = slotW * i + slotW / 2f
-                    var currentBottom = chartH
-                    
-                    if (day.entries.isNotEmpty()) {
-                        val unitH = chartH / maxVisible
-                        
-                        day.entries.forEach { entry ->
-                            val color = getEmotionColor(entry.emotion)
-                            val top = currentBottom - unitH
-                            
-                            drawRect(
-                                color = color,
-                                topLeft = Offset(cx - barW / 2f, top),
-                                size = Size(barW, unitH)
+                // Compact Tabs
+                Row(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(2.dp)
+                ) {
+                    listOf("D", "W", "M").forEachIndexed { index, label ->
+                        val isSelected = uiState.selectedTab == index
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(if (isSelected) NeonCyan.copy(alpha = 0.2f) else Color.Transparent)
+                                .clickable { viewModel.setTab(index) }
+                                .padding(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = label,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (isSelected) NeonCyan else MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            currentBottom = top
                         }
                     }
                 }
             }
             
-            Spacer(Modifier.height(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                val showFilter = data.size <= 7
-                data.forEachIndexed { index, day ->
-                    val show = showFilter || (index % 5 == 0) || index == data.lastIndex
-                    if (show) {
-                        Text(
-                            text = day.dateLabel,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color(0xFF6B6B6B),
-                            maxLines = 1,
-                            softWrap = false,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
-                    } else if (data.size > 7) {
-                        // Keep spacing for hidden elements so alignment is retained
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                }
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Reusing existing chart but making it feel more integrated
+            Box(modifier = Modifier.height(140.dp)) {
+                StackedMoodBarChart(uiState.chartData)
             }
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// WELLNESS SCORE CARD
-// ═══════════════════════════════════════════════════════════════════════
-
 @Composable
-private fun WellnessScoreCard(score: Int) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = score / 100f,
-        animationSpec = tween(1200, easing = FastOutSlowInEasing),
-        label = "wellnessScore"
-    )
+private fun BentoMeditationTile(
+    meditation: MeditationItem,
+    isActive: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(if (isPressed) 0.95f else 1f)
 
-    val scoreColor = when {
-        score >= 80 -> NeonGreen
-        score >= 60 -> NeonCyan
-        score >= 40 -> NeonOrange
-        else -> ErrorRed
-    }
-
-    Box(
+    NeonGlassCard(
         modifier = Modifier
-            .fillMaxWidth()
-            .shadow(
-                12.dp, RoundedCornerShape(20.dp),
-                ambientColor = PrimaryPurple.copy(alpha = 0.2f),
-                spotColor = PrimaryPurple.copy(alpha = 0.3f)
-            )
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                AppColors.sectionGradient(PrimaryPurple)
-            )
-            .border(
-                1.5.dp,
-                AppColors.sectionBorder(PrimaryPurple),
-                RoundedCornerShape(20.dp)
-            )
-            .padding(20.dp)
+            .scale(scale)
+            .clickable(interactionSource = interactionSource, indication = null) { onClick() },
+        glowColor = PrimaryPurple,
+        cornerRadius = 24.dp,
+        showGlow = isActive
     ) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("✨", fontSize = 20.sp)
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    "Wellness Score",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.weight(1f))
-                Text(
-                    "$score/100",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = scoreColor
-                )
-            }
-
-            Spacer(Modifier.height(16.dp))
-
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start
+        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(PrimaryPurple.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(animatedProgress)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(PrimaryPurple, scoreColor)
-                            )
-                        )
+                Icon(
+                    imageVector = meditation.icon,
+                    contentDescription = null,
+                    tint = PrimaryPurple,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-
-            Spacer(Modifier.height(10.dp))
-
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
             Text(
-                text = when {
-                    score >= 80 -> "Excellent! You're doing amazing."
-                    score >= 60 -> "Good progress. Keep it up!"
-                    score >= 40 -> "Room for improvement. Stay consistent."
-                    else -> "Let's work on building better habits."
-                },
-                fontSize = 12.sp,
+                text = meditation.title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            
+            Text(
+                text = meditation.duration,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            if (isActive) {
+                StatusBadge(text = "Active", color = NeonCyan)
+            } else {
+                Text(
+                    text = "START →",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = PrimaryPurple
+                )
+            }
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// ACTIVE TIMER CARD
-// ═══════════════════════════════════════════════════════════════════════
-
 @Composable
-private fun ActiveTimerCard(
+private fun ActiveTimerBento(
     timer: ActiveTimer,
     formattedTime: String,
     onPause: () -> Unit,
     onResume: () -> Unit,
     onStop: () -> Unit
 ) {
-    val animatedProgress by animateFloatAsState(
-        targetValue = timer.progress,
-        animationSpec = tween(300),
-        label = "timerProgress"
-    )
-
-    val accentColor = if (timer.isCompleted) NeonGreen else PrimaryPurple
-
-    // Pulsing glow when running
-    val infiniteTransition = rememberInfiniteTransition(label = "timerPulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.3f,
-        targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "pulse"
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .shadow(
-                16.dp, RoundedCornerShape(24.dp),
-                ambientColor = accentColor.copy(alpha = if (timer.isRunning) pulseAlpha else 0.2f),
-                spotColor = accentColor.copy(alpha = if (timer.isRunning) pulseAlpha else 0.3f)
-            )
-            .clip(RoundedCornerShape(24.dp))
-            .background(
-                AppColors.sectionGradient(accentColor)
-            )
-            .border(
-                1.5.dp,
-                AppColors.sectionBorder(accentColor),
-                RoundedCornerShape(24.dp)
-            )
-            .padding(24.dp)
+    NeonGlassCard(
+        glowColor = NeonCyan,
+        cornerRadius = 32.dp
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Title
-            Text(
-                text = if (timer.isCompleted) "✅ Session Complete!" else "🧘 ${timer.title}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (timer.isCompleted) NeonGreen else MaterialTheme.colorScheme.onSurface
-            )
-
-            Spacer(Modifier.height(20.dp))
-
-            // Big Timer Display
-            Text(
-                text = formattedTime,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = accentColor,
-                letterSpacing = 4.sp
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            // Progress Bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.07f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(animatedProgress)
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            Brush.horizontalGradient(listOf(accentColor, NeonCyan))
-                        )
+            // Radial Progress Mini
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    progress = timer.progress,
+                    modifier = Modifier.size(64.dp),
+                    color = NeonCyan,
+                    strokeWidth = 6.dp
+                )
+                Icon(
+                    imageVector = Icons.Rounded.SelfImprovement,
+                    contentDescription = null,
+                    tint = NeonCyan,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "${(timer.progress * 100).toInt()}% complete",
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            if (!timer.isCompleted) {
-                Spacer(Modifier.height(20.dp))
-
-                // Control Buttons
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = timer.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = formattedTime,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black,
+                    color = NeonCyan,
+                    letterSpacing = 2.sp
+                )
+            }
+            
+            // Compact Controls
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconButton(
+                    onClick = { if (timer.isRunning) onPause() else onResume() },
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                 ) {
-                    // Stop Button
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(ErrorRed.copy(alpha = 0.15f))
-                            .border(1.dp, ErrorRed.copy(alpha = 0.4f), RoundedCornerShape(14.dp))
-                            .clickable { onStop() }
-                            .padding(vertical = 14.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                Icons.Default.Stop,
-                                contentDescription = "Stop",
-                                tint = ErrorRed,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                "Stop",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = ErrorRed
-                            )
-                        }
-                    }
-
-                    // Pause / Resume Button
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(
-                                AppColors.accentGradient
-                            )
-                            .clickable {
-                                if (timer.isRunning) onPause() else onResume()
-                            }
-                            .padding(vertical = 14.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                if (timer.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (timer.isRunning) "Pause" else "Resume",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                if (timer.isRunning) "Pause" else "Resume",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
+                    Icon(
+                        imageVector = if (timer.isRunning) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                IconButton(
+                    onClick = onStop,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(ErrorRed.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Stop,
+                        contentDescription = null,
+                        tint = ErrorRed
+                    )
                 }
             }
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════════════════
-// MEDITATION CARD
-// ═══════════════════════════════════════════════════════════════════════
+@Composable
+private fun SectionHeader(title: String, dotColor: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 4.dp)
+    ) {
+        Box(
+            Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(dotColor)
+        )
+        Spacer(Modifier.width(12.dp))
+        Text(
+            title.uppercase(),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Black,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            letterSpacing = 1.5.sp
+        )
+    }
+}
 
 @Composable
-private fun MeditationCard(
-    meditation: MeditationItem,
-    isActive: Boolean,
-    onStart: () -> Unit
-) {
-    val borderColor = if (isActive) PrimaryPurple.copy(alpha = 0.5f) else AppColors.dividerColor
-
-    Box(
+fun StackedMoodBarChart(data: List<MoodDayAggregate>) {
+    val dividerColor = AppColors.dividerColor
+    
+    Canvas(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .shadow(
-                8.dp, RoundedCornerShape(16.dp),
+            .fillMaxHeight()
+    ) {
+        val w = size.width
+        val h = size.height
+        val padBottom = 20f
+        val chartH = h - padBottom
+        
+        if (data.isEmpty()) return@Canvas
+        
+        val slotW = w / data.size
+        val barW = (slotW * 0.4f).coerceAtMost(20f)
+        
+        // Draw horizontal grid lines
+        for (i in 0..4) {
+            val y = chartH * i / 4f
+            drawLine(dividerColor.copy(alpha = 0.2f), Offset(0f, y), Offset(w, y), strokeWidth = 1f)
+        }
+
+        data.forEachIndexed { i, day ->
+            val cx = slotW * i + slotW / 2f
+            var currentBottom = chartH
+            
+            if (day.entries.isNotEmpty()) {
+                val unitH = chartH / 5 // Assuming max 5 entries per day for visualization
+                
+                day.entries.forEach { entry ->
+                    val color = getEmotionColor(entry.emotion)
+                    val top = (currentBottom - unitH).coerceAtLeast(0f)
+                    
+                    drawRoundRect(
+                        color = color,
+                        topLeft = Offset(cx - barW / 2f, top),
+                        size = Size(barW, currentBottom - top),
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(4f, 4f)
+                    )
+                    currentBottom = top
+                }
+            }
+        }
+    }
+}
+
+private fun getEmotionColor(emotion: String): Color = when (emotion) {
+    "Happy" -> Color(0xFFFFD60A)
+    "Calm" -> NeonBlue
+    "Excited" -> NeonOrange
+    "Grateful" -> NeonPurple
+    "Peaceful" -> NeonGreen
+    "Anxious" -> Color(0xFF64D2FF)
+    "Sad" -> Color(0xFF0040DD)
+    "Frustrated" -> ErrorRed
+    else -> Color.Gray
+}
+RoundedCornerShape(16.dp),
                 ambientColor = if (isActive) PrimaryPurple.copy(alpha = 0.2f) else Color.Transparent,
                 spotColor = if (isActive) PrimaryPurple.copy(alpha = 0.2f) else Color.Transparent
             )

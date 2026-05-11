@@ -57,6 +57,10 @@ import com.dkgs.innerpulse.presentation.navigation.Screen
 import com.dkgs.innerpulse.presentation.theme.ThemeViewModel
 import com.dkgs.innerpulse.ui.components.*
 import com.dkgs.innerpulse.ui.theme.*
+import androidx.compose.ui.draw.blur
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.foundation.Canvas
+import androidx.compose.ui.graphics.drawscope.Stroke
 import com.dkgs.innerpulse.R
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -117,7 +121,7 @@ fun DashboardRoute(
         state = state,
         ringConnectionState = ringConnectionState,
         isReconnecting = isAutoReconnecting,
-        pairedRing = pairedRing,
+        pairedRing = pairedRing?.firstOrNull()?.let { Ring(it.macAddress, it.name) },
         onConnectClick = {
             smartRingViewModel.manualReconnect(onReconnectFailed = {
                 navController?.navigate("ringSetup")
