@@ -22,6 +22,7 @@ import com.crrepa.ble.conn.bean.CRPTimingStressInfo
 import com.crrepa.ble.conn.bean.CRPTimingHrvInfo
 import com.crrepa.ble.conn.bean.CRPStepsDetailsInfo
 import com.crrepa.ble.conn.bean.CRPSleepDetailsInfo
+import com.crrepa.ble.conn.bean.CRPHistorySleepTimeInfo
 import com.crrepa.ble.conn.bean.CRPSleepChronotypeInfo
 import com.crrepa.ble.conn.type.CRPHistoryDay
 import com.crrepa.ble.conn.type.CRPBloodOxygenType
@@ -185,7 +186,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
             override fun onHistoryBloodOxygen(p0: MutableList<CRPHistoryBloodOxygenInfo>?) {}
             override fun onTimingBloodOxygen(p0: CRPTimingBloodOxygenInfo?) {}
             override fun onTimingInterval(p0: Int) {}
-            override fun onSupportSleepBloodOxygen(p0: Boolean) {}
+            override fun onSupportBloodOxygenType(p0: CRPBloodOxygenType?) {}
         })
 
         // 5. Stress
@@ -214,7 +215,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
             }
 
             override fun onHistorySleepChange(p0: CRPHistoryDay?, p1: CRPSleepInfo?) {}
-            override fun onHistorySleepListChange(p0: MutableList<Long>?) {}
+            override fun onHistorySleepListChange(p0: MutableList<CRPHistorySleepTimeInfo>?) {}
             override fun onSleepDetails(p0: CRPSleepDetailsInfo?) {}
             override fun onSleepChronotype(p0: CRPSleepChronotypeInfo?) {}
             override fun onSleepEnd(p0: Boolean) {}
