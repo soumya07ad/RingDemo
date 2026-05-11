@@ -11,17 +11,11 @@
 -keep class com.dkgs.innerpulse.** { *; }
 -keepnames class com.dkgs.innerpulse.** { *; }
 
-# ══════════════════════════════════════════════════════════
-# JMRing SDK & Dependencies (DO NOT OBFUSCATE)
-# ══════════════════════════════════════════════════════════
+# Crrepa Smart Ring SDK
+-keep class com.crrepa.ble.** { *; }
+-keep interface com.crrepa.ble.** { *; }
+-dontwarn com.crrepa.ble.**
 
-# JMRing Official SDK
--keep class com.jimi.** { *; }
--keep class com.gps.track.jmring.** { *; }
-
-# Jieli (BT/OTA Library)
--keep class com.yucheng.** { *; }
--keep class com.jieli.** { *; }
 
 # Tencent MMKV
 -keep class com.tencent.mmkv.** { *; }

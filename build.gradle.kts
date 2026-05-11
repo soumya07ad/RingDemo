@@ -137,20 +137,9 @@ dependencies {
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
 
     // ══════════════════════════════════════════════════════════
-    // JMRing SDK Integration
+    // Crrepa Smart Ring SDK Integration
     // ══════════════════════════════════════════════════════════
-    api("com.jimi:JMRing:1.0.0_13")
-    
-    // Explicitly adding transitive dependencies to fix "Cannot access supertype" errors in IDE
-    api("com.jimi:ycbtsdk-release:4.0.6")
-    api("com.jimi:jl_rcsp:0.5.5")
-    api("com.jimi:JL_Watch:1.10.3")
-    api("com.jimi:jl_bt_ota:1.9.6")
-    api("com.jimi:aizo_sdk_debug:1.1.5")
-    api("com.jimi:aizo_be_lib_release:1.1.5")
-    api("com.jimi:aizo_serversdk_release:2_2.1.14")
-    api("com.jimi:AliAgent-release:4.2.2")
-    api("com.jimi:BmpConvert:1.6.0")
+    implementation(files("libs/my-ring-ble-1.1.8-1210.aar"))
     
     // External SDK dependencies
     implementation("com.blankj:utilcodex:1.31.1")

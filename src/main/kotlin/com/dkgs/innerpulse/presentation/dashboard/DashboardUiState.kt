@@ -28,6 +28,8 @@ data class DashboardUiState(
     val heartRateMeasuring: Boolean = false,
     val spO2: Float = 0f,
     val spO2Measuring: Boolean = false,
+    val hrv: Int = 0,
+    val hrvMeasuring: Boolean = false,
     val bloodPressureSystolic: Int = 0,
     val bloodPressureDiastolic: Int = 0,
     val bloodPressureHeartRate: Int = 0,

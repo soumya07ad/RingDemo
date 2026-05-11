@@ -138,6 +138,12 @@ fun DashboardRoute(
         onSyncSleep = {
             navController?.navigate(Screen.MeasureScore.route)
         },
+        onMeasureHRV = {
+            viewModel.startHrvMeasurement()
+        },
+        onMeasureBP = {
+            viewModel.startBloodPressureMeasurement()
+        },
         currentTheme = currentTheme,
         onThemeChange = { themeViewModel.setTheme(it) },
         isUsingPhone = isUsingPhone,
@@ -157,6 +163,8 @@ fun DashboardScreenWithHeader(
     onMeasureSpO2: () -> Unit = {},
     onMeasureStress: () -> Unit = {},
     onSyncSleep: () -> Unit = {},
+    onMeasureHRV: () -> Unit = {},
+    onMeasureBP: () -> Unit = {},
     currentTheme: AppTheme = AppTheme.SYSTEM,
     onThemeChange: (AppTheme) -> Unit = {},
     isUsingPhone: Boolean = false,
@@ -280,14 +288,7 @@ fun DashboardScreenWithHeader(
                 onDisconnectClick = onDisconnectClick
             )
 
-            if (isConnected) {
-                HealthScoreCard(
-                    score = state.healthScore,
-                    onRefresh = onSyncSleep,
-                    modifier = Modifier.padding(horizontal = 20.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Health Metrics Grid
             Column(
@@ -340,6 +341,34 @@ fun DashboardScreenWithHeader(
                     )
                 }
 
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    FloatingMetricTile(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.Favorite,
+                        label = "HRV",
+                        value = if (!isConnected) "--" else if (state.hrv > 0) "${state.hrv}" else "--",
+                        unit = "ms",
+                        progress = if (isConnected) (state.hrv / 150f).coerceIn(0f, 1f) else 0f,
+                        gradientColors = listOf(PrimaryPurple, NeonBlue),
+                        glowColor = PrimaryPurple,
+                        iconBgColor = StepsIconBg
+                    )
+                    FloatingMetricTile(
+                        modifier = Modifier.weight(1f),
+                        icon = Icons.Default.FavoriteBorder,
+                        label = "BLOOD PRESSURE",
+                        value = if (!isConnected) "--" else if (state.bloodPressureSystolic > 0) "${state.bloodPressureSystolic}/${state.bloodPressureDiastolic}" else "--",
+                        unit = "mmHg",
+                        progress = if (isConnected) (state.bloodPressureSystolic / 180f).coerceIn(0f, 1f) else 0f,
+                        gradientColors = listOf(NeonOrange, ErrorRed),
+                        glowColor = NeonOrange,
+                        iconBgColor = DistanceIconBg
+                    )
+                }
+
                 if (isConnected) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -358,6 +387,28 @@ fun DashboardScreenWithHeader(
                             icon = Icons.Default.FavoriteBorder,
                             color = NeonCyan,
                             onClick = onMeasureSpO2,
+                            enabled = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        MeasurementButton(
+                            text = if (state.hrvMeasuring) "Measuring..." else "LIVE HRV",
+                            icon = Icons.Default.Favorite,
+                            color = PrimaryPurple,
+                            onClick = onMeasureHRV,
+                            enabled = true,
+                            modifier = Modifier.weight(1f)
+                        )
+                        MeasurementButton(
+                            text = if (state.bloodPressureMeasuring) "Measuring..." else "LIVE BP",
+                            icon = Icons.Default.FavoriteBorder,
+                            color = NeonOrange,
+                            onClick = onMeasureBP,
                             enabled = true,
                             modifier = Modifier.weight(1f)
                         )

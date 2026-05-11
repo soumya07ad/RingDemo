@@ -94,6 +94,12 @@ data class RingData(
     val heartRateMeasuring: Boolean = false,  // true when HR measurement in progress
     val spO2: Float = 0f,          // blood oxygen % (Float: 99.5)
     val spO2Measuring: Boolean = false,
+    val hrv: Int = 0,
+    val hrvMeasuring: Boolean = false,
+    val bloodPressureSystolic: Int = 0,
+    val bloodPressureDiastolic: Int = 0,
+    val bloodPressureHeartRate: Int = 0,
+    val bloodPressureMeasuring: Boolean = false,
     val stress: Int = 0,         // stress level (0-100)
     val stressMeasuring: Boolean = false,
     val steps: Int = 0,
@@ -145,7 +151,9 @@ enum class MeasurementType {
     NONE,
     HEART_RATE,
     SPO2,
-    STRESS;
+    STRESS,
+    HRV,
+    BLOOD_PRESSURE;
     
     /**
      * Display name for UI
@@ -155,6 +163,8 @@ enum class MeasurementType {
             HEART_RATE -> "Heart Rate"
             SPO2 -> "Blood Oxygen (SpO2)"
             STRESS -> "Stress Level"
+            HRV -> "HRV"
+            BLOOD_PRESSURE -> "Blood Pressure"
             NONE -> ""
         }
 }

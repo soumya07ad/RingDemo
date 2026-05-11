@@ -108,6 +108,26 @@ interface IRingRepository {
      * Stop stress measurement
      */
     fun stopStressMeasurement()
+
+    /**
+     * Start HRV measurement
+     */
+    fun startHrvMeasurement()
+
+    /**
+     * Stop HRV measurement
+     */
+    fun stopHrvMeasurement()
+
+    /**
+     * Start Blood Pressure measurement
+     */
+    fun startBloodPressureMeasurement()
+
+    /**
+     * Stop Blood Pressure measurement
+     */
+    fun stopBloodPressureMeasurement()
     
     /**
      * Request sleep history from ring
