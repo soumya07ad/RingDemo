@@ -139,6 +139,12 @@ class RingRepositoryImpl(
             heartRateMeasuring = data.heartRateMeasuring,
             spO2 = data.spO2,
             spO2Measuring = data.spO2Measuring,
+            hrv = data.hrv,
+            hrvMeasuring = data.hrvMeasuring,
+            bloodPressureSystolic = data.bloodPressureSystolic,
+            bloodPressureDiastolic = data.bloodPressureDiastolic,
+            bloodPressureHeartRate = data.bloodPressureHeartRate,
+            bloodPressureMeasuring = data.bloodPressureMeasuring,
             stress = data.stress,
             stressMeasuring = data.stressMeasuring,
             steps = data.steps,
@@ -243,6 +249,22 @@ class RingRepositoryImpl(
     
     override fun stopStressMeasurement() {
         crrepaRingManager.stopMeasurement(7)
+    }
+
+    override fun startHrvMeasurement() {
+        crrepaRingManager.startMeasurement(8)
+    }
+
+    override fun stopHrvMeasurement() {
+        crrepaRingManager.stopMeasurement(8)
+    }
+
+    override fun startBloodPressureMeasurement() {
+        crrepaRingManager.startMeasurement(9)
+    }
+
+    override fun stopBloodPressureMeasurement() {
+        crrepaRingManager.stopMeasurement(9)
     }
     
     override fun requestSleepHistory() {

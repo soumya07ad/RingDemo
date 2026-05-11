@@ -33,6 +33,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import com.crrepa.ble.conn.listener.CRPBatteryListener
 import com.crrepa.ble.conn.listener.CRPBloodOxygenChangeListener
+import com.crrepa.ble.conn.listener.CRPBloodPressureChangeListener
 import com.crrepa.ble.conn.listener.CRPHrvChangeListener
 import com.crrepa.ble.conn.listener.CRPStressChangeListener
 
@@ -205,6 +206,29 @@ class CrrepaRingManager private constructor(private val context: Context) {
             override fun onSleepChronotype(p0: com.crrepa.ble.conn.bean.CRPSleepChronotypeInfo?) {}
             override fun onSleepEnd(p0: Boolean) {}
         })
+
+        // 7. HRV
+        conn.setHrvChangeListener(object : CRPHrvChangeListener {
+            override fun onHrv(hrv: Int) {
+                Log.d(TAG, "HRV update: $hrv")
+                _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
+            }
+
+            override fun onHistoryHrv(p0: MutableList<com.crrepa.ble.conn.bean.CRPHistoryHrvInfo>?) {}
+            override fun onTimingInterval(p0: Int) {}
+        })
+
+        // 8. Blood Pressure
+        conn.setBloodPressureListener(object : CRPBloodPressureChangeListener {
+            override fun onBloodPressureChange(systolic: Int, diastolic: Int) {
+                Log.d(TAG, "Blood pressure update: $systolic/$diastolic")
+                _ringData.value = _ringData.value.copy(
+                    bloodPressureSystolic = systolic,
+                    bloodPressureDiastolic = diastolic,
+                    bloodPressureMeasuring = false
+                )
+            }
+        })
     }
 
     private fun updateStepsInfo(info: CRPStepsInfo) {
@@ -316,6 +340,14 @@ class CrrepaRingManager private constructor(private val context: Context) {
                 conn.startMeasureStress()
                 _ringData.value = _ringData.value.copy(stressMeasuring = true)
             }
+            8 -> { // HRV
+                conn.startMeasureHrv()
+                _ringData.value = _ringData.value.copy(hrvMeasuring = true)
+            }
+            9 -> { // Blood Pressure
+                conn.startMeasureBloodPressure()
+                _ringData.value = _ringData.value.copy(bloodPressureMeasuring = true)
+            }
         }
     }
 
@@ -334,6 +366,14 @@ class CrrepaRingManager private constructor(private val context: Context) {
             7 -> {
                 conn.stopMeasureStress()
                 _ringData.value = _ringData.value.copy(stressMeasuring = false)
+            }
+            8 -> {
+                conn.stopMeasureHrv()
+                _ringData.value = _ringData.value.copy(hrvMeasuring = false)
+            }
+            9 -> {
+                conn.stopMeasureBloodPressure()
+                _ringData.value = _ringData.value.copy(bloodPressureMeasuring = false)
             }
         }
     }

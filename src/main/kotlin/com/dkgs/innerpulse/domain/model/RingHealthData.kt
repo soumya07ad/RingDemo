@@ -41,6 +41,12 @@ data class RingHealthData(
     val heartRateMeasuring: Boolean = false,  // true when measuring HR
     val spO2: Float = 0f,           // blood oxygen % (Float: 99.5)
     val spO2Measuring: Boolean = false,
+    val hrv: Int = 0,
+    val hrvMeasuring: Boolean = false,
+    val bloodPressureSystolic: Int = 0,
+    val bloodPressureDiastolic: Int = 0,
+    val bloodPressureHeartRate: Int = 0,
+    val bloodPressureMeasuring: Boolean = false,
     val stress: Int = 0,          // stress level (0-100)
     val stressMeasuring: Boolean = false,
     val steps: Int = 0,
