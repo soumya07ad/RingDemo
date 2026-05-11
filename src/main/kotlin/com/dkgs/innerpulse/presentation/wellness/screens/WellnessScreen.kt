@@ -51,7 +51,8 @@ import androidx.compose.foundation.lazy.staggeredgrid.*
 fun WellnessScreen(
     viewModel: WellnessViewModel,
     onMeditationClick: (String) -> Unit,
-    onBackClick: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onJournalClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -77,7 +78,7 @@ fun WellnessScreen(
             containerColor = Color.Transparent,
             topBar = {
                 BrandedTopBar(
-                    painter = painterResource(id = com.dkgs.innerpulse.R.drawable.logo_ring),
+                    painter = painterResource(id = com.dkgs.innerpulse.R.drawable.ic_premium_logo),
                     title = "Wellness Hub",
                     modifier = Modifier.statusBarsPadding()
                 )
@@ -140,11 +141,11 @@ fun WellnessScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 uiState.emotions.forEach { emotion ->
-                                    val isSelected = uiState.selectedEmotion?.id == emotion.id
+                                    val isSelected = uiState.selectedEmotion == emotion.name
                                     EmotionPill(
                                         emotion = emotion,
                                         isSelected = isSelected,
-                                        onClick = { viewModel.selectEmotion(emotion) }
+                                        onClick = { viewModel.selectEmotion(emotion.name) }
                                     )
                                 }
                             }
@@ -171,7 +172,7 @@ fun WellnessScreen(
                                 icon = Icons.Rounded.EditNote,
                                 label = "JOURNAL",
                                 color = NeonCyan,
-                                onClick = { /* Open Journal */ }
+                                onClick = onJournalClick
                             )
                             BentoActionTile(
                                 icon = Icons.Rounded.Timeline,
@@ -200,7 +201,7 @@ fun WellnessScreen(
                             Spacer(modifier = Modifier.height(20.dp))
                             
                             Box(modifier = Modifier.height(140.dp).fillMaxWidth()) {
-                                StackedMoodBarChart(data = uiState.weeklyMoodAggregates)
+                                StackedMoodBarChart(data = uiState.chartData)
                             }
                         }
                     }
@@ -495,11 +496,11 @@ private fun ActiveTimerBento(
             
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 IconButton(
-                    onClick = if (timer.isPaused) onResume else onPause,
+                    onClick = if (!timer.isRunning) onResume else onPause,
                     modifier = Modifier.background(MaterialTheme.colorScheme.surface, CircleShape)
                 ) {
                     Icon(
-                        imageVector = if (timer.isPaused) Icons.Rounded.PlayArrow else Icons.Rounded.Pause,
+                        imageVector = if (!timer.isRunning) Icons.Rounded.PlayArrow else Icons.Rounded.Pause,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface
                     )
