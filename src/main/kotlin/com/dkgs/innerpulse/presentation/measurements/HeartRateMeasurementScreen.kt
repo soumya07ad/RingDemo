@@ -105,11 +105,19 @@ fun HeartRateMeasurementScreen(
 
                     if (!state.isFinished) {
                         Text(
-                            text = "${(progress * 100).toInt()}%",
+                            text = if (state.currentValue.isNotEmpty()) state.currentValue else "${(progress * 100).toInt()}%",
                             style = MaterialTheme.typography.displaySmall,
                             color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
+                        if (state.currentValue.isNotEmpty()) {
+                            Text(
+                                text = "BPM",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = ErrorRed,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     } else {
                         Text(
                             text = "COMPLETED",

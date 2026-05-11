@@ -163,12 +163,16 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 3. Heart Rate
         conn.setHeartRateChangeListener(object : CRPHeartRateChangeListener {
             override fun onRealtimeHeartRate(hr: Int) {
-                Log.d(TAG, "Heart rate update: $hr")
-                _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
+                if (hr > 0 && hr < 255) {
+                    Log.d(TAG, "Heart rate update: $hr")
+                    _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
+                }
             }
 
             override fun onHeartRate(hr: Int) {
-                _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
+                if (hr > 0 && hr < 255) {
+                    _ringData.value = _ringData.value.copy(heartRate = hr, lastUpdate = System.currentTimeMillis())
+                }
             }
 
             override fun onTimingHeartRate(p0: CRPHeartRateInfo?) {}
@@ -179,8 +183,12 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 4. Blood Oxygen (SpO2)
         conn.setBloodOxygenChangeListener(object : CRPBloodOxygenChangeListener {
             override fun onBloodOxygen(bloodOxygen: Int) {
-                Log.d(TAG, "SpO2 update: $bloodOxygen%")
-                _ringData.value = _ringData.value.copy(spO2 = bloodOxygen.toFloat(), spO2Measuring = false)
+                if (bloodOxygen > 0 && bloodOxygen < 255) {
+                    Log.d(TAG, "SpO2 update: $bloodOxygen%")
+                    _ringData.value = _ringData.value.copy(spO2 = bloodOxygen.toFloat(), spO2Measuring = false)
+                } else {
+                    Log.d(TAG, "SpO2 ignored (invalid): $bloodOxygen")
+                }
             }
 
             override fun onHistoryBloodOxygen(p0: MutableList<CRPHistoryBloodOxygenInfo>?) {}
@@ -192,8 +200,10 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 5. Stress
         conn.setStressChangeListener(object : CRPStressChangeListener {
             override fun onStressChange(stress: Int) {
-                Log.d(TAG, "Stress update: $stress")
-                _ringData.value = _ringData.value.copy(stress = stress, stressMeasuring = false)
+                if (stress > 0 && stress < 255) {
+                    Log.d(TAG, "Stress update: $stress")
+                    _ringData.value = _ringData.value.copy(stress = stress, stressMeasuring = false)
+                }
             }
 
             override fun onHistoryStressChange(p0: MutableList<CRPHistoryStressInfo>?) {}
@@ -224,8 +234,10 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 7. HRV
         conn.setHrvChangeListener(object : CRPHrvChangeListener {
             override fun onHrv(hrv: Int) {
-                Log.d(TAG, "HRV update: $hrv")
-                _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
+                if (hrv > 0 && hrv < 255) {
+                    Log.d(TAG, "HRV update: $hrv")
+                    _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
+                }
             }
 
             override fun onHistoryHrv(p0: MutableList<CRPHistoryHrvInfo>?) {}

@@ -15,6 +15,7 @@ data class MeasurementUiState(
     val progress: Float = 0f,
     val isFinished: Boolean = false,
     val resultValue: String = "",
+    val currentValue: String = "",
     val unit: String = "",
     val statusText: String = ""
 )
@@ -52,10 +53,10 @@ class MeasurementViewModel(
 
     private fun startProgressSimulation() {
         val duration = when (type) {
-            MeasurementType.HEART_RATE -> 45_000L
-            MeasurementType.SPO2 -> 60_000L
-            MeasurementType.STRESS -> 90_000L
-            MeasurementType.HEALTH_SCORE -> 15_000L
+            MeasurementType.HEART_RATE -> 15_000L
+            MeasurementType.SPO2 -> 20_000L
+            MeasurementType.STRESS -> 30_000L
+            MeasurementType.HEALTH_SCORE -> 5_000L
         }
 
         simulationJob = viewModelScope.launch {
@@ -73,15 +74,29 @@ class MeasurementViewModel(
     private fun observeResults() {
         viewModelScope.launch {
             ringRepository.ringData.collect { data ->
-                val result = when (type) {
-                    MeasurementType.HEART_RATE -> if (data.heartRate > 0 && !data.heartRateMeasuring) data.heartRate.toString() else null
-                    MeasurementType.SPO2 -> if (data.spO2 > 0 && !data.spO2Measuring) data.spO2.toInt().toString() else null
-                    MeasurementType.STRESS -> if (data.stress > 0 && !data.stressMeasuring) data.stress.toString() else null
+                val current = when (type) {
+                    MeasurementType.HEART_RATE -> if (data.heartRate > 0) data.heartRate.toString() else null
+                    MeasurementType.SPO2 -> if (data.spO2 > 0) data.spO2.toInt().toString() else null
+                    MeasurementType.STRESS -> if (data.stress > 0) data.stress.toString() else null
                     MeasurementType.HEALTH_SCORE -> if (data.healthScore > 0) data.healthScore.toString() else null
                 }
 
-                if (result != null) {
-                    finishMeasurement(result)
+                if (current != null) {
+                    _uiState.update { it.copy(currentValue = current) }
+                }
+
+                val isFinishedResult = when (type) {
+                    MeasurementType.HEART_RATE -> !data.heartRateMeasuring && data.heartRate > 0
+                    MeasurementType.SPO2 -> !data.spO2Measuring && data.spO2 > 0
+                    MeasurementType.STRESS -> !data.stressMeasuring && data.stress > 0
+                    MeasurementType.HEALTH_SCORE -> data.healthScore > 0
+                }
+
+                // Or finish if we have a value and progress is high enough
+                val forcedFinish = current != null && _uiState.value.progress >= 0.8f
+
+                if (isFinishedResult || forcedFinish) {
+                    finishMeasurement(current ?: _uiState.value.currentValue)
                 }
             }
         }

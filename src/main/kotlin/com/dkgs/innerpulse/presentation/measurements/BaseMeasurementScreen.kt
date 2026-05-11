@@ -164,7 +164,27 @@ fun BaseMeasurementScreen(
                             color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Medium
                         )
-                        if (showCircularProgress) {
+                        
+                        if (state.currentValue.isNotEmpty() && !state.isFinished) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Text(
+                                    text = state.currentValue,
+                                    style = MaterialTheme.typography.displayMedium,
+                                    color = accentColor,
+                                    fontWeight = FontWeight.Black
+                                )
+                                if (state.unit.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = state.unit,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = accentColor.copy(alpha = 0.7f),
+                                        modifier = Modifier.padding(bottom = 8.dp)
+                                    )
+                                }
+                            }
+                        } else if (showCircularProgress) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "${(state.progress * 100).toInt()}%",
