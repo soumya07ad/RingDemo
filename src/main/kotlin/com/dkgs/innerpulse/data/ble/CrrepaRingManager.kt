@@ -245,17 +245,20 @@ class CrrepaRingManager private constructor(private val context: Context) {
         // 7. HRV
         conn.setHrvChangeListener(object : CRPHrvChangeListener {
             override fun onHrv(hrv: Int) {
+                Log.d(TAG, "RAW HRV received: $hrv")
                 if (hrv > 0 && hrv < 255) {
-                    Log.d(TAG, "HRV update: $hrv")
+                    Log.d(TAG, "HRV update accepted: $hrv")
                     _ringData.value = _ringData.value.copy(hrv = hrv, hrvMeasuring = false)
                 } else {
-                    Log.d(TAG, "HRV ignored (invalid): $hrv")
+                    Log.d(TAG, "HRV ignored (invalid signal): $hrv")
                 }
             }
 
             override fun onHistoryHrv(p0: MutableList<CRPHistoryHrvInfo>?) {}
             override fun onTimingInterval(p0: Int) {}
-            override fun onTimingHrv(p0: CRPTimingHrvInfo?) {}
+            override fun onTimingHrv(info: CRPTimingHrvInfo?) {
+                Log.d(TAG, "onTimingHrv: $info")
+            }
         })
 
         // 8. Blood Pressure
@@ -289,6 +292,7 @@ class CrrepaRingManager private constructor(private val context: Context) {
     }
 
     private fun updateStepsInfo(info: CRPStepsInfo) {
+        Log.i(TAG, "SYNC: Updating Steps Info: steps=${info.steps}, distance=${info.distance}")
         _ringData.value = _ringData.value.copy(
             steps = info.steps,
             distance = info.distance,

@@ -34,11 +34,21 @@ class StepRepository(
                 ringRepository.ringData,
                 phoneStepDataSource.steps
             ) { connStatus, ringData, phoneSteps ->
-                // The user's ring doesn't reliably provide step tracking, so we always prioritize the phone's step tracking.
-                _isUsingPhone.value = true
+                val isConnected = connStatus is ConnectionStatus.Connected
+                Log.d("StepRepository", "Sync check: isConnected=$isConnected, ringSteps=${ringData.steps}, phoneSteps=$phoneSteps")
                 
-                _steps.value = phoneSteps
-                _distance.value = phoneSteps * 0.75f // 0.75m per step
+                // If ring is connected and providing steps, use them. Otherwise use phone.
+                if (isConnected && ringData.steps > 0) {
+                    Log.i("StepRepository", "→ Using RING steps: ${ringData.steps}")
+                    _isUsingPhone.value = false
+                    _steps.value = ringData.steps
+                    _distance.value = ringData.distance.toFloat()
+                } else {
+                    Log.i("StepRepository", "→ Using PHONE steps: $phoneSteps")
+                    _isUsingPhone.value = true
+                    _steps.value = phoneSteps
+                    _distance.value = phoneSteps * 0.75f // 0.75m per step
+                }
             }.collect { }
         }
     }
